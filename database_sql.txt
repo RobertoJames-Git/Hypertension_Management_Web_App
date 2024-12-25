@@ -3,21 +3,18 @@
 
 DROP TABLE IF EXISTS support;
 DROP TABLE IF EXISTS communicate;
-DROP TABLE IF EXISTS Monitor;
-DROP TABLE IF EXISTS Message;
-DROP TABLE IF EXISTS Reading;
-DROP TABLE IF EXISTS Patient;
-DROP TABLE IF EXISTS Family_Member;
-DROP TABLE IF EXISTS Health_Care_Prof;
+DROP TABLE IF EXISTS monitor;
+DROP TABLE IF EXISTS message;
+DROP TABLE IF EXISTS reading;
+DROP TABLE IF EXISTS patient;
+DROP TABLE IF EXISTS family_member;
+DROP TABLE IF EXISTS health_care_prof;
 DROP TABLE IF EXISTS monitor_request;
-DROP TABLE IF EXISTS UserProfile;
-
-
-
+DROP TABLE IF EXISTS userprofile;
 
 
 -- Create User Table
-CREATE TABLE UserProfile (
+CREATE TABLE userprofile (
     userid INT AUTO_INCREMENT NOT NULL,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -32,41 +29,38 @@ CREATE TABLE monitor_request (
     request_date DATETIME NOT NULL,
     request_status ENUM('pending', 'accepted', 'rejected') NOT NULL,
     recipient_info VARCHAR(255) NOT NULL,
-    FOREIGN KEY (sender_id,sender_username) REFERENCES UserProfile(userid, username)
+    FOREIGN KEY (sender_id, sender_username) REFERENCES userprofile(userid, username)
 );
 
-
 -- Create Family Member Table
-CREATE TABLE Family_Member (
+CREATE TABLE family_member (
     userid INT AUTO_INCREMENT NOT NULL,
     username VARCHAR(50) NOT NULL,
     education_level VARCHAR(50),
     PRIMARY KEY (userid, username),
-    FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
+    FOREIGN KEY (userid, username) REFERENCES userprofile(userid, username)
 );
 
-
-
 -- Create Health Care Professional Table
-CREATE TABLE Health_Care_Prof (
+CREATE TABLE health_care_prof (
     userid INT AUTO_INCREMENT NOT NULL,
     username VARCHAR(50) NOT NULL,
     years_of_exp INT NOT NULL,
     workplace VARCHAR(100),
     PRIMARY KEY (userid, username),
-    FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
+    FOREIGN KEY (userid, username) REFERENCES userprofile(userid, username)
 );
 
 -- Create Patient Table
-CREATE TABLE Patient (
+CREATE TABLE patient (
     userid INT AUTO_INCREMENT NOT NULL,
     username VARCHAR(50) NOT NULL,
     PRIMARY KEY (userid, username),
-    FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
+    FOREIGN KEY (userid, username) REFERENCES userprofile(userid, username)
 );
 
 -- Create Reading Table
-CREATE TABLE Reading (
+CREATE TABLE reading (
     reading_id VARCHAR(50) NOT NULL,
     readingdate DATE NOT NULL,
     systolic INT NOT NULL,
@@ -74,10 +68,8 @@ CREATE TABLE Reading (
     PRIMARY KEY (reading_id)
 );
 
-
-
 -- Create Message Table
-CREATE TABLE Message (
+CREATE TABLE message (
     message_id INT AUTO_INCREMENT PRIMARY KEY,
     healthcare_prof_userid INT NOT NULL,
     healthcare_prof_username VARCHAR(50) NOT NULL,
@@ -85,13 +77,12 @@ CREATE TABLE Message (
     patient_username VARCHAR(50) NOT NULL,
     message_date DATETIME NOT NULL,
     message_content TEXT NOT NULL,
-    FOREIGN KEY (healthcare_prof_userid, healthcare_prof_username) REFERENCES Health_Care_Prof(userid, username),
-    FOREIGN KEY (patient_userid, patient_username) REFERENCES Patient(userid, username)
+    FOREIGN KEY (healthcare_prof_userid, healthcare_prof_username) REFERENCES health_care_prof(userid, username),
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
 );
 
-
--- Create monitor Table
-CREATE TABLE Monitor (
+-- Create Monitor Table
+CREATE TABLE monitor (
     monitor_id INT AUTO_INCREMENT PRIMARY KEY,
     healthcare_prof_userid INT NOT NULL,
     healthcare_prof_username VARCHAR(50) NOT NULL,
@@ -99,15 +90,12 @@ CREATE TABLE Monitor (
     patient_username VARCHAR(50) NOT NULL,
     start_date DATETIME NOT NULL,
     end_date DATETIME NOT NULL,
-    FOREIGN KEY (healthcare_prof_userid, healthcare_prof_username) REFERENCES Health_Care_Prof(userid, username),
-    FOREIGN KEY (patient_userid, patient_username) REFERENCES Patient(userid, username)
+    FOREIGN KEY (healthcare_prof_userid, healthcare_prof_username) REFERENCES health_care_prof(userid, username),
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
 );
 
-
-
-
 -- Create Communicate Table
-CREATE TABLE communicate(
+CREATE TABLE communicate (
     communicate_id INT AUTO_INCREMENT PRIMARY KEY,
     family_member_userid INT NOT NULL,
     family_username VARCHAR(50) NOT NULL,
@@ -115,13 +103,12 @@ CREATE TABLE communicate(
     patient_username VARCHAR(50) NOT NULL,
     message_date DATETIME NOT NULL,
     message_content TEXT NOT NULL,
-    FOREIGN KEY (family_member_userid, family_username) REFERENCES Family_Member(userid, username),
-    FOREIGN KEY (patient_userid, patient_username) REFERENCES Patient(userid, username)
-
+    FOREIGN KEY (family_member_userid, family_username) REFERENCES family_member(userid, username),
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
 );
 
--- Create support Table
-CREATE TABLE support(
+-- Create Support Table
+CREATE TABLE support (
     support_id INT AUTO_INCREMENT PRIMARY KEY,
     family_member_userid INT NOT NULL,
     family_username VARCHAR(50) NOT NULL,
@@ -130,10 +117,6 @@ CREATE TABLE support(
     start_date DATETIME NOT NULL,
     end_date DATETIME,
     relation_to_patient VARCHAR(50),
-    FOREIGN KEY (family_member_userid, family_username) REFERENCES Family_Member(userid, username),
-    FOREIGN KEY (patient_userid, patient_username) REFERENCES Patient(userid, username)
-
+    FOREIGN KEY (family_member_userid, family_username) REFERENCES family_member(userid, username),
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
 );
-
-
-
