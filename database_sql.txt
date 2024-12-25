@@ -120,3 +120,5 @@ CREATE TABLE support (
     FOREIGN KEY (family_member_userid, family_username) REFERENCES family_member(userid, username),
     FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
 );
+
+
