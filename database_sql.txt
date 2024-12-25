@@ -22,6 +22,7 @@ CREATE TABLE monitor_request (
 CREATE TABLE Family_Member (
     userid INT AUTO_INCREMENT NOT NULL,
     username VARCHAR(50) NOT NULL,
+    education_level VARCHAR(50)
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
 );
