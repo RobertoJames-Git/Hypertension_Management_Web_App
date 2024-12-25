@@ -22,7 +22,7 @@ CREATE TABLE monitor_request (
 CREATE TABLE Family_Member (
     userid INT AUTO_INCREMENT NOT NULL,
     username VARCHAR(50) NOT NULL,
-    education_level VARCHAR(50)
+    education_level VARCHAR(50),
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
 );
@@ -71,6 +71,23 @@ CREATE TABLE Message (
     FOREIGN KEY (patient_userid, patient_username) REFERENCES Patient(userid, username)
 );
 
+
+-- Create monitor Table
+CREATE TABLE Monitor (
+    monitor_id INT AUTO_INCREMENT PRIMARY KEY,
+    healthcare_prof_userid INT NOT NULL,
+    healthcare_prof_username VARCHAR(50) NOT NULL,
+    patient_userid INT NOT NULL,
+    patient_username VARCHAR(50) NOT NULL,
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,
+    FOREIGN KEY (healthcare_prof_userid, healthcare_prof_username) REFERENCES Health_Care_Prof(userid, username),
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES Patient(userid, username)
+);
+
+
+
+
 -- Create Communicate Table
 CREATE TABLE communicate(
     communicate_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -87,18 +104,18 @@ CREATE TABLE communicate(
 
 -- Create support Table
 CREATE TABLE support(
+    support_id INT AUTO_INCREMENT PRIMARY KEY,
     family_member_userid INT NOT NULL,
     family_username VARCHAR(50) NOT NULL,
     patient_userid INT NOT NULL,
     patient_username VARCHAR(50) NOT NULL,
     start_date DATETIME NOT NULL,
-    end_date TEXT NOT NULL,
-    relation_to_patient Var()
+    end_date DATETIME,
+    relation_to_patient VARCHAR(50),
     FOREIGN KEY (family_member_userid, family_username) REFERENCES Family_Member(userid, username),
     FOREIGN KEY (patient_userid, patient_username) REFERENCES Patient(userid, username)
 
 );
-
 
 
 
