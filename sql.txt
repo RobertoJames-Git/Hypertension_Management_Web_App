@@ -1,0 +1,43 @@
+-- Create User Table
+CREATE TABLE UserProfile (
+    userid VARCHAR(50) NOT NULL,
+    username NVARCHAR(50) NOT NULL,
+    password NVARCHAR(255) NOT NULL,
+    PRIMARY KEY (userid, username)
+);
+
+-- Create Family Member Table
+CREATE TABLE Family_Member (
+    userid VARCHAR(50) NOT NULL,
+    username NVARCHAR(50) NOT NULL,
+    relation_to_patient NVARCHAR(50),
+    PRIMARY KEY (userid, username),
+    FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
+);
+
+-- Create Health Care Professional Table
+CREATE TABLE Health_Care_Prof (
+    userid VARCHAR(50) NOT NULL,
+    username NVARCHAR(50) NOT NULL,
+    years_of_exp INT NOT NULL,
+    workplace NVARCHAR(100),
+    PRIMARY KEY (userid, username),
+    FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
+);
+
+-- Create Patient Table
+CREATE TABLE Patient (
+    userid VARCHAR(50) NOT NULL,
+    username NVARCHAR(50) NOT NULL,
+    PRIMARY KEY (userid, username),
+    FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
+);
+
+-- Create Reading Table
+CREATE TABLE Reading (
+    reading_id VARCHAR(50) NOT NULL,
+    readingdate DATE NOT NULL,
+    systolic INT NOT NULL,
+    diastolic INT NOT NULL,
+    PRIMARY KEY (reading_id)
+);
