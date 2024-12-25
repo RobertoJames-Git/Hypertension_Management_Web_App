@@ -1,34 +1,34 @@
 -- Create User Table
 CREATE TABLE UserProfile (
-    userid VARCHAR(50) NOT NULL,
-    username NVARCHAR(50) NOT NULL,
-    password NVARCHAR(255) NOT NULL,
+    userid INT AUTO_INCREMENT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     PRIMARY KEY (userid, username)
 );
 
 -- Create Family Member Table
 CREATE TABLE Family_Member (
-    userid VARCHAR(50) NOT NULL,
-    username NVARCHAR(50) NOT NULL,
-    relation_to_patient NVARCHAR(50),
+    userid AUTO_INCREMENT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    relation_to_patient VARCHAR(50),
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
 );
 
 -- Create Health Care Professional Table
 CREATE TABLE Health_Care_Prof (
-    userid VARCHAR(50) NOT NULL,
-    username NVARCHAR(50) NOT NULL,
+    userid AUTO_INCREMENT NOT NULL,
+    username VARCHAR(50) NOT NULL,
     years_of_exp INT NOT NULL,
-    workplace NVARCHAR(100),
+    workplace VARCHAR(100),
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
 );
 
 -- Create Patient Table
 CREATE TABLE Patient (
-    userid VARCHAR(50) NOT NULL,
-    username NVARCHAR(50) NOT NULL,
+    userid AUTO_INCREMENT NOT NULL,
+    username VARCHAR(50) NOT NULL,
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES UserProfile(userid, username)
 );
@@ -41,3 +41,30 @@ CREATE TABLE Reading (
     diastolic INT NOT NULL,
     PRIMARY KEY (reading_id)
 );
+
+CREATE TABLE monitor_request (
+    request_id INT AUTO_INCREMENT PRIMARY KEY,
+    userID INT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    role ENUM('Health care Professional', 'Patient', 'Family Member') NOT NULL,
+    request_date DATETIME NOT NULL,
+    request_status ENUM('pending', 'accepted', 'rejected') NOT NULL,
+    recipient_info VARCHAR(100) NOT NULL,
+    FOREIGN KEY (userID, username, role) REFERENCES user_profile(userID, username, role)
+);
+
+-- Create Message Table
+CREATE TABLE Message (
+    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    healthcare_prof_userid INT NOT NULL,
+    healthcare_prof_username VARCHAR(50) NOT NULL,
+    patient_userid INT NOT NULL,
+    patient_username VARCHAR(50) NOT NULL,
+    message_date DATETIME NOT NULL,
+    message_content TEXT NOT NULL,
+    FOREIGN KEY (healthcare_prof_userid, healthcare_prof_username) REFERENCES Health_Care_Prof(userid, username),
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES Patient(userid, username)
+);
+
+
+
