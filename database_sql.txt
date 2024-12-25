@@ -13,7 +13,7 @@ CREATE TABLE monitor_request (
     role ENUM('Health care Professional', 'Patient', 'Family Member') NOT NULL,
     request_date DATETIME NOT NULL,
     request_status ENUM('pending', 'accepted', 'rejected') NOT NULL,
-    recipient_info VARCHAR(100) NOT NULL,
+    recipient_info VARCHAR(255) NOT NULL,
     FOREIGN KEY (sender_id,sender_username) REFERENCES UserProfile(userid, username)
 );
 
