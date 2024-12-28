@@ -1,0 +1,82 @@
+
+header{
+    border-bottom: 2px solid black;
+    display: flex;
+    justify-content: center;
+}
+
+.navMenu div{
+  display: inline-block;
+  margin-right: 30px;
+  transition: color 0.3s ease, padding 0.3s ease; /* Smooth easing effect */
+  cursor: pointer;
+  
+}
+
+.navMenu div:hover{
+    background-color: #1946da;
+    color: white;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+
+
+.navbar{
+    display: grid;
+    grid-template-columns: 300px 600px auto;
+    align-items: center;
+    padding-bottom: 5px;
+    font-family: Arial;
+    font-size: 20px;
+    
+    
+}
+
+
+.website_Name{
+    display: flex;
+    background-color: #1946da;
+    color:white;
+    padding: 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    width: max-content;
+    align-items: center;
+}
+
+.website_Name img{
+    background-color: white;
+    border-radius: 10px;
+    margin-left: 10px;
+}
+
+
+.register_and_login_container {
+    display: grid;
+    grid-template-columns: auto auto;
+    width: max-content;
+    font-weight: bold;
+}
+
+
+
+.register_container{
+    border-right: 1px solid white;
+    background-color: #1977BB;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+}
+
+.login_container{
+    background-color: #1946da;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+.register_container, .login_container{
+    padding: 5px;
+    color: white;
+    padding: 10px;
+
+}
+
