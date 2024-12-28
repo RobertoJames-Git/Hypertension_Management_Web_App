@@ -6,8 +6,14 @@
   <title>Our Mission</title>
   <!-- Link the external stylesheet -->
   <link rel="stylesheet" href="styles/aboutUsStyle.css">
+  <link rel="stylesheet" href="styles/indexStyle.css">
 </head>
 <body>
+
+    <?php
+        require_once("navbar.php");
+    ?>
+
     <section class="how-it-works-section" id="how-it-works">
         <div class="content-wrapper">
             <div class="content-container">
