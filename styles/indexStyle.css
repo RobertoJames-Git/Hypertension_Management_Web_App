@@ -9,15 +9,15 @@ header{
     justify-content: center;
 }
 
-.navMenu div{
+#navMenu div{
   display: inline-block;
   margin-left: 30px;
-  transition: color 0.3s ease, padding 0.3s ease; /* Smooth easing effect */
+  transition: color 0.4s ease, padding 0.4s ease; /* Smooth easing effect */
   cursor: pointer;
   border-radius: 20px;
 }
 
-.navMenu div:hover{
+#navMenu div:hover{
     background-color: #1946da;
     color: white;
     padding: 10px;
@@ -26,7 +26,7 @@ header{
 
 
 
-.navbar{
+#navbar{
     display: grid;
     grid-template-columns: 270px 600px auto;
     align-items: center;
@@ -37,8 +37,12 @@ header{
     
 }
 
+#home_option{
+    margin-left: 0px;
+}
 
-.website_Name{
+
+#website_Name{
     display: flex;
     background-color: #1946da;
     color:white;
@@ -47,39 +51,58 @@ header{
     font-weight: bold;
     width: max-content;
     align-items: center;
+    transition: padding ease 0.5s;
+    cursor:pointer;
 }
 
-.website_Name img{
+#website_Name img{
     background-color: white;
     margin-left: 10px;
 }
 
+#website_Name:hover{
+    outline: 2px solid white ;
+    padding-left: 25px;
+    padding-right: 25px;
+}
 
-.register_and_login_container {
+#register_and_login_container {
     display: grid;
     grid-template-columns: auto auto;
     width: max-content;
     font-weight: bold;
+    border: 3px solid white;
+    border-radius: 20px;
+    cursor: pointer;
 }
 
 
 
-.register_container{
+#register_container{
     border-right: 1px solid white;
     background-color: #1977BB;
     border-top-left-radius: 15px;
     border-bottom-left-radius: 15px;
 }
 
-.login_container{
+#login_container{
     background-color: #1946da;
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
 }
-.register_container, .login_container{
+#register_container, #login_container{
     padding: 5px;
     color: white;
     padding: 10px;
+    transition: padding ease-in 0.4s,padding ease-out 0.4s;
 
 }
 
+#register_container:hover{
+    padding-right: 30px;
+
+}
+
+#login_container:hover{
+    padding-left: 30px;
+}
