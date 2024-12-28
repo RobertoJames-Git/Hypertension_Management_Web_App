@@ -40,3 +40,110 @@ body {
     border-radius: 10px;
     display: block;
   }
+  
+  .team-section {
+    padding: 40px 20px; /* Add spacing around the section */
+    text-align: center;
+    background-color: #1a1a1a;
+  }
+  
+  .team-section h2 {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  
+  .team-section p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: #cccccc;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto; /* Center the text */
+  }
+  
+  .team-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center the team members */
+    gap: 20px;
+  }
+  
+  .team-member {
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 250px;
+    text-align: center;
+    color: white;
+  }
+  
+  .team-member img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .team-member h3 {
+    font-size: 1.5em;
+    margin: 10px 0 5px;
+  }
+  
+  .team-member .role {
+    font-size: 1em;
+    color: #cccccc;
+  }
+
+  .how-it-works-section {
+    padding: 40px 20px; /* Add spacing around the section */
+    text-align: center;
+    background-color: #1a1a1a; /* Match the background color */
+  }
+  
+  .how-it-works-section .content-wrapper {
+    display: flex;
+    flex-wrap: wrap; /* Make it responsive */
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    max-width: 1200px; /* Restrict the overall width */
+    margin: 0 auto; /* Center the section on the page */
+  }
+  
+  .how-it-works-section .content-container {
+    flex: 1;
+    min-width: 300px; /* Ensure the content is always readable */
+    max-width: 600px;
+    padding: 20px;
+    color: white;
+    text-align: left; /* Align text to the left for readability */
+  }
+  
+  .how-it-works-section h2 {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  
+  .how-it-works-section p {
+    font-size: 1.2em;
+    color: #cccccc;
+    line-height: 1.6;
+  }
+  
+  .how-it-works-section .image-container {
+    flex: 1;
+    min-width: 300px; /* Ensure the image remains responsive */
+    max-width: 600px;
+    padding: 20px; /* Add space around the image */
+    display: flex;
+    justify-content: center; /* Center the image */
+    align-items: center;
+  }
+  
+  .how-it-works-section img {
+    width: 100%;
+    max-width: 100%; /* Restrict the image to its container */
+    border-radius: 10px;
+  }
+  
