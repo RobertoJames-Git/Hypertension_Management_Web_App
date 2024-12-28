@@ -6,7 +6,6 @@
   <title>Our Mission</title>
   <!-- Link the external stylesheet -->
   <link rel="stylesheet" href="styles/aboutUsStyle.css">
-  <link rel="stylesheet" href="styles/indexStyle.css">
 </head>
 <body>
 
