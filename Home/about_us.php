@@ -5,24 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Our Mission</title>
   <!-- Link the external stylesheet -->
-  <link rel="stylesheet" href="styles/aboutUsStyle.css">
+  <link rel="stylesheet" href="../styles/aboutUsStyle.css">
 </head>
 <body>
 
     <?php
-        require_once("navbar.php");
+        require_once("../navbar.php");
     ?>
 
     <section class="how-it-works-section" id="how-it-works">
         <div class="content-wrapper">
             <div class="content-container">
-            <h2>How it Works</h2>
+            <h2>How it all Works</h2>
             <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
             </p>
             </div>
             <div class="image-container">
-            <img src="Images/aboutUsImages/image-how-it-works.jpg" alt="Empowering Health and Wellness">
+            <img src="../Images/aboutUsImages/image-how-it-works.jpg" alt="Empowering Health and Wellness">
             </div>
         </div>
     </section>
@@ -36,7 +36,7 @@
             in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
         </p>
         <div class="image-container">
-        <img src="Images/aboutUsImages/our-mission.png">
+        <img src="../Images/aboutUsImages/our-mission.png">
         </div>
     </section>
 
@@ -47,22 +47,22 @@
         </p>
             <div class="team-container">
                 <div class="team-member">
-                    <img src="Images/aboutUsImages/Image-Placeholder.jpg" alt="Member" 1>
+                    <img src="../Images/aboutUsImages/Image-Placeholder.jpg" alt="Member" 1>
                     <h3> Roberto James</h3>
                     <p class="role"> Team Lead Researcher</p>
                 </div>
                 <div class="team-member">
-                    <img src="Images/aboutUsImages/Image-Placeholder.jpg" alt="Member 2">
+                    <img src="../Images/aboutUsImages/Image-Placeholder.jpg" alt="Member 2">
                     <h3> Lorem ipsum dolor</h3>
                     <p class="role"> Lorem ipsum dolor</p>
                 </div>
                 <div class="team-member">
-                    <img src="Images/aboutUsImages/Image-Placeholder.jpg" alt="Member 3">
+                    <img src="../Images/aboutUsImages/Image-Placeholder.jpg" alt="Member 3">
                     <h3> Lorem ipsum dolor</h3>
                     <p class="role"> Lorem ipsum dolor</p>
                 </div>
                 <div class="team-member">
-                    <img src="Images/aboutUsImages/Image-Placeholder.jpg" alt="Member 4">
+                    <img src="../Images/aboutUsImages/Image-Placeholder.jpg" alt="Member 4">
                     <h3> Lorem ipsum dolor</h3>
                     <p class="role"> Lorem ipsum dolor</p>
                 </div>
