@@ -7,12 +7,13 @@ header{
     border-bottom: 2px solid white;
     display: flex;
     justify-content: center;
+    width: 100%;
 }
 
 #navMenu div{
-  display: inline-block;
+  display: inline;
   margin-left: 30px;
-  transition: color 0.4s ease, padding 0.4s ease; /* Smooth easing effect */
+  transition:  padding 0.4s ease; /* Smooth easing effect */
   cursor: pointer;
   border-radius: 20px;
 }
@@ -37,11 +38,6 @@ header{
     
 }
 
-#home_option{
-    margin-left: 0px;
-}
-
-
 #website_Name{
     display: flex;
     background-color: #1946da;
@@ -55,7 +51,7 @@ header{
     cursor:pointer;
 }
 
-#website_Name img{
+#website_Name img{ 
     background-color: white;
     margin-left: 10px;
 }
@@ -106,4 +102,119 @@ header{
 
 #login_container:hover{
     padding-left: 30px;
+}
+
+
+@media (max-width:999px){
+    
+    #navbar {
+        display: block;
+        height: auto; /* Adjust height dynamically */
+        max-height: 100vh; /* Ensure the navbar doesn't exceed the viewport height */
+        width: 300px;
+        position: fixed;
+        z-index: 1;
+        border: 2px solid white;
+        background-color: #1a1a1a;
+        font-size: 20px;
+        border-right: 2px solid white;
+        margin-left: 10px;
+        border-radius: 10px;
+        left: 0;
+    
+        /* Enable scrolling for overflowing content */
+        overflow-y: auto; /* Vertical scrolling */
+        overflow-x: hidden; /* Prevent horizontal scrolling */
+    }
+    
+
+    #navMenu div{
+        display: block;
+        margin-top: 10px;
+        transition:  padding 0.4s ease; /* Smooth easing effect */
+    }
+
+    #navMenu{
+        margin-left: 0px;
+        transition: height ease-in 0.3s;
+    }
+
+    #website_Name{
+        margin: auto;
+        transition: padding ease 0.5s, border-radius ease 0.5s;
+        margin-top: 10px;
+    }
+    #navMenu div{
+        line-height: 15px;
+        border-radius: 5px;
+        padding: 10px;
+        margin-left: 5px;
+        margin-right: 5px;
+        transition: text-indent ease-in 0.3s;
+    }
+
+    #navMenu div:hover{
+        background-color: rgb(58,59,61);
+        color: white;
+        padding: 10px;
+        text-indent: 20px;
+    }
+
+
+
+
+    #website_Name:hover{
+        padding-left: 40px;
+        padding-right: 40px;
+        border-radius: 10px;
+    }
+
+
+    #register_and_login_container {
+        margin-top: 50%;
+        border-top: 2px solid white;
+        width: 100%;
+        display: block;
+        outline:none;
+        border-radius:0px;
+        cursor:auto;
+    }
+    
+    
+    #register_container{
+        border-right: 2px solid white;
+        background-color: #1977BB;
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+    }
+    
+
+    #login_container{
+        background-color: #1946da;
+    }
+    
+
+    #register_container, #login_container{
+        color: white;
+        padding: 5px;
+        transition: padding ease-in 0.3s,text-indent ease-in 0.3s;
+        margin-top: 10px;
+        border-radius: 0px;
+        margin-left: 10px;
+        margin-right: 10px;
+        border-radius:5px;
+    }
+    
+    #register_container:hover, #login_container:hover{
+        text-indent: 20px;
+
+    }
+    #register_container{
+        border-right: none;
+    
+    }
+
+    #login_container:hover{
+        padding-left: 0px;
+    }
 }

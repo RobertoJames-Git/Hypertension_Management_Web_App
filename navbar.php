@@ -22,6 +22,7 @@
 
 <header>
     <link rel="stylesheet" href="<?php echo $level_down?>styles/indexStyle.css">
+    
     <div id="navbar">
         <div id="website_Name" onclick="window.location.href='index.php'">HypMonitor <img src="<?php echo $level_down ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
         <div id="navMenu">
@@ -29,7 +30,7 @@
             <div>Profile</div>
             <div>Record BP</div>
             <div>Support</div>
-            <div onclick="window.location.href='about_us.php'">About Us</div>
+            <div onclick="window.location.href='Home/about_us.php'">About Us</div>
         </div>
 
         <div id="register_and_login_container">
