@@ -26,7 +26,6 @@ header{
 }
 
 
-
 #navbar{
     display: grid;
     grid-template-columns: 200px 600px 180px;
@@ -104,27 +103,35 @@ header{
     padding-left: 30px;
 }
 
+#heading-for-small-screen{
+    display: none;
+    
+
+}
+
+#sidebarclose{
+    display: none;
+}
 
 @media (max-width:999px){
     
     #navbar {
-        display: block;
-        height: auto; /* Adjust height dynamically */
+        display: none;
+        height: 95%; /* Adjust height dynamically */
         max-height: 100vh; /* Ensure the navbar doesn't exceed the viewport height */
         width: 300px;
-        position: fixed;
+        position: absolute;
         z-index: 1;
         border: 2px solid white;
         background-color: #1a1a1a;
         font-size: 20px;
         border-right: 2px solid white;
-        margin-left: 10px;
         border-radius: 10px;
         left: 0;
-    
         /* Enable scrolling for overflowing content */
         overflow-y: auto; /* Vertical scrolling */
         overflow-x: hidden; /* Prevent horizontal scrolling */
+
     }
     
 
@@ -142,8 +149,9 @@ header{
     #website_Name{
         margin: auto;
         transition: padding ease 0.5s, border-radius ease 0.5s;
-        margin-top: 10px;
+        
     }
+    
     #navMenu div{
         line-height: 15px;
         border-radius: 5px;
@@ -171,13 +179,19 @@ header{
 
 
     #register_and_login_container {
-        margin-top: 50%;
+       margin-top: auto;
         border-top: 2px solid white;
         width: 100%;
         display: block;
         outline:none;
         border-radius:0px;
         cursor:auto;
+        height: max-content;
+        padding-bottom: 10px;
+        /*Keeps element at the bottom of navbar*/
+        position: absolute;
+        bottom: 0;
+        
     }
     
     
@@ -203,6 +217,7 @@ header{
         margin-left: 10px;
         margin-right: 10px;
         border-radius:5px;
+        cursor:pointer;
     }
     
     #register_container:hover, #login_container:hover{
@@ -217,4 +232,109 @@ header{
     #login_container:hover{
         padding-left: 0px;
     }
+
+    header{
+        border-bottom:none;
+    }
+
+    /*********Heading for small screens*****************/
+
+    #heading-for-small-screen{
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        font-size: 18px;
+        border-bottom: 2px solid white;
+        padding-bottom: 15px;
+    }
+
+    #heading-for-small-screen #website_Name{
+        height: 28px;
+        margin: 0;
+        font-size: 20px;
+    }
+
+    #heading-for-small-screen div{
+        animation: slideIn 0.5s ease-out forwards; 
+    }
+
+    #openNav{
+        display: inline-flex;
+        align-items: center;
+        padding: 5px;
+        background-color: #1946da;
+        font-size: 20px;
+        border-radius: 20px;
+        gap: 10px;
+        font-weight: bold;
+        transition: padding ease 0.5s,border-radius ease 0.5s;
+        
+    }
+    
+    #openNav:hover{
+        outline: 2px solid white;
+        padding-left: 20px;
+        padding-right: 20px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    #sidebarclose{
+        display: block;
+        text-align: right;
+        margin-left: auto;
+        padding: 10px;
+        width: max-content;
+        
+        border-radius: 20px;
+        background-color: #1946da;
+        padding: 10px;
+        padding-left: 15px;
+        padding-right: 15px;
+        font-size:15px;
+        cursor: pointer;
+
+    }
+
+    #sidebarclose:hover{
+        outline: 2px solid white;
+    }
+
+
+
+    
+
+}
+
+
+
+/* Define the slide-in animation */
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%); /* Start off-screen to the left */
+        opacity: 0; /* Start with no opacity */
+    }
+    to {
+        transform: translateX(0); /* Slide to the original position */
+        opacity: 1; /* Fade in */
+    }
+}
+
+/* Define the slide-out animation */
+@keyframes slideOut {
+    from {
+        transform: translateX(0); /* Start from the original position */
+        opacity: 1; /* Fully visible */
+    }
+    to {
+        transform: translateX(-100%); /* Slide out to the left */
+        opacity: 0; /* Fade out */
+    }
+}
+
+
+/* Apply the animation to the element */
+#navbar {
+    animation: slideIn 0.5s ease-out forwards; /* 0.5s duration, ease-out timing function */
+
 }

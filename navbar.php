@@ -21,10 +21,19 @@
 ?>
 
 <header>
+    <script src="Javascript/navbar.js"></script>
     <link rel="stylesheet" href="<?php echo $level_down?>styles/indexStyle.css">
     
-    <div id="navbar">
+    <div id="heading-for-small-screen">
         <div id="website_Name" onclick="window.location.href='index.php'">HypMonitor <img src="<?php echo $level_down ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
+        <div id="openNav" onclick="openSideMenu()">Menu &#9776;</div>
+    </div>
+
+
+    <div id="navbar">
+    <div id="sidebarclose" onclick="openSideMenu()">X</div>
+        <div id="website_Name" onclick="window.location.href='index.php'">HypMonitor <img src="<?php echo $level_down ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
+
         <div id="navMenu">
             <div id="home_option" onclick="window.location.href='index.php'">Home</div>
             <div>Profile</div>
@@ -39,4 +48,6 @@
         </div>
     </div>
 </header>
+
+
 
