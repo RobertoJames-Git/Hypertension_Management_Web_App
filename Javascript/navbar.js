@@ -7,7 +7,7 @@ function openSideMenu(){
 
     if (navigationBar.style.display==''){
         navigationBar.style.display='block';
-        navigationBar.style.animation='slideIn 0.5s ease-out forwards';
+        navigationBar.style.animation='slideIn 0.5s ease-in forwards';
         return;
     }
 
@@ -16,8 +16,13 @@ function openSideMenu(){
     }
     
     setTimeout(() => {
-        navigationBar.style.display='';
-    }, 480);
+        if (navigationBar.style.animation=='slideOut 0.5s ease-out backwards'){
+            navigationBar.style.display='';
+            navigationBar.style.animation='slideIn 0.5s ease-in forwards';
+        }
+    }, 490);
+
+    
 }
 
 

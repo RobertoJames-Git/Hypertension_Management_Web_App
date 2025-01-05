@@ -113,6 +113,11 @@ header{
     display: none;
 }
 
+#profile_option img{
+    display: none;
+}
+
+
 @media (max-width:999px){
     
     #navbar {
@@ -300,12 +305,24 @@ header{
         outline: 2px solid white;
     }
 
+    #profile_option {
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    #profile_option img {
+        display: inline;
+        vertical-align: middle;
+        background-color: white;
+        border-radius: 15px;
+        padding: 3px;
+        
+    }
 
 
     
 
 }
-
 
 
 /* Define the slide-in animation */
@@ -335,6 +352,6 @@ header{
 
 /* Apply the animation to the element */
 #navbar {
-    animation: slideIn 0.5s ease-out forwards; /* 0.5s duration, ease-out timing function */
+    animation: slideIn 0.5s ease-in forwards; /* 0.5s duration, ease-out timing function */
 
 }

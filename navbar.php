@@ -2,7 +2,7 @@
 <?php
     // Dynamically determine the base URL
     $base_url = dirname($_SERVER['SCRIPT_NAME']) .'/';
-
+    
     #determine how many levels from the root directiory the file is in by counting
     #the amount of slashes and minus 2 eg: /Major_Project_DHI/. you minus two because by default the project
     # folder will e included and sill have two slashes
@@ -18,28 +18,29 @@
         $level_down = $level_down .'../';
     }
 
+    
 ?>
 
 <header>
-    <script src="Javascript/navbar.js"></script>
-    <link rel="stylesheet" href="<?php echo $level_down?>styles/indexStyle.css">
-    
+    <script src="<?php echo htmlspecialchars($level_down)?>Javascript/navbar.js"></script>
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($level_down) ?>styles/indexStyle.css">
+
     <div id="heading-for-small-screen">
-        <div id="website_Name" onclick="window.location.href='index.php'">HypMonitor <img src="<?php echo $level_down ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
+        <div id="website_Name" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>index.php'">HypMonitor <img src="<?php echo htmlspecialchars($level_down) ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
         <div id="openNav" onclick="openSideMenu()">Menu &#9776;</div>
     </div>
 
 
     <div id="navbar">
     <div id="sidebarclose" onclick="openSideMenu()">X</div>
-        <div id="website_Name" onclick="window.location.href='index.php'">HypMonitor <img src="<?php echo $level_down ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
+        <div id="website_Name" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>index.php'">HypMonitor <img src="<?php echo htmlspecialchars( $level_down) ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
 
         <div id="navMenu">
-            <div id="home_option" onclick="window.location.href='index.php'">Home</div>
-            <div>Profile</div>
+            <div id="home_option" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>index.php'">  Home</div>
+            <div id="profile_option"> <img src="<?php echo htmlspecialchars($level_down) ?>images/navbarImages/user.svg" alt="user svg not found" width="20px"> Profile</div>
             <div>Record BP</div>
             <div>Support</div>
-            <div onclick="window.location.href='Home/about_us.php'">About Us</div>
+            <div onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>Home/about_us.php'">About Us</div>
         </div>
 
         <div id="register_and_login_container">
