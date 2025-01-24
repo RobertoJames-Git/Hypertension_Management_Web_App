@@ -35,6 +35,7 @@
     <div id="sidebarclose" onclick="openSideMenu()">X</div>
         <div id="website_Name" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>index.php'">HypMonitor <img src="<?php echo htmlspecialchars( $level_down) ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
 
+        
         <div id="navMenu">
             <div id="home_option" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>index.php'"> Home</div>
             <div id="profile_option"> Profile</div>

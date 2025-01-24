@@ -10,6 +10,10 @@ header{
     width: 100%;
 }
 
+#navMenu{
+   margin:auto;
+}
+
 #navMenu div{
     display: inline;
     margin-left: 10px;
@@ -26,29 +30,30 @@ header{
 }
 
 
-#navbar{
+#navbar {
     display: grid;
-    grid-template-columns: 200px 600px 180px;
+    grid-template-columns: auto 600px auto; /* Grid layout */
+    width: 100%;
     align-items: center;
     padding-bottom: 15px;
     font-family: Arial;
     font-size: 20px;
-    
 }
 
-#website_Name{
+#website_Name {
     display: flex;
     background-color: #1946da;
-    color:white;
+    color: white;
     padding: 10px;
     border-radius: 10px;
     font-weight: bold;
-    width: max-content;
+    width: max-content; /* Content-based width */
     align-items: center;
-    transition: padding ease 0.5s;
-    cursor:pointer;
-
+    transition: background-color ease 0.5s;
+    cursor: pointer;
 }
+
+
 
 #website_Name img{ 
     background-color: white;
@@ -56,8 +61,9 @@ header{
 }
 
 #website_Name:hover{
-    padding-left: 25px;
-    padding-right: 25px;
+    background-color: white;
+    color: #1946da;
+    outline: 2px solid #1946da;
 }
 
 #register_and_login_container {
@@ -66,6 +72,7 @@ header{
     grid-column-gap: 5px;
     width: max-content;
     font-weight: bold;
+    margin-left: auto;
 }
 
 
@@ -105,8 +112,7 @@ header{
     display: none;
 }
 
-
-@media (max-width:999px){
+@media (max-width:959px){
     
     #navbar {
         display: block;
@@ -164,7 +170,6 @@ header{
 
 
     #register_and_login_container {
-        border-top: 2px solid white;
         width: 100%;
         display: block;
         outline:none;
@@ -228,6 +233,7 @@ header{
         font-size: 18px;
         border-bottom: 2px solid white;
         padding-bottom: 15px;
+        border-bottom: 2px solid black;
     }
 
     #heading-for-small-screen #website_Name{
@@ -292,7 +298,8 @@ header{
     #home_option{
         display: inline-flex;
         align-items: center;
-        margin: auto;
+        margin-left: 0px;
+        
         
     }
 
@@ -317,7 +324,20 @@ header{
 }
 
 
+@media (max-height:420px) {
+    #navMenu{
+        overflow-y: scroll;
+        height: 150px;
+    }
+}
 
+
+@media (max-height:350px) {
+    #navMenu{
+
+        height: 80px; 
+    }
+}
 
 /* Slide-in animation */
 @keyframes slideIn {
