@@ -125,16 +125,10 @@ header{
 
     }
     
-
-    #navMenu div{
-        display: block;
-        margin-top: 10px;
-        transition:  padding 0.4s ease; /* Smooth easing effect */
-    }
-
     #navMenu{
+        margin-top: 20px;
         margin-left: 0px;
-        transition: height ease-in 0.3s;
+        
     }
 
     #website_Name{
@@ -144,20 +138,23 @@ header{
     }
     
     #navMenu div{
-        line-height: 15px;
-        border-radius: 5px;
-        padding: 10px;
+        display:flex;
+        padding: 5px;
+        border-bottom:2px solid grey ;
+        border-radius: 0px;
         margin-left: 5px;
         margin-right: 5px;
         transition: text-indent ease-in 0.3s;
+        margin-top: 10px;
     }
 
     #navMenu div:hover{
-        background-color: grey;
-        color: white;
-        padding: 10px;
+        background-color: white;
+        color: #1946da;
         text-indent: 20px;
-
+        border-radius: 5px;
+        border-bottom:2px solid white ;
+        outline: 2px solid #1946da;
     }
 
     #website_Name:hover{
@@ -291,7 +288,22 @@ header{
         align-items: center;
     }
     
-    #profile_option img {
+
+    #home_option{
+        display: inline-flex;
+        align-items: center;
+        margin: auto;
+        
+    }
+
+
+    #recordBP_option{
+        display: inline-flex;
+        align-items: center;
+        margin: auto;
+    }
+
+    #profile_option img, #recordBP_option img,#home_option img {
         display: inline;
         vertical-align: middle;
         background-color: white;
@@ -299,6 +311,7 @@ header{
         padding: 3px;
         
     }
+
 
 
 }
