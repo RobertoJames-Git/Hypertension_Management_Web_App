@@ -1,28 +1,28 @@
 body{
     font-family: Arial, sans-serif;
-    background-color: #1a1a1a;
-    color: white;
+    background-color: white;
+    color: black;
 }
 header{
-    border-bottom: 2px solid white;
+    border-bottom: 2px solid black;
     display: flex;
     justify-content: center;
     width: 100%;
 }
 
 #navMenu div{
-  display: inline;
-  margin-left: 30px;
-  transition:  padding 0.4s ease; /* Smooth easing effect */
-  cursor: pointer;
-  border-radius: 20px;
+    display: inline;
+    margin-left: 10px;
+    cursor: pointer;
+    border-radius: 20px;
+    padding: 10px;
+    transition: background-color 0.5s ease; /* Add smooth transition */
 }
 
 #navMenu div:hover{
     background-color: #1946da;
     color: white;
-    padding: 10px;
-    
+
 }
 
 
@@ -34,7 +34,6 @@ header{
     font-family: Arial;
     font-size: 20px;
     
-    
 }
 
 #website_Name{
@@ -42,12 +41,13 @@ header{
     background-color: #1946da;
     color:white;
     padding: 10px;
-    border-radius: 20px;
+    border-radius: 10px;
     font-weight: bold;
     width: max-content;
     align-items: center;
     transition: padding ease 0.5s;
     cursor:pointer;
+
 }
 
 #website_Name img{ 
@@ -56,7 +56,6 @@ header{
 }
 
 #website_Name:hover{
-    outline: 2px solid white ;
     padding-left: 25px;
     padding-right: 25px;
 }
@@ -64,49 +63,37 @@ header{
 #register_and_login_container {
     display: grid;
     grid-template-columns: auto auto;
+    grid-column-gap: 5px;
     width: max-content;
     font-weight: bold;
-    outline: 2px solid white;
-    border-radius: 20px;
-    cursor: pointer;
-    justify-content: center;
 }
 
 
 
 #register_container{
-    border-right: 2px solid white;
-    background-color: #1977BB;
-    border-top-left-radius: 15px;
-    border-bottom-left-radius: 15px;
+    background-color: #1946da;
+
 }
 
 #login_container{
-    background-color: #1946da;
+    background-color: #F5A623;
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
 }
 #register_container, #login_container{
-    padding: 5px;
+    border-radius: 10px;
     color: white;
     padding: 10px;
-    transition: padding ease-in 0.4s,padding ease-out 0.4s;
-
+    cursor: pointer;
 }
 
-#register_container:hover{
-    padding-right: 30px;
+#register_container:hover,#login_container:hover{
+    outline:2px solid black;
 
-}
-
-#login_container:hover{
-    padding-left: 30px;
 }
 
 #heading-for-small-screen{
     display: none;
-    
-
 }
 
 #sidebarclose{
@@ -121,21 +108,19 @@ header{
 @media (max-width:999px){
     
     #navbar {
-        display: none;
+        display: block;
         height: 95%; /* Adjust height dynamically */
-        max-height: 100vh; /* Ensure the navbar doesn't exceed the viewport height */
         width: 300px;
-        position: absolute;
+        position: fixed;
         z-index: 1;
-        border: 2px solid white;
-        background-color: #1a1a1a;
+        background-color: white;
         font-size: 20px;
-        border-right: 2px solid white;
-        border-radius: 10px;
-        left: 0;
-        /* Enable scrolling for overflowing content */
+        left: -315px;
         overflow-y: auto; /* Vertical scrolling */
         overflow-x: hidden; /* Prevent horizontal scrolling */
+        outline: 2px solid black;
+        margin-left: 10px;
+        border-radius: 10px;
 
     }
     
@@ -154,7 +139,7 @@ header{
     #website_Name{
         margin: auto;
         transition: padding ease 0.5s, border-radius ease 0.5s;
-        
+
     }
     
     #navMenu div{
@@ -167,62 +152,56 @@ header{
     }
 
     #navMenu div:hover{
-        background-color: rgb(58,59,61);
+        background-color: grey;
         color: white;
         padding: 10px;
         text-indent: 20px;
+
     }
-
-
-
 
     #website_Name:hover{
         padding-left: 40px;
         padding-right: 40px;
-        border-radius: 10px;
     }
 
 
     #register_and_login_container {
-       margin-top: auto;
         border-top: 2px solid white;
         width: 100%;
         display: block;
         outline:none;
-        border-radius:0px;
         cursor:auto;
         height: max-content;
-        padding-bottom: 10px;
-        /*Keeps element at the bottom of navbar*/
-        position: absolute;
         bottom: 0;
-        
+        margin-top: 10px;
+        position: absolute;
+        margin-bottom: 10px;
     }
     
     
     #register_container{
-        border-right: 2px solid white;
-        background-color: #1977BB;
+        border-right: 2px solid #1946da;
         border-top-left-radius: 15px;
         border-bottom-left-radius: 15px;
     }
     
 
     #login_container{
-        background-color: #1946da;
+        background-color: #F5A623;
     }
     
 
     #register_container, #login_container{
         color: white;
         padding: 5px;
-        transition: padding ease-in 0.3s,text-indent ease-in 0.3s;
+        transition: text-indent ease-in 0.3s;
         margin-top: 10px;
         border-radius: 0px;
         margin-left: 10px;
         margin-right: 10px;
         border-radius:5px;
         cursor:pointer;
+        
     }
     
     #register_container:hover, #login_container:hover{
@@ -259,9 +238,6 @@ header{
         font-size: 20px;
     }
 
-    #heading-for-small-screen div{
-        animation: slideIn 0.5s ease-out forwards; 
-    }
 
     #openNav{
         display: inline-flex;
@@ -269,11 +245,11 @@ header{
         padding: 5px;
         background-color: #1946da;
         font-size: 20px;
-        border-radius: 20px;
+        border-radius: 10px;
         gap: 10px;
         font-weight: bold;
         transition: padding ease 0.5s,border-radius ease 0.5s;
-        
+        color : white;
     }
     
     #openNav:hover{
@@ -290,19 +266,23 @@ header{
         margin-left: auto;
         padding: 10px;
         width: max-content;
-        
+        color: white;
         border-radius: 20px;
         background-color: #1946da;
-        padding: 10px;
-        padding-left: 15px;
-        padding-right: 15px;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 5px;
+        padding-top: 5px;
         font-size:15px;
+        margin-right: 5px;
+        margin-top: 5px;
         cursor: pointer;
 
     }
 
-    #sidebarclose:hover{
-        outline: 2px solid white;
+    #sidebarclose:hover {
+        box-shadow: 0 0 2px 2px #1946da; /* Equal shadow on all sides */
+        transition: box-shadow 0.2s ease; /* Optional: Smooth transition */
     }
 
     #profile_option {
@@ -320,38 +300,41 @@ header{
     }
 
 
-    
-
 }
 
 
-/* Define the slide-in animation */
+
+
+/* Slide-in animation */
 @keyframes slideIn {
     from {
-        transform: translateX(-100%); /* Start off-screen to the left */
-        opacity: 0; /* Start with no opacity */
+        left: var(--start-position); /* Dynamic starting position */
+        opacity: 1; /* Maintain visibility */
     }
     to {
-        transform: translateX(0); /* Slide to the original position */
-        opacity: 1; /* Fade in */
+        left: 0; /* Slide into view */
+        opacity: 1;
     }
 }
 
-/* Define the slide-out animation */
+/* Slide-out animation */
 @keyframes slideOut {
     from {
-        transform: translateX(0); /* Start from the original position */
-        opacity: 1; /* Fully visible */
+        left: var(--start-position); /* Dynamic starting position */
+        opacity: 1; /* Maintain visibility */
     }
     to {
-        transform: translateX(-100%); /* Slide out to the left */
-        opacity: 0; /* Fade out */
+        left: -315px; /* Slide out of view */
+        opacity: 1;
     }
 }
 
 
-/* Apply the animation to the element */
-#navbar {
-    animation: slideIn 0.5s ease-in forwards; /* 0.5s duration, ease-out timing function */
+/* Apply the animations dynamically */
+#navbar.slide-in {
+    animation: slideIn 0.3s ease forwards;
+}
 
+#navbar.slide-out {
+    animation: slideOut 0.3s ease forwards;
 }

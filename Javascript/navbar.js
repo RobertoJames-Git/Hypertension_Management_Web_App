@@ -2,29 +2,24 @@ function openSideMenu(){
 
     // Run the function only when menu is clicked
     checkScreenWidth();
-    navigationBar = document.getElementById('navbar');
+    const navbar = document.getElementById('navbar');
+    const currentLeft = navbar.getBoundingClientRect().left; // Get the current position
 
+    // Set the CSS variable for dynamic starting position
+    navbar.style.setProperty('--start-position', `${currentLeft}px`);
 
-    if (navigationBar.style.display==''){
-        navigationBar.style.display='block';
-        navigationBar.style.animation='slideIn 0.5s ease-in forwards';
-        return;
+    if (navbar.classList.contains('slide-in')) {
+        // If currently sliding in or fully in, slide out
+        navbar.classList.remove('slide-in');
+        navbar.classList.add('slide-out');
+    } else {
+        // If currently sliding out or fully out, slide in
+        navbar.classList.remove('slide-out');
+        navbar.classList.add('slide-in');
     }
 
-    if(navigationBar.style.display!='grid'){
-        navigationBar.style.animation='slideOut 0.5s ease-out backwards';
-    }
-    
-    setTimeout(() => {
-        if (navigationBar.style.animation=='slideOut 0.5s ease-out backwards'){
-            navigationBar.style.display='';
-            navigationBar.style.animation='slideIn 0.5s ease-in forwards';
-        }
-    }, 490);
 
-    
-}
-
+} 
 
 //this function ensures that that the navbar keeps its layout consistent when
 // if the sidebar is opened when the screen is less than 1000px then the screen extended beyond 1000px.
