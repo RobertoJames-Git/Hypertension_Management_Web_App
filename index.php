@@ -21,7 +21,7 @@
     ?>
 
     <div>
-        Manage
+        Alert
         Monitor
         Support
     </div>

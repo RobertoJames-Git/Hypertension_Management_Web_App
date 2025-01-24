@@ -88,8 +88,9 @@ header{
 }
 
 #register_container:hover,#login_container:hover{
-    outline:2px solid black;
-
+    outline:2px solid #1946da;
+    background-color: white;
+    color: #1946da;
 }
 
 #heading-for-small-screen{
@@ -109,7 +110,7 @@ header{
     
     #navbar {
         display: block;
-        height: 95%; /* Adjust height dynamically */
+        height: 93%; /* Adjust height dynamically */
         width: 300px;
         position: fixed;
         z-index: 1;
