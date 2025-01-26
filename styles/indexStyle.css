@@ -328,6 +328,7 @@ header{
     #navMenu{
         overflow-y: scroll;
         height: 150px;
+        padding-bottom: 5px;
     }
 }
 
@@ -371,4 +372,84 @@ header{
 
 #navbar.slide-out {
     animation: slideOut 0.3s ease forwards;
+}
+
+
+
+
+
+
+/***********Styling for Index page specificlly*********************************/
+
+
+#features_container{
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-row-gap:20px ;
+    outline: 2px solid black;
+    padding: 15px;
+    width: max-content;
+    grid-column-gap: 15px;
+    border-radius: 10px;
+    background-color: #1946da;
+    margin: auto;
+    font-family:  sans-serif;
+}
+
+#features_container h1{
+    color: white;
+    margin: 0;
+    grid-column: 1 / span 3; /*The column the element is in and who many columns you ant to span across*/
+}
+
+#features_container p{
+    margin: 0;
+    display: grid;
+    grid-template-columns: 120px auto;
+    font-size: 30px;
+    align-items: center;
+    font-weight: bold;
+    padding-bottom: 10px;
+    border-bottom: 1px solid gray;
+}
+
+ul li{
+    margin-bottom: 10px;
+}
+
+ul{
+    padding-left: 20px;
+}
+
+#alert_container, #monitor_container,#support_container{
+    padding: 10px;
+    outline: 2px solid black;
+    width: 300px;
+    background-color: white;
+    border-bottom: 10px solid #F5A623;
+    
+}
+
+@media (max-width:1030px){
+
+    #features_container{
+        grid-template-columns: auto auto ;
+
+    }
+
+    #features_container h1{
+        grid-column:1/span 2; /*The column the element is in and who many columns you ant to span across*/
+    }
+}
+
+
+@media (max-width:710px){
+
+    #features_container{
+        grid-template-columns: auto  ;
+    }
+
+    #features_container h1{
+        grid-column:1/span 1; /*The column the element is in and who many columns you ant to span across*/
+    }
 }
