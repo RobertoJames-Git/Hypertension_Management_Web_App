@@ -2,14 +2,14 @@ body {
 
     font-family: Arial, sans-serif;
     background-color: #1a1a1a;
-    color: white;
+    color: black;
     line-height: 1.6;
   }
 
   .mission-section {
     padding: 40px 20px; /* Add spacing around the section */
     text-align: center;
-    background-color: #1a1a1a;
+    background-color: white;
   }
 
   .mission-section h2 {
@@ -21,7 +21,6 @@ body {
   .mission-section p {
     font-size: 1.2em;
     margin-bottom: 30px;
-    color: #cccccc;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto; /* Center the text */
@@ -44,7 +43,7 @@ body {
   .team-section {
     padding: 40px 20px; /* Add spacing around the section */
     text-align: center;
-    background-color: #1a1a1a;
+    background-color: white;
   }
   
   .team-section h2 {
@@ -98,7 +97,11 @@ body {
   .how-it-works-section {
     padding: 40px 20px; /* Add spacing around the section */
     text-align: center;
-    background-color: #1a1a1a; /* Match the background color */
+    width: max-content;
+    margin: auto;
+    margin-top: 20px;
+    border-radius: 20px;
+    background-color: rgb(240,240,240);
   }
   
   .how-it-works-section .content-wrapper {
@@ -115,7 +118,6 @@ body {
     min-width: 300px; /* Ensure the content is always readable */
     max-width: 600px;
     padding: 20px;
-    color: white;
     text-align: left; /* Align text to the left for readability */
   }
   
@@ -127,7 +129,6 @@ body {
   
   .how-it-works-section p {
     font-size: 1.2em;
-    color: #cccccc;
     line-height: 1.6;
   }
   

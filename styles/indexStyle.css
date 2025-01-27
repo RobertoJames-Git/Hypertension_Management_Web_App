@@ -2,6 +2,7 @@ body{
     font-family: Arial, sans-serif;
     background-color: white;
     color: black;
+    
 }
 header{
     border-bottom: 2px solid black;
@@ -394,18 +395,24 @@ header{
     background-color: #1946da;
     margin: auto;
     font-family:  sans-serif;
+    box-shadow: 0px 0px 8px 8px gray;
+}
+
+#features_container img{
+    width: 50px;
+    padding-left: 10px;
 }
 
 #features_container h1{
     color: white;
     margin: 0;
-    grid-column: 1 / span 3; /*The column the element is in and who many columns you ant to span across*/
+    grid-column:1/span 3;
 }
 
 #features_container p{
     margin: 0;
     display: grid;
-    grid-template-columns: 120px auto;
+    grid-template-columns: 105px auto;
     font-size: 30px;
     align-items: center;
     font-weight: bold;
@@ -452,4 +459,39 @@ ul{
     #features_container h1{
         grid-column:1/span 1; /*The column the element is in and who many columns you ant to span across*/
     }
+}
+
+#prevalence_container{
+    margin: auto;
+    display: grid;
+    grid-template-columns: auto auto;
+    width: 1200px;
+    background-color: #1946da;
+    padding: 20px;
+    padding-top: 15px;
+    border-radius: 15px;
+    border: 2px solid black;
+    transition: box-shadow ease-in 0.3s;
+}
+
+#prevalence_container:hover{
+    box-shadow: 0px 4px 4px 4px gray;
+}
+
+#prevalence_container p{
+    color: white;
+    font-size: 25px;
+    padding-left: 20px;
+    line-height:2;
+    font-weight: lighter;
+    font-style: italic;
+    margin: 0;
+
+}
+
+#prevalence_container h1{
+    grid-column:1/span 2;
+    color: white;
+    margin: 0;
+    margin-bottom: 10px;
 }

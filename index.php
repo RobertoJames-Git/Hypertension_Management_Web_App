@@ -22,13 +22,22 @@
     
     <br>
 
+    <div id="prevalence_container">
+        <h1>Partnering for a better health</h1>
+        <img src="images/indexImages/hypertension.jpg" alt="" width="600px">
+        <p>Approximately one in three Jamaicans aged 15 and older are hypertensive, with 35.8% of women and 31.7% of men affected<br> (Jamaica Health and Lifestyle Survey, 2016-2017).</p>
+    </div>
+
+    <br><br>
     <div id="features_container">
 
-        <h1>Features</h1>
+
+        <h1>Features Designed to Help You</h1>
+
         
- 
+
         <div id="alert_container">
-            <p> <img src="images/indexImages/alert.png" alt="" width="40px">Alert</p>
+            <p> <img src="images/indexImages/alert.png" alt="">Alert</p>
             <ul>
                 <li>Daily Reminders: Receive alerts to upload your blood pressure readings every day.</li>
                 <li>Emergency Notifications: Instantly notify family members and healthcare professionals if your blood pressure is too high.</li>
@@ -39,7 +48,7 @@
 
             
         <div id="monitor_container">
-            <p><img src="images/indexImages/monitor.png" alt="" width="">Monitor</p>
+            <p><img src="images/indexImages/monitor.png" alt="">Monitor</p>
 
             <ul>
                 <li>Visual Tracking: View an interactive graph of your blood pressure readings.</li>
@@ -60,7 +69,5 @@
 
     </div>   
 
-
 </body>
 </html>
-
