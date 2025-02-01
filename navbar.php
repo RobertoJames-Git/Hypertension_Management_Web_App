@@ -23,7 +23,7 @@
 
 <header>
     <script src="<?php echo htmlspecialchars($level_down)?>Javascript/navbar.js"></script>
-    <link rel="stylesheet" href="<?php echo htmlspecialchars($level_down) ?>styles/indexStyle.css">
+    <link rel="stylesheet"  href="<?php echo htmlspecialchars($level_down) ?>styles/indexStyle.css">
 
     <div id="heading-for-small-screen">
         <div id="website_Name" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>index.php'">HypMonitor <img src="<?php echo htmlspecialchars($level_down) ?>images/navbarImages/heart.svg" alt="Image of heart icon" > </div>
@@ -45,7 +45,7 @@
         </div>
 
         <div id="register_and_login_container">
-            <div id="register_container">Register</div> 
+            <div id="register_container">Create an account</div> 
             <div id="login_container">Login</div>
         </div>
     </div>

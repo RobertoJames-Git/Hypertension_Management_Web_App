@@ -1,11 +1,11 @@
 body{
-    font-family: Arial, sans-serif;
-    background-color: white;
+    font-family: sans-serif;
+    background-color: rgb(230, 230, 240);
     color: black;
     
 }
 header{
-    border-bottom: 2px solid black;
+    border-bottom: 1px solid black;
     display: flex;
     justify-content: center;
     width: 100%;
@@ -33,12 +33,14 @@ header{
 
 #navbar {
     display: grid;
-    grid-template-columns: auto 600px auto; /* Grid layout */
+    grid-template-columns: 180px 600px 300px; /* Grid layout */
     width: 100%;
     align-items: center;
     padding-bottom: 15px;
     font-family: Arial;
     font-size: 20px;
+    width: max-content;
+
 }
 
 #website_Name {
@@ -67,6 +69,24 @@ header{
     outline: 2px solid #1946da;
 }
 
+#aboutus_container,#login_container{
+    color: #1946da;
+    border: 2px solid#1946da;
+    padding: 10px;
+    border-radius: 20px;
+    margin: auto;
+    cursor: pointer;
+    transition: background-color ease 0.5s;
+}
+
+
+#aboutus_container:hover,#login_container:hover{
+    background-color: #1946da;
+    color: white;
+}
+
+
+
 #register_and_login_container {
     display: grid;
     grid-template-columns: auto auto;
@@ -78,28 +98,25 @@ header{
 
 
 
-#register_container{
-    background-color: #1946da;
 
-}
-
-#login_container{
-    background-color: #F5A623;
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
-}
-#register_container, #login_container{
-    border-radius: 10px;
+#register_container,#register_in_about_container{
+    border-radius: 20px;
     color: white;
-    padding: 10px;
+    padding: 8px;
     cursor: pointer;
+    transition: background-color ease 0.5s, color ease 0.5s;
+    background-color: #1946da;
+    border: 2px solid #1946da;
+    margin: auto;
 }
 
-#register_container:hover,#login_container:hover{
-    outline:2px solid #1946da;
+
+#register_container:hover,#register_in_about_container:hover{
+
     background-color: white;
     color: #1946da;
 }
+
 
 #heading-for-small-screen{
     display: none;
@@ -113,7 +130,7 @@ header{
     display: none;
 }
 
-@media (max-width:959px){
+@media (max-width:1085px){
     
     #navbar {
         display: block;
@@ -185,15 +202,9 @@ header{
     
     #register_container{
         border-right: 2px solid #1946da;
-        border-top-left-radius: 15px;
-        border-bottom-left-radius: 15px;
     }
     
 
-    #login_container{
-        background-color: #F5A623;
-    }
-    
 
     #register_container, #login_container{
         color: white;
@@ -207,15 +218,17 @@ header{
         cursor:pointer;
         
     }
+
+    #login_container{
+        color: #1946da;
+    }
+    
     
     #register_container:hover, #login_container:hover{
         text-indent: 20px;
 
     }
-    #register_container{
-        border-right: none;
-    
-    }
+
 
     #login_container:hover{
         padding-left: 0px;
@@ -336,7 +349,6 @@ header{
 
 @media (max-height:350px) {
     #navMenu{
-
         height: 80px; 
     }
 }
@@ -384,57 +396,65 @@ header{
 
 
 #features_container{
+    
     display: grid;
     grid-template-columns: auto auto auto;
-    grid-row-gap:20px ;
-    outline: 2px solid black;
+    grid-column-gap: 15px;
     padding: 15px;
     width: max-content;
-    grid-column-gap: 15px;
     border-radius: 10px;
-    background-color: #1946da;
     margin: auto;
     font-family:  sans-serif;
-    box-shadow: 0px 0px 8px 8px gray;
+    grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+    grid-template-rows: repeat(3, auto);  /* 3 rows */
+    color: rgb(0, 0, 120);
 }
 
-#features_container img{
-    width: 50px;
-    padding-left: 10px;
+.image-wrapper {
+    width: 360px; 
+    height: 244px;
+    overflow: hidden; /* Keeps the zoomed image inside the same dimensions */
+    border-radius: 20px; /* Ensures rounded corners */
+    margin-bottom: 5px;
 }
+
+
+#features_container img {
+    width: 360px;
+    height: 244px;
+    border-radius: 20px;
+    transition: transform 0.4s ease-in-out; /* Smooth transition */
+}
+
+#features_container img:hover {
+    transform: scale(1.15); /* Zooms in by 15% */
+}
+
 
 #features_container h1{
-    color: white;
+    color: rgb(0, 0, 120);
     margin: 0;
     grid-column:1/span 3;
-}
-
-#features_container p{
-    margin: 0;
-    display: grid;
-    grid-template-columns: 105px auto;
-    font-size: 30px;
-    align-items: center;
-    font-weight: bold;
-    padding-bottom: 10px;
-    border-bottom: 1px solid gray;
-}
-
-ul li{
+    margin: auto;
+    font-size: 35px;
     margin-bottom: 10px;
 }
 
-ul{
-    padding-left: 20px;
+
+#features_container p{
+    font-size: 15px;
+    color: rgb(90, 90, 90);
+    
 }
 
-#alert_container, #monitor_container,#support_container{
+
+#alert_info, #monitor_info,#support_info{
     padding: 10px;
-    outline: 2px solid black;
-    width: 300px;
-    background-color: white;
-    border-bottom: 10px solid #F5A623;
-    
+    width: 340px;
+    background-color: rgb(245,245,245);
+    border-bottom: 2px solid #6a7fc2;
+    border-radius: 20px;
+    height: 250px;
 }
 
 @media (max-width:1030px){
@@ -454,6 +474,7 @@ ul{
 
     #features_container{
         grid-template-columns: auto  ;
+
     }
 
     #features_container h1{
@@ -495,3 +516,52 @@ ul{
     margin: 0;
     margin-bottom: 10px;
 }
+
+
+#welcome_message{
+    display: grid;
+    grid-template-columns: auto 400px;
+    text-align: center;
+    background-color: rgb(245,245,250);
+    font-weight: bolder;
+    width: max-content;
+    margin: auto;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 20px;
+    border: 1px solid gray;
+    transition: box-shadow ease 0.5s;
+}
+
+#welcome_message:hover{
+    box-shadow: -2px 2px 8px 4px gray;
+}
+
+#welcome_message img {
+    position: relative;
+    width: 550px;
+    height: auto;
+    -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0));
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0));
+    border-radius: 10px;
+}
+
+#welcome_container{
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+#welcome_message p{
+    font-size: 40px;
+    color: rgb(0, 0, 120);
+    grid-column:1/span 2;
+}
+
+#register_in_about_container{
+    margin: auto;
+    font-size: 18px;
+}
+
+
+
+
