@@ -48,7 +48,7 @@
             <div class="team-container">
                 <div class="team-member">
                     <img src="../Images/aboutUsImages/Image-Placeholder.jpg" alt="Member" 1>
-                    <h3> Roberto James Vice Team Lead</h3>
+                    <h3> Roberto James Vice Team Lead u</h3>
                     <p class="role"> Team Lead Researcher</p>
                 </div>
                 <div class="team-member">
