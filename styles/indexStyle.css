@@ -33,13 +33,14 @@ header{
 
 #navbar {
     display: grid;
-    grid-template-columns: 180px 600px 300px; /* Grid layout */
+    grid-template-columns: auto auto auto; /* Grid layout */
     width: 100%;
     align-items: center;
     padding-bottom: 15px;
     font-family: Arial;
     font-size: 20px;
-    width: max-content;
+    padding-left: 20px;
+    padding-right: 20px;
 
 }
 
