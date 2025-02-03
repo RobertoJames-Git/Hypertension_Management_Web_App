@@ -65,7 +65,7 @@ header{
 }
 
 #website_Name:hover{
-    background-color: white;
+    background-color: rgb(230, 230, 240);;
     color: #1946da;
     outline: 2px solid #1946da;
 }
@@ -141,7 +141,7 @@ header{
         z-index: 1;
         background-color: white;
         font-size: 20px;
-        left: -315px;
+        left: -380px;
         overflow-y: auto; /* Vertical scrolling */
         overflow-x: hidden; /* Prevent horizontal scrolling */
         outline: 2px solid black;
@@ -373,7 +373,7 @@ header{
         opacity: 1; /* Maintain visibility */
     }
     to {
-        left: -315px; /* Slide out of view */
+        left: -380x; /* Slide out of view */
         opacity: 1;
     }
 }
