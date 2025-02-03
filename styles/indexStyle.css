@@ -70,7 +70,7 @@ header{
     outline: 2px solid #1946da;
 }
 
-#aboutus_container,#login_container{
+#aboutus_container,#login_container, #learn_more_container{
     color: #1946da;
     border: 2px solid#1946da;
     padding: 10px;
@@ -81,7 +81,7 @@ header{
 }
 
 
-#aboutus_container:hover,#login_container:hover{
+#aboutus_container:hover,#login_container:hover, #learn_more_container:hover{
     background-color: #1946da;
     color: white;
 }
@@ -427,6 +427,7 @@ header{
     transition: transform 0.4s ease-in-out; /* Smooth transition */
 }
 
+
 #features_container img:hover {
     transform: scale(1.15); /* Zooms in by 15% */
 }
@@ -441,6 +442,10 @@ header{
     margin-bottom: 20px;
 }
 
+#features_container h2{
+    color: rgb(0,16,71);
+    font-weight:normal;
+}
 
 #features_container p{
     font-size: 15px;
@@ -455,7 +460,7 @@ header{
     background-color: rgb(245,245,245);
     border-bottom: 2px solid #6a7fc2;
     border-radius: 20px;
-    height: 250px;
+    height: 180px;
 }
 
 @media (max-width:1030px){
@@ -525,7 +530,7 @@ header{
     text-align: center;
     background-color: rgb(245,245,250);
     font-weight: bolder;
-    width: max-content;
+    width: 1000px;
     margin: auto;
     padding: 20px;
     margin-top: 20px;
@@ -540,7 +545,7 @@ header{
 
 #welcome_message img {
     position: relative;
-    width: 550px;
+    width: 570px;
     height: auto;
     -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0));
     mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0));
@@ -564,5 +569,9 @@ header{
 }
 
 
-
-
+#learn_more_container{
+    display: block;
+    width: 200px;
+    margin: 0;
+    padding: 10px;
+}

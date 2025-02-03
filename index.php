@@ -42,7 +42,6 @@
 
     <div id="features_container">
 
-
         <h1>Features Designed to Help You</h1>
 
         <div id="alert_container">
@@ -52,9 +51,9 @@
             <div id="alert_info">     
                 <h2> Alert</h2>
 
-                <p>Daily Reminders: Receive alerts to upload your blood pressure readings every day.</p>
-                <p>Emergency Notifications: Instantly notify family members and healthcare professionals if your blood pressure is too high.</p>
+                <p>Sends daily reminders to upload blood pressure readings and emergency notifications to family and healthcare professionals if levels are too </p>
 
+                <div id="learn_more_container">Learn more</div>
             </div>
         </div>
 
@@ -68,26 +67,21 @@
                 
                 <h2>Monitor</h2>
                 
-                <p>Visual Tracking: View an interactive graph of your blood pressure readings.</p>
-                <p>History Access: Easily access your past readings to monitor trends over time.</p>
-                <p>Informed Decisions: Share your data with healthcare professionals for personalized care and improved management.</p>
+                <p>Provides an interactive graph for visual tracking, access to past readings for trend analysis, and data sharing with healthcare professionals.</p>
+                <div id="learn_more_container">Learn more</div>
             </div>
         </div>
 
 
         <div>
-
             <div class="image-wrapper">
                 <img src="images/indexImages/support.png" alt="" >
             </div>
-            
             <div id="support_info">
                 <h2>Support</h2>
+                <p>Add family members and a healthcare professional to your support network so you can collaboratively monitor your health and provide encouragement</p>
                 
-                <p>Add Support Members: Include family members and healthcare professionals in your care team.</p>
-                <p>Collaborative Care: Allow your support network to monitor your blood pressure readings and provide encouragement.</p>
-                <p>Patient-Centered Messaging: Allow patients to communicate directly with their family members and healthcare professionals.</p>
-            
+                <div id="learn_more_container">Learn more</div>
             </div>
         </div>
 
