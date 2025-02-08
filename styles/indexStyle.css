@@ -62,10 +62,11 @@ header{
 #website_Name img{ 
     background-color: white;
     margin-left: 10px;
+    border-radius: 5px;
 }
 
 #website_Name:hover{
-    background-color: rgb(230, 230, 240);;
+    background-color: white;
     color: #1946da;
     outline: 2px solid #1946da;
 }
@@ -112,12 +113,16 @@ header{
 }
 
 
-#register_container:hover,#register_in_about_container:hover{
+#register_in_about_container:hover{
 
     background-color: white;
     color: #1946da;
 }
 
+#register_container:hover{
+    background-color:  rgb(230, 230, 240);
+    color: #1946da;
+}
 
 #heading-for-small-screen{
     display: none;
@@ -136,7 +141,7 @@ header{
     #navbar {
         display: block;
         height: 93%; /* Adjust height dynamically */
-        width: 300px;
+        width: 250px;
         position: fixed;
         z-index: 1;
         background-color: white;
@@ -157,9 +162,10 @@ header{
     }
 
     #website_Name{
+       
         margin: auto;
         transition: padding ease 0.5s, border-radius ease 0.5s;
-
+        margin-top: 10px;
     }
     
     #navMenu div{
@@ -217,7 +223,7 @@ header{
         margin-right: 10px;
         border-radius:5px;
         cursor:pointer;
-        
+        width: 220px;
     }
 
     #login_container{
@@ -227,9 +233,12 @@ header{
     
     #register_container:hover, #login_container:hover{
         text-indent: 20px;
-
+        
     }
 
+    #register_container:hover{
+        background-color: white;
+    }
 
     #login_container:hover{
         padding-left: 0px;
@@ -272,7 +281,6 @@ header{
     }
     
     #openNav:hover{
-        outline: 2px solid white;
         padding-left: 20px;
         padding-right: 20px;
         border-radius: 10px;
@@ -293,7 +301,6 @@ header{
         padding-bottom: 5px;
         padding-top: 5px;
         font-size:15px;
-        margin-right: 5px;
         margin-top: 5px;
         cursor: pointer;
 
@@ -571,7 +578,7 @@ header{
 
 #learn_more_container{
     display: block;
-    width: 180px;
+    width: max-content;
     margin: 0;
     padding: 8px;
 }

@@ -45,7 +45,7 @@
         </div>
 
         <div id="register_and_login_container">
-            <div id="register_container">Create an account</div> 
+            <div id="register_container" onclick="window.location.href='<?php echo htmlspecialchars($level_down)?>create_account.php' ">Create an account</div> 
             <div id="login_container">Login</div>
         </div>
 

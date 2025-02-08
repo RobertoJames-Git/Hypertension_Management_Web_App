@@ -1,0 +1,11 @@
+label{
+    display: block;
+}
+
+#button_container{
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-column-gap: 30px;
+    margin-top: 10px;
+    width: 100px;
+}
