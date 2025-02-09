@@ -1,11 +1,81 @@
+
+
 label{
     display: block;
+    margin-top: 20px;
 }
 
-#button_container{
+
+#form_container{
     display: grid;
-    grid-template-columns: auto auto;
-    grid-column-gap: 30px;
-    margin-top: 10px;
-    width: 100px;
+    grid-template-columns: auto 350px;
+    grid-column-gap: 20px;
+    margin: auto;
+    width: max-content;
+    background-color: white;
+    padding:10px;
+    margin-top: 20px;
+    border-radius: 10px;
+    outline: 1px solid black;
+}
+
+#form_container img{
+    width: 420px;
+    border-radius: 10px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+h1{
+    color: black;
+    margin: auto;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 5px;
+    width: 310px;
+    border-bottom: 1px solid gray;
+}
+
+input{
+    width: 300px;
+    height: 20px;
+    border-style: none;
+    outline: 1px solid black;
+}
+
+select{
+    height: 30px;
+    width: 308px;
+}
+
+
+
+form{
+    margin: auto;
+    width: max-content;
+}
+
+select:focus,input:focus{
+    outline: 2px solid #1946da;
+    border-style: none;
+}
+
+
+#submit-btn{
+    margin-top: 15px;
+    display: block;
+    width: 307px;
+    background-color: #1946da;
+    color: white;
+    height: 35px;
+    outline: none;
+    font-size: 17px;
+    transition: background-color ease-in-out 0.3s;
+}
+
+#submit-btn:hover{
+    outline: 1px solid #1946da;
+    color: #1946da;
+    background-color: white;
+    cursor: pointer;
 }
