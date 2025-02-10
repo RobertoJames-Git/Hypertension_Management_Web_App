@@ -1,11 +1,4 @@
 
-
-label{
-    display: block;
-    margin-top: 20px;
-}
-
-
 #form_container{
     display: grid;
     grid-template-columns: auto 350px;
@@ -69,7 +62,7 @@ select:focus,input:focus{
 
 
 #submit-btn{
-    margin-top: 15px;
+    margin-top: 20px;
     display: block;
     width: 307px;
     background-color: #1946da;
@@ -99,4 +92,16 @@ select:focus,input:focus{
         display: none;
     }
     
+}
+
+.formError{
+    color: red;
+    text-align: right;
+}
+
+.label_and_alert_containert{
+    display: grid;
+    grid-template-columns: auto auto;
+    margin-top: 20px;
+    width: 300px;
 }
