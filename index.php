@@ -73,7 +73,7 @@
         </div>
 
 
-        <div>
+        <div id="support_container">
             <div class="image-wrapper">
                 <img src="images/indexImages/support.png" alt="" >
             </div>

@@ -16,7 +16,8 @@ label{
     padding:10px;
     margin-top: 20px;
     border-radius: 10px;
-    outline: 1px solid black;
+    box-shadow: 0px 4px 4px 4px gray;
+    transition: box-shadow ease-in 0.3s;
 }
 
 #form_container img{
@@ -25,6 +26,12 @@ label{
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
 }
+
+#form_container:hover{
+    box-shadow: 0px 8px 8px 8px gray;
+}
+
+
 
 h1{
     color: black;
@@ -78,4 +85,18 @@ select:focus,input:focus{
     color: #1946da;
     background-color: white;
     cursor: pointer;
+}
+
+
+@media (max-width: 820px) {
+    #form_container{
+        grid-template-columns: auto 350px;
+        grid-column-gap: 0px;
+
+    }
+
+    #form_container img{
+        display: none;
+    }
+    
 }
