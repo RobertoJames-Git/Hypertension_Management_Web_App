@@ -16,7 +16,7 @@
     <div id="form_container">
 
         <div>
-            <img src="images/CreateAccountImages/hyp_patient_and support.png" alt="" >
+            <img src="images/CreateAccountImages/hyp_patient_and_support_crop.jpg" alt="Image of hypertensive family member and support network" >
         </div>
         
         <div>
@@ -28,38 +28,53 @@
                 <div class="label_and_alert_containert">
                     <label for="">First Name</label>
                     <!-- nl2br() → Converts newlines (\n) into <br> tags, allowing line breaks to be displayed properly in HTML.-->
-                    <span class="formError"><?php echo isset($_SESSION["fnameErr"]) ? nl2br(htmlspecialchars($_SESSION["fnameErr"]."\n", ENT_QUOTES, 'UTF-8')) : ''; ?></span>
+                    <span class="formError"><?php echo isset($_SESSION["fnameErr"]) ? htmlspecialchars($_SESSION["fnameErr"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
                 </div>
-                <input type="text" name="fname" id="">
+
+                <input type="text" name="fname" id="" value="<?php echo isset($_SESSION["fname"]) ? htmlspecialchars($_SESSION["fname"],ENT_QUOTES,'UTF-8'):'' ?>"  >
 
                 <div class="label_and_alert_containert">
                     <label for="">Last Name</label>
-                    <span class="formError"><?php echo isset($_SESSION["lnameErr"]) ? nl2br(htmlspecialchars($_SESSION["lnameErr"]."\n", ENT_QUOTES, 'UTF-8')) : ''; ?></span>
+                    <span class="formError"><?php echo isset($_SESSION["lnameErr"]) ? htmlspecialchars($_SESSION["lnameErr"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
                 </div>
-                <input type="text" name="lname" id="">
+                <input type="text" name="lname" id="" value="<?php echo isset($_SESSION["lname"]) ? htmlspecialchars($_SESSION["lname"],ENT_QUOTES,'UTF-8'):'' ?>" >
+                
+                <div class="label_and_alert_containert">
+                    <label for="">Gender</label>
+                    <span class="formError"><?php echo isset($_SESSION["genderErr"]) ? htmlspecialchars($_SESSION["genderErr"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
+                </div>
+
+                <select name="gender" id="">
+                    <option value="">Select an option</option>
+                    <option value="male"    <?php echo isset($_SESSION["gender"])&& $_SESSION["gender"]=="male" ? htmlspecialchars("selected") :''?> >Male</option>
+                    <option value="female"  <?php echo isset($_SESSION["gender"])&& $_SESSION["gender"]=="female" ? htmlspecialchars("selected") :''?>>Female</option>
+                    <option value="other"   <?php echo isset($_SESSION["gender"])&& $_SESSION["gender"]=="other" ? htmlspecialchars("selected") :''?>>Other</option>
+                    <option value="rather not say"  <?php echo isset($_SESSION["gender"])&& $_SESSION["gender"]=="rather not say" ? htmlspecialchars("selected") :''?> >Rather not say</option>
+                </select>
                 
                 <div class="label_and_alert_containert">
                     <label for="">Date of Birth</label>
-                    <span class="formError"><?php echo isset($_SESSION["dobErr"]) ? nl2br(htmlspecialchars($_SESSION["dobErr"]."\n", ENT_QUOTES, 'UTF-8')) : ''; ?></span>
+                    <span class="formError"><?php echo isset($_SESSION["dobErr"]) ? htmlspecialchars($_SESSION["dobErr"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
                 </div>
-                <input type="date" name="dob" id="">
-                
+                <input type="date" name="dob" id=""  value="<?php echo isset($_SESSION["dob"]) ? htmlspecialchars($_SESSION["dob"]) :''?>">
+
                 <div class="label_and_alert_containert">
                     <label for="">Select your account type</label>
-                    <span class="formError"><?php echo isset($_SESSION["user_typeErr"]) ? nl2br(htmlspecialchars($_SESSION["user_typeErr"]."\n", ENT_QUOTES, 'UTF-8')) : ''; ?></span>
+                    <span class="formError"><?php echo isset($_SESSION["user_typeErr"]) ? htmlspecialchars($_SESSION["user_typeErr"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
                 </div>
                 <select name="user_type" id="">
                     <option value="">Select an option</option>
-                    <option value="">Hypertensive Individual</option>
-                    <option value="">Family Member</option>
-                    <option value="">Healthcare Professional</option>
+                    <option value="Hypertensive Individual" <?php echo isset($_SESSION["user_type"])&& $_SESSION["user_type"]=="Hypertensive Individual" ? htmlspecialchars("selected") :''?>>Hypertensive Individual</option>
+                    <option value="Family Member"           <?php echo isset($_SESSION["user_type"])&& $_SESSION["user_type"]=="Family Member" ? htmlspecialchars("selected") :''?>>Family Member</option>
+                    <option value="Healthcare Professional" <?php echo isset($_SESSION["user_type"])&& $_SESSION["user_type"]=="Healthcare Professional" ? htmlspecialchars("selected") :''?>>Healthcare Professional</option>
                 </select>
+                
 
                 <div class="label_and_alert_containert">
                     <label for="">Email</label>
-                    <span class="formError"><?php echo isset($_SESSION["emailErr"]) ? nl2br(htmlspecialchars($_SESSION["emailErr"]."\n", ENT_QUOTES, 'UTF-8')) : ''; ?></span>
+                    <span class="formError"><?php echo isset($_SESSION["emailErr"]) ? htmlspecialchars($_SESSION["emailErr"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
                 </div>
-                <input type="" name="email" id="">
+                <input type="email" name="email" id="" value="<?php echo isset($_SESSION["email"]) ? htmlspecialchars($_SESSION["email"]) :''?>">
 
                 <br>
                 <input id="submit-btn" type="submit" name="account_creation" value="Create Account">
@@ -69,5 +84,7 @@
         </div>
    
     </div>
+
+    <br><br>
 </body>
 </html>
