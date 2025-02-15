@@ -2,14 +2,17 @@
 <?php
 
     session_start();
+
+    #redirect user if a form was not submitted to this page
     if(!isset($_POST["account_creation"])){
         header("location:../create_account.php");
     }
     else{
 
+        #unsets any previous error message
         unset($_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],$_SESSION["user_typeErr"],$_SESSION["genderErr"],$_SESSION["emailErr"]);
         
-
+        #this variable will keep track of if there were any validation errors
         $valErr=false;
 
         //Calls a user defined function to sanitize input
@@ -88,7 +91,8 @@
             $_SESSION["emailErr"]="Invalid Email";
             $valErr=true;
         }
-
+        
+        #stores the users input in a session to make their info persistent in the form
         if($valErr==true){
             $_SESSION["fname"]=$_POST["fname"];
             $_SESSION["lname"]=$_POST["lname"];
@@ -99,11 +103,11 @@
             header("location:../create_account.php"); 
         }
         else{
+            #if there were no validation error then all variables that store validation data is unset
             unset($_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],$_SESSION["user_typeErr"],$_SESSION["genderErr"]);
             
             /* 
-            
-            Send verification code to email
+                Send verification code to email
             */
         }
     }
