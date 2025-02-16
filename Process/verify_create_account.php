@@ -69,6 +69,10 @@
             $_SESSION["dobErr"]="Field is empty";
             $valErr=true;
         }
+        else if(calculateAge($_POST["dob"])<18){
+            $_SESSION["dobErr"]="Must be 18 or older";
+            $valErr=true;
+        }
 
 
         if($_POST["user_type"]==""){
@@ -128,10 +132,24 @@
         $dataToSanitize = trim($dataToSanitize);
     
         // Convert special characters into HTML entities to prevent XSS attacks
-        $dataToSanitize = filter_var($dataToSanitize, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $sanitizedData = filter_var($dataToSanitize, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     
         // Return the sanitized input
-        return $dataToSanitize;
+        return $sanitizedData;
+    }
+
+
+    function calculateAge($birthdate) {
+        // Convert the birthdate string into a DateTime object
+        $dob = new DateTime($birthdate);
+        
+        // Get the current date
+        $today = new DateTime();
+    
+        // Calculate the age difference
+        $age = $today->diff($dob)->y;
+    
+        return $age;
     }
     
 

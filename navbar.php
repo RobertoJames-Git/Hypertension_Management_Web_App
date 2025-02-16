@@ -40,7 +40,7 @@
             <div id="home_option" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>index.php'"> Home</div>
             <div id="profile_option"> Profile</div>
             <div id="recordBP_option"> Record BP</div>
-            <div>Support</div>
+            <div onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>support.php'">Support</div>
             <div onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>Home/about_us.php'"> About Us</div>
         </div>
 
