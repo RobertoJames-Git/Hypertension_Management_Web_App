@@ -10,16 +10,22 @@ DROP TABLE IF EXISTS patient;
 DROP TABLE IF EXISTS family_member;
 DROP TABLE IF EXISTS health_care_prof;
 DROP TABLE IF EXISTS monitor_request;
-DROP TABLE IF EXISTS userprofile;
+DROP TABLE IF EXISTS web_users;
 
-
--- Create User Table
-CREATE TABLE userprofile (
-    userid INT AUTO_INCREMENT NOT NULL,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    PRIMARY KEY (userid, username)
+create table web_users(
+	userID INT AUTO_INCREMENT,
+    username varchar(10),
+    fname varchar(50),
+    lname varchar(50),
+    gender enum('male','female','other','rather not say'),
+    dob date,
+    email varchar(200),
+    token varchar(150),
+    account_status enum('pending','active'),
+    password varchar(100),
+    PRIMARY KEY(userID, username) 
 );
+
 
 CREATE TABLE monitor_request (
     request_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -29,7 +35,7 @@ CREATE TABLE monitor_request (
     request_date DATETIME NOT NULL,
     request_status ENUM('pending', 'accepted', 'rejected') NOT NULL,
     recipient_info VARCHAR(255) NOT NULL,
-    FOREIGN KEY (sender_id, sender_username) REFERENCES userprofile(userid, username)
+    FOREIGN KEY (sender_id, sender_username) REFERENCES web_users(userid, username)
 );
 
 -- Create Family Member Table
@@ -38,7 +44,7 @@ CREATE TABLE family_member (
     username VARCHAR(50) NOT NULL,
     education_level VARCHAR(50),
     PRIMARY KEY (userid, username),
-    FOREIGN KEY (userid, username) REFERENCES userprofile(userid, username)
+    FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
 );
 
 -- Create Health Care Professional Table
@@ -48,7 +54,7 @@ CREATE TABLE health_care_prof (
     years_of_exp INT NOT NULL,
     workplace VARCHAR(100),
     PRIMARY KEY (userid, username),
-    FOREIGN KEY (userid, username) REFERENCES userprofile(userid, username)
+    FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
 );
 
 -- Create Patient Table
@@ -56,7 +62,7 @@ CREATE TABLE patient (
     userid INT AUTO_INCREMENT NOT NULL,
     username VARCHAR(50) NOT NULL,
     PRIMARY KEY (userid, username),
-    FOREIGN KEY (userid, username) REFERENCES userprofile(userid, username)
+    FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
 );
 
 -- Create Reading Table

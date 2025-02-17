@@ -127,6 +127,7 @@
         return $d && $d->format($format) === $date;
     }
 
+
     function sanitizeInput($dataToSanitize) {
         // Remove any leading or trailing whitespace
         $dataToSanitize = trim($dataToSanitize);
@@ -152,6 +153,3 @@
         return $age;
     }
     
-
-
-
