@@ -152,7 +152,7 @@
             //calls a function from the databse folder that adds the user to the database
             if(!addUserToDatabase()){//if an error occurs while adding the user account then they are redirected back tot the form
                 header("location:../create_account.php");
-
+                die();
             }
             
             /* 
@@ -161,11 +161,13 @@
             $body="<p>
                 Dear ".$_SESSION['fname'].' '.$_SESSION['lname'].",
                 <br>
-                Thank you for registering with [Your Website]! We're excited to have you on board as a part of our health-focused community. Whether you are a hypertensive individual, a patient, or a healthcare professional, we are here to support you on your journey.
+                Thank you for registering with HypMonitor! We're excited to have you on board as a part of our health-focused community. Whether you are a hypertensive individual, a patient, or a healthcare professional, we are here to support you on your journey.
                 <br>
                 To activate your account and get started, please click the link below:
 
                 <br><br>
+                Username:
+                <br>Password: ".$_SESSION['password']."<br>
                 <a href='http://localhost/Major_Project_DHI/create_account.php'>Activate your account</a>
                 <br><br>
                 This link will verify your email and confirm that you are the one creating the account. If you don't click on the activation link by the end of the day, your account will be automatically removed.
@@ -180,6 +182,7 @@
 
             sendmail($_SESSION["email"],"Welcome To HypMonitor! Activate your Account",$body);
             
+            header("location:../emailAlert.php");
         }
     }
 

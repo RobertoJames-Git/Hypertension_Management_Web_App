@@ -34,7 +34,9 @@ function sendMail($to, $subject, $body) {
         
         // Send Email
         $mail->send();
+        $_SESSION["email_status"]=true;
         return "Email has been sent successfully.";
+
     } catch (Exception $e) {
         return "Email could not be sent. Error: " . $mail->ErrorInfo;
     }

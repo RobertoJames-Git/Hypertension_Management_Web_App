@@ -11,8 +11,8 @@
             $stmt = $dbConn->prepare($sql);
             
             $token= bin2hex(random_bytes(32));
-            $password=generateRandomPassword();
-            $password_hash= password_hash($password,PASSWORD_DEFAULT);
+            $_SESSION["password"]=generateRandomPassword();
+            $password_hash= password_hash($_SESSION["password"],PASSWORD_DEFAULT);
             
             $time = new DateTime(); // Get current time
             $time->modify('+30 minutes'); // Add 30 minutes
@@ -38,7 +38,7 @@
         }
         catch(mysqli_sql_exception $e){
 
-            $_SESSION["emailErr"]="This email is already registered.";
+            $_SESSION["emailErr"]="Email already registered";
             return false;//to indicate a error occurred
         }
 

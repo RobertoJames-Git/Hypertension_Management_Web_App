@@ -132,6 +132,7 @@ CREATE TABLE support (
 
 
 
+
 DELIMITER $$
 
 CREATE PROCEDURE AddWebUser(
@@ -185,6 +186,8 @@ BEGIN
             WHEN p_userType = 'Healthcare Professional' THEN
                 INSERT INTO health_care_prof (userid, username, years_of_exp) 
                 VALUES (newUserID, p_username, p_years_of_exp);
+            ELSE SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Invalid userType';
         END CASE;
     ELSE
         SIGNAL SQLSTATE '45000'
