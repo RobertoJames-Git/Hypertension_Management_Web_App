@@ -1,5 +1,7 @@
-
 <?php
+
+    require_once("sendmail.php");
+    require_once("../Database/database_actions.php");
 
     session_start();
 
@@ -10,18 +12,22 @@
     else{
 
         #unsets any previous error message
-        unset($_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],$_SESSION["user_typeErr"],$_SESSION["genderErr"],$_SESSION["emailErr"]);
+        
+        unset(  $_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],
+                $_SESSION["user_typeErr"],$_SESSION["genderErr"],$_SESSION["emailErr"],
+                $_SESSION["family_edu_level_Err"],$_SESSION["health_prov_exp_Err"]);
         
         #this variable will keep track of if there were any validation errors
         $valErr=false;
 
-        //Calls a user defined function to sanitize input
-        $_POST["fname"] = sanitizeInput($_POST["fname"]);
-        $_POST["lname"]= sanitizeInput($_POST["lname"]);
-        $_POST["dob"]= sanitizeInput($_POST["dob"]);
-        $_POST["user_type"]= sanitizeInput($_POST["user_type"]);
-        $_POST["email"]= sanitizeInput($_POST["email"]);
-        $_POST["gender"]= sanitizeInput($_POST["gender"]);
+        //Calls a user defined function to sanitize input 
+        $sanitized_post = [];
+        foreach ($_POST as $key => $value) {
+            $sanitized_post[$key] = sanitizeInput($value);
+        }
+        $_POST = $sanitized_post; // Overwrite after sanitization
+        
+
 
         if($_POST["fname"]==""){
             $_SESSION["fnameErr"]="Field is empty";
@@ -50,6 +56,7 @@
             $_SESSION["lnameErr"]="Name cannot be a number";
             $valErr=true; 
         }
+        
 
         if($_POST["gender"]==""){
             $_SESSION["genderErr"]="Field is empty";
@@ -84,6 +91,32 @@
             $_SESSION["user_typeErr"] = "Invalid user type";
             $valErr=true;
         }
+        
+        if($_POST["user_type"]=="Family Member"){
+            if($_POST["family_edu_level"]==""){
+                $_SESSION["family_edu_level_Err"] = "Field is empty";
+                $valErr=true; 
+            }
+            //check if the education level recieved is valid
+            else if(!in_array($_POST["family_edu_level"],["No Formal Education","Elementary","Secondary","Some Tertiary","Vocational Training","Degree"])){
+                $_SESSION["family_edu_level_Err"] = "Invalid Option";
+                $valErr=true; 
+            }
+        }
+
+        else if($_POST["user_type"]=="Healthcare Professional"){
+            
+            if($_POST["health_prov_exp"]==""){
+                $_SESSION["health_prov_exp_Err"] = "Field is empty";
+                $valErr=true; 
+            }
+            //check if the educaion level recieved is valid
+            else if(!in_array($_POST["health_prov_exp"],["Less than a year","One to two years","Three to Fours years","Five years or more","Over a decade"])){
+                $_SESSION["health_prov_exp_Err"] = "Invalid Option";
+                $valErr=true; 
+            }
+        }
+
 
 
         if($_POST["email"]==""){
@@ -95,6 +128,8 @@
             $_SESSION["emailErr"]="Invalid Email";
             $valErr=true;
         }
+
+
         
         #stores the users input in a session to make their info persistent in the form
         if($valErr==true){
@@ -104,15 +139,47 @@
             $_SESSION["dob"]=$_POST["dob"];
             $_SESSION["user_type"]=$_POST["user_type"];
             $_SESSION["email"]=$_POST["email"];
+            $_SESSION["family_edu_level"]=$_POST["family_edu_level"];
+            $_SESSION["health_prov_exp"]=$_POST["health_prov_exp"];
             header("location:../create_account.php"); 
         }
         else{
             #if there were no validation error then all variables that store validation data is unset
-            unset($_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],$_SESSION["user_typeErr"],$_SESSION["genderErr"]);
+            unset(  $_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],
+                    $_SESSION["user_typeErr"],$_SESSION["genderErr"],$_SESSION["emailErr"],
+                    $_SESSION["family_edu_level_Err"],$_SESSION["health_prov_exp_Err"]);
+            
+            //calls a function from the databse folder that adds the user to the database
+            if(!addUserToDatabase()){//if an error occurs while adding the user account then they are redirected back tot the form
+                header("location:../create_account.php");
+
+            }
             
             /* 
-                Send verification code to email
+                Send activation link to email
             */
+            $body="<p>
+                Dear ".$_SESSION['fname'].' '.$_SESSION['lname'].",
+                <br>
+                Thank you for registering with [Your Website]! We're excited to have you on board as a part of our health-focused community. Whether you are a hypertensive individual, a patient, or a healthcare professional, we are here to support you on your journey.
+                <br>
+                To activate your account and get started, please click the link below:
+
+                <br><br>
+                <a href='http://localhost/Major_Project_DHI/create_account.php'>Activate your account</a>
+                <br><br>
+                This link will verify your email and confirm that you are the one creating the account. If you don't click on the activation link by the end of the day, your account will be automatically removed.
+
+                If you didn't create this account, please disregard this email.
+                <br>
+                We're here if you need any assistance.
+                <br>
+                Best regards,
+
+                <p>";
+
+            sendmail($_SESSION["email"],"Welcome To HypMonitor! Activate your Account",$body);
+            
         }
     }
 

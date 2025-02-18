@@ -24,7 +24,11 @@
     box-shadow: 0px 8px 8px 8px gray;
 }
 
-
+#form_div{
+    height: 499px;
+    overflow-y: auto; /* Enables vertical scrolling if content overflows */
+    padding-bottom: 5px;
+}
 
 h1{
     color: black;
@@ -104,4 +108,8 @@ select:focus,input:focus{
     grid-template-columns: auto auto;
     margin-top: 20px;
     width: 300px;
+}
+
+.family_attribute,.health_prof_attribute{
+    display: none;
 }

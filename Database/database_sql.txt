@@ -19,8 +19,9 @@ create table web_users(
     lname varchar(50),
     gender enum('male','female','other','rather not say'),
     dob date,
-    email varchar(200),
-    token varchar(150),
+    email varchar(200) Unique,
+    token varchar(100),
+    token_expiration datetime,
     account_status enum('pending','active'),
     password varchar(100),
     PRIMARY KEY(userID, username) 
@@ -40,27 +41,27 @@ CREATE TABLE monitor_request (
 
 -- Create Family Member Table
 CREATE TABLE family_member (
-    userid INT AUTO_INCREMENT NOT NULL,
+    userid INT NOT NULL,
     username VARCHAR(50) NOT NULL,
-    education_level VARCHAR(50),
+    education_level ENUM('No Formal Education','Elementary','Secondary','Some Tertiary','Vocational Training','Degree'),
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
 );
 
 -- Create Health Care Professional Table
 CREATE TABLE health_care_prof (
-    userid INT AUTO_INCREMENT NOT NULL,
+    userid INT NOT NULL,
     username VARCHAR(50) NOT NULL,
     years_of_exp INT NOT NULL,
-    workplace VARCHAR(100),
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
 );
 
 -- Create Patient Table
 CREATE TABLE patient (
-    userid INT AUTO_INCREMENT NOT NULL,
+    userid INT NOT NULL,
     username VARCHAR(50) NOT NULL,
+    hyp_status enum('normal','high','low','critical'),
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
 );
@@ -128,3 +129,67 @@ CREATE TABLE support (
 );
 
 
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE AddWebUser(
+    IN p_fname VARCHAR(50),
+    IN p_lname VARCHAR(50),
+    IN p_gender ENUM('male','female','other','rather not say'),
+    IN p_dob DATE,
+    IN p_email VARCHAR(200),
+    IN p_token VARCHAR(150),
+    IN p_token_expiration datetime,
+    IN p_account_status ENUM('pending','active'),
+    IN p_password_hashed VARCHAR(100),
+    IN p_userType ENUM('Hypertensive Individual', 'Family Member', 'Healthcare Professional'),
+    IN p_education_level VARCHAR(50),  -- For Family Member
+    IN p_years_of_exp INT             -- For Healthcare Professional
+)
+BEGIN
+    DECLARE userExists INT;
+    DECLARE newUserID INT;
+    DECLARE p_username VARCHAR(10);
+    DECLARE firstPart VARCHAR(3);
+    DECLARE lastPart VARCHAR(3);
+
+    -- Check if the email already exists
+    SELECT COUNT(*) INTO userExists FROM web_users WHERE email = p_email;
+
+    IF userExists = 0 THEN
+        -- Insert into web_users table without username
+        INSERT INTO web_users (fname, lname, gender, dob, email, token, token_expiration,account_status, password)
+        VALUES (p_fname, p_lname, p_gender, p_dob, p_email, p_token,p_token_expiration,p_account_status, p_password_hashed);
+
+        -- Get the new userID
+        SET newUserID = LAST_INSERT_ID();
+
+        -- Extract the first 3 letters of fname and last 3 letters of lname (handling short names)
+        SET firstPart = LEFT(p_fname, 3);
+        SET lastPart = RIGHT(p_lname, 3);
+
+        -- Construct username
+        SET p_username = CONCAT(firstPart, '_', lastPart, newUserID);
+
+        -- Update the user with the generated username
+        UPDATE web_users SET username = p_username WHERE userID = newUserID;
+
+        -- Insert into the appropriate table based on user type
+        CASE 
+            WHEN p_userType = 'Hypertensive Individual' THEN
+                INSERT INTO patient (userid, username) VALUES (newUserID, p_username);
+            WHEN p_userType = 'Family Member' THEN
+                INSERT INTO family_member (userid, username, education_level) VALUES (newUserID, p_username, p_education_level);
+            WHEN p_userType = 'Healthcare Professional' THEN
+                INSERT INTO health_care_prof (userid, username, years_of_exp) 
+                VALUES (newUserID, p_username, p_years_of_exp);
+        END CASE;
+    ELSE
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Email already exists.';
+    END IF;
+END $$
+
+DELIMITER ;
