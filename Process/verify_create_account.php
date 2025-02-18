@@ -175,7 +175,7 @@
                 If you didn't create this account, please disregard this email.
                 <br>
                 We're here if you need any assistance.
-                <br>
+                <br><br>
                 Best regards,
 
                 <p>";
