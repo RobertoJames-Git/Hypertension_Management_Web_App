@@ -34,11 +34,11 @@ function sendMail($to, $subject, $body) {
         
         // Send Email
         $mail->send();
-        $_SESSION["email_status"]=true;
-        return "Email has been sent successfully.";
+        return true;
 
     } catch (Exception $e) {
-        return "Email could not be sent. Error: " . $mail->ErrorInfo;
+       return false;
+        // return "Email could not be sent. Error: " . $mail->ErrorInfo;
     }
 }
 

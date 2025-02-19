@@ -113,3 +113,15 @@ select:focus,input:focus{
 .family_attribute,.health_prof_attribute{
     display: none;
 }
+
+#database_Error{
+    background-color: red;
+    width: max-content;
+    margin:auto;
+    padding: 10px;
+    color: white;
+    margin-top: 10px;
+    border-radius: 10px;
+    display: none;
+}
+

@@ -7,10 +7,10 @@
     function addUserToDatabase(){
         try{
             $dbConn=getDatabaseConnection();
-            $sql = "CALL AddWebUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "CALL AddWebUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,@generated_username)";
             $stmt = $dbConn->prepare($sql);
             
-            $token= bin2hex(random_bytes(32));
+            $_SESSION["token"]= bin2hex(random_bytes(32));
             $_SESSION["password"]=generateRandomPassword();
             $password_hash= password_hash($_SESSION["password"],PASSWORD_DEFAULT);
             
@@ -25,7 +25,7 @@
                 $_SESSION["gender"], 
                 $_SESSION["dob"], 
                 $_SESSION["email"], 
-                $token, 
+                $_SESSION["token"], 
                 $token_expiration,
                 $account_status, 
                 $password_hash, 
@@ -35,10 +35,29 @@
             );
 
             $stmt->execute();
+            $stmt->close();
+
+            // Retrieve the OUT parameter value
+            $result = $dbConn->query("SELECT @generated_username AS username");
+
+            // Fetch the username
+            if ($row = $result->fetch_assoc()) {
+                $_SESSION["username"]= $row["username"];
+            } else {
+                $_SESSION["database_or_sendmail_Err"]="Failed to retrieve username.";
+            }
+
+            $dbConn->close();
+
         }
         catch(mysqli_sql_exception $e){
+            
+            if (strpos($e->getMessage(), 'Email already exists') !== false) {
+                $_SESSION["emailErr"]="Email already registered.";
 
-            $_SESSION["emailErr"]="Email already registered";
+            } else {
+                $_SESSION["database_or_sendmail_Err"]="Database Error: " . $e->getMessage();
+            }
             return false;//to indicate a error occurred
         }
 

@@ -15,6 +15,11 @@
         session_start();
     ?>
 
+
+    <div id="database_Error">
+        <span id="errorContent">Database Error: <?php  echo isset($_SESSION["database_or_sendmail_Err"]) ? htmlspecialchars($_SESSION["database_or_sendmail_Err"]) :''; ?></span>
+    </div>
+
     <div id="form_container">
 
         <div>

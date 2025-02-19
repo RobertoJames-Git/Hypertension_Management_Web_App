@@ -1,6 +1,6 @@
-------Drop all tables
+-- Drop all tables
 
-
+DROP PROCEDURE AddWebUser;
 DROP TABLE IF EXISTS support;
 DROP TABLE IF EXISTS communicate;
 DROP TABLE IF EXISTS monitor;
@@ -147,7 +147,8 @@ CREATE PROCEDURE AddWebUser(
     IN p_password_hashed VARCHAR(100),
     IN p_userType ENUM('Hypertensive Individual', 'Family Member', 'Healthcare Professional'),
     IN p_education_level VARCHAR(50),  -- For Family Member
-    IN p_years_of_exp INT             -- For Healthcare Professional
+    IN p_years_of_exp INT,             -- For Healthcare Professional
+    OUT p_generated_username VARCHAR(50)
 )
 BEGIN
     DECLARE userExists INT;
@@ -169,11 +170,11 @@ BEGIN
 
         -- Extract the first 3 letters of fname and last 3 letters of lname (handling short names)
         SET firstPart = LEFT(p_fname, 3);
-        SET lastPart = RIGHT(p_lname, 3);
+        SET lastPart = LEFT(p_lname, 3);
 
         -- Construct username
         SET p_username = CONCAT(firstPart, '_', lastPart, newUserID);
-
+        SET p_generated_username =p_username;
         -- Update the user with the generated username
         UPDATE web_users SET username = p_username WHERE userID = newUserID;
 
@@ -185,7 +186,7 @@ BEGIN
                 INSERT INTO family_member (userid, username, education_level) VALUES (newUserID, p_username, p_education_level);
             WHEN p_userType = 'Healthcare Professional' THEN
                 INSERT INTO health_care_prof (userid, username, years_of_exp) 
-                VALUES (newUserID, p_username, p_years_of_exp);
+                VALUES (newUserID, p_username);
             ELSE SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Invalid userType';
         END CASE;

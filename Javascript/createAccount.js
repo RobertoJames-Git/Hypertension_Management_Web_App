@@ -30,9 +30,19 @@ function showAttributes(accountType) {
     }
 }
 
+function displayDatabaseErr(){
+
+    errorContent=document.getElementById("errorContent").getHTML();
+    if(errorContent.length >16){
+        document.getElementById("errorContent").style="display:block";
+    }
+
+}
 
 // Call the function on page load to display the specialized fields
 window.onload = function() {
     let userType = document.getElementById("user_typeID").value;
     showAttributes(userType);
+
+    displayDatabaseErr();
 };
