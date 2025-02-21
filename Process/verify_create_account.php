@@ -138,66 +138,49 @@
         }
 
 
-        
-        
+
         if($valErr==true){//redirect user if there is an error in validation
 
             header("location:../create_account.php"); 
+            
+        }
+        
+
+        #if there were no validation error then all variables that store validation data is unset
+        unset(  $_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],
+                $_SESSION["user_typeErr"],$_SESSION["genderErr"],$_SESSION["emailErr"],
+                $_SESSION["family_edu_level_Err"],$_SESSION["health_prov_exp_Err"],$_SESSION["database_or_sendmail_Err"],$_SESSION["username"]);
+        
+        //calls a function from the databse folder that adds the user to the database
+        if(addUserToDatabase()==false){//if an error occurs while adding the user account then they are redirected back tot the form
+            header("location:../create_account.php");
+
+        }
+        
+
+        if(!isset($_SESSION["username"])||$_SESSION["username"]==""){
+            $_SESSION["database_or_sendmail_Err"]="Could not generate username";
+            header("location:../create_account.php");
+
+        }
+
+        //send activation email to user
+        $emailResponse=sendActivationEmail($_SESSION["email"]);
+
+        if($emailResponse==false){
+            $_SESSION["database_or_sendmail_Err"]="Email with activation code coud not be sent";
+            header("location:../create_account.php");
+        }
+        else if($emailResponse==true){
+            $_SESSION["email_status"]=true;
         }
         else{
-            #if there were no validation error then all variables that store validation data is unset
-            unset(  $_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],
-                    $_SESSION["user_typeErr"],$_SESSION["genderErr"],$_SESSION["emailErr"],
-                    $_SESSION["family_edu_level_Err"],$_SESSION["health_prov_exp_Err"],$_SESSION["database_or_sendmail_Err"],$_SESSION["username"]);
-            
-            //calls a function from the databse folder that adds the user to the database
-            if(addUserToDatabase()==false){//if an error occurs while adding the user account then they are redirected back tot the form
-                header("location:../create_account.php");
-
-            }
-            
-            /* 
-                Send activation link to email
-            */
-
-            if(!isset($_SESSION["username"])||$_SESSION["username"]==""){
-                $_SESSION["database_or_sendmail_Err"]="Could not generate username";
-                header("location:../create_account.php");
-
-            }
-
-            $body="<p>
-                Dear ".$_SESSION['fname'].' '.$_SESSION['lname'].",
-                <br>
-                Thank you for registering with HypMonitor! We're excited to have you on board as a part of our health-focused community. Whether you are a hypertensive individual, a patient, or a healthcare professional, we are here to support you on your journey.
-                <br>
-                To activate your account and get started, please click the link below:
-
-                <br><br>
-                Username:".$_SESSION["username"]."
-                <br>Password: ".$_SESSION['password']."
-                <br><a href='http://localhost/Major_Project_DHI/activate.php?token=".$_SESSION["token"]."'>Activate your account</a>
-                <br><br>
-                This link will verify your email and confirm that you are the one creating the account. If you don't click on the activation link by the end of the day, your account will be automatically removed.
-
-                If you didn't create this account, please disregard this email.
-                <br>
-                We're here if you need any assistance.
-                <br><br>
-                Best regards,
-
-                <p>";
-
-            if(sendmail($_SESSION["email"],"Welcome To HypMonitor! Activate your Account",$body)==false){
-                $_SESSION["database_or_sendmail_Err"]="Email with activation code coud not be sent";
-                header("location:../create_account.php");
-            }
-            else{
-                $_SESSION["email_status"]=true;
-            }
-            
-            header("location:../emailAlert.php");
+            //store error:  Not all data needed to send an email is set
+            $_SESSION["database_or_sendmail_Err"]=$emailResponse;
         }
+        
+        header("location:../emailAlert.php");
+        
     }
 
 

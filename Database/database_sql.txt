@@ -1,5 +1,6 @@
--- Drop all tables
+-- Drop all tables and procedure
 
+DROP PROCEDURE ActivateUser;
 DROP PROCEDURE AddWebUser;
 DROP TABLE IF EXISTS support;
 DROP TABLE IF EXISTS communicate;
@@ -20,7 +21,7 @@ create table web_users(
     gender enum('male','female','other','rather not say'),
     dob date,
     email varchar(200) Unique,
-    token varchar(100),
+    token varchar(100) Unique,
     token_expiration datetime,
     account_status enum('pending','active'),
     password varchar(100),
@@ -142,7 +143,6 @@ CREATE PROCEDURE AddWebUser(
     IN p_dob DATE,
     IN p_email VARCHAR(200),
     IN p_token VARCHAR(150),
-    IN p_token_expiration datetime,
     IN p_account_status ENUM('pending','active'),
     IN p_password_hashed VARCHAR(100),
     IN p_userType ENUM('Hypertensive Individual', 'Family Member', 'Healthcare Professional'),
@@ -156,11 +156,15 @@ BEGIN
     DECLARE p_username VARCHAR(10);
     DECLARE firstPart VARCHAR(3);
     DECLARE lastPart VARCHAR(3);
-
+	DECLARE p_token_expiration datetime;
+   
     -- Check if the email already exists
     SELECT COUNT(*) INTO userExists FROM web_users WHERE email = p_email;
 
     IF userExists = 0 THEN
+
+        -- Set token expiration (10 minutes from now)
+        SET p_token_expiration = NOW() + INTERVAL 10 MINUTE;
         -- Insert into web_users table without username
         INSERT INTO web_users (fname, lname, gender, dob, email, token, token_expiration,account_status, password)
         VALUES (p_fname, p_lname, p_gender, p_dob, p_email, p_token,p_token_expiration,p_account_status, p_password_hashed);
@@ -193,6 +197,135 @@ BEGIN
     ELSE
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Email already exists.';
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE ActivateUser(
+    IN p_token VARCHAR(100)
+)
+BEGIN
+    DECLARE tokenExists INT;
+    DECLARE accountActive INT;
+    DECLARE tokenValid INT;
+
+    -- Check if the token exists
+    SELECT COUNT(*) INTO tokenExists 
+    FROM web_users 
+    WHERE token = p_token;
+
+    -- Check if the account is already active
+    SELECT COUNT(*) INTO accountActive 
+    FROM web_users 
+    WHERE token = p_token AND account_status = 'active';
+
+    -- Check if the token is valid (not expired and account is still pending)
+    SELECT COUNT(*) INTO tokenValid 
+    FROM web_users 
+    WHERE token = p_token 
+    AND account_status = 'pending' 
+    AND token_expiration > NOW();
+
+    -- Case 1: Token does not exist
+    IF tokenExists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid token';
+
+    -- Case 2: Account is already active
+    ELSEIF accountActive > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Account is already active.';
+
+    -- Case 3: Token exists but is expired
+    ELSEIF tokenValid = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Activation link expired. A new one has been sent to your email.';
+
+    -- Case 4: Token is valid, account is pending, and within time limit → Activate the account
+    ELSE
+        UPDATE web_users
+        SET account_status = 'active'
+        WHERE token = p_token;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateUserTokenAndPassword(
+    IN p_current_token VARCHAR(150),
+    IN p_new_token VARCHAR(150),
+    IN p_new_password_hashed VARCHAR(100)
+)
+BEGIN
+    DECLARE userExists INT;
+
+    -- Check if a user exists with the given current token
+    SELECT COUNT(*) INTO userExists FROM web_users WHERE token = p_current_token;
+
+    IF userExists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid token. No matching user found.';
+    ELSE
+        -- Update the token, expiration, and password
+        UPDATE web_users 
+        SET 
+            token = p_new_token,
+            token_expiration = NOW() + INTERVAL 10 MINUTE,
+            password = p_new_password_hashed
+        WHERE token = p_current_token;
+
+        -- Return the updated user details as a result set
+        SELECT fname, lname, username 
+        FROM web_users 
+        WHERE token = p_new_token;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateUserTokenAndPassword(
+    IN p_current_token VARCHAR(150),
+    IN p_new_token VARCHAR(150),
+    IN p_new_password_hashed VARCHAR(100)
+)
+BEGIN
+    DECLARE userExists INT;
+
+    -- Check if a user exists with the given current token
+    SELECT COUNT(*) INTO userExists FROM web_users WHERE token = p_current_token;
+
+    IF userExists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid token. No matching user found.';
+    ELSE
+        -- Update the token, expiration, and password
+        UPDATE web_users 
+        SET 
+            token = p_new_token,
+            token_expiration = NOW() + INTERVAL 10 MINUTE,
+            password = p_new_password_hashed
+        WHERE token = p_current_token;
+
+        -- Return the updated user details as a result set
+        SELECT fname, lname, username, email
+        FROM web_users 
+        WHERE token = p_new_token;
     END IF;
 END $$
 
