@@ -10,16 +10,13 @@
 <body>
 
 
-    <?php 
-        require_once('navbar.php');
-        session_start();
-    ?>
-
 
     <div id="database_Error">
         <span id="errorContent">Database Error: <?php  echo isset($_SESSION["database_or_sendmail_Err"]) ? htmlspecialchars($_SESSION["database_or_sendmail_Err"]) :''; ?></span>
     </div>
 
+    <br>
+    
     <div id="form_container">
 
         <div>
@@ -114,9 +111,12 @@
                     <option value="Over a decade"       <?php echo isset($_SESSION["health_prov_exp"])&& $_SESSION["health_prov_exp"]=="Over a decade" ? htmlspecialchars("selected") :''?>>Over a Decade</option>
                 </select>
                 
-                <input id="submit-btn" type="submit" name="account_creation" value="Create Account">
+                <input id="submit-btn" class="button_style" type="submit" name="account_creation" value="Create Account">
 
             </form>
+
+            <button id="" class="button_style" onclick="window.location.href='index.php'" >Back to Home</button>
+            <p>Already have an account? <a href="login.php">Login</a> </p>
         </div>
    
     </div>

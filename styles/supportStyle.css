@@ -12,6 +12,10 @@
     font-size: 18px;
     align-items: center;
     box-shadow: 0px 0px 4px 3px grey;
+
+        /* Add horizontal scrolling if the screen is too small */
+        overflow-x: auto;  
+        white-space: nowrap; /* Prevents content from wrapping */
 }
 #support_selected{
     background-color: white;
@@ -19,4 +23,48 @@
     padding-top: 5px;
     padding-bottom: 5px;
     border-radius: 5px;
+}
+
+@media (max-width:730px) {
+    #Support_Navbar{
+        width: 500px;
+        column-gap: 20px;
+    }
+
+    #support_selected{
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+        /* Scrollbar Styling for Webkit Browsers (Chrome, Edge, Safari) */
+    #Support_Navbar::-webkit-scrollbar {
+        height: 8px; /* Adjust scrollbar thickness */
+    
+    }
+
+    #Support_Navbar::-webkit-scrollbar-track {
+        background: #e0e0e0; /* Track color */
+        border-radius: 10px; 
+        
+    }
+
+    #Support_Navbar::-webkit-scrollbar-thumb {
+        background: #1946da; /* Scrollbar color */
+        border-radius: 10px;
+        transition: background 0.3s ease-in-out;
+    }
+
+
+    #Support_Navbar::-webkit-scrollbar-thumb:hover {
+        background: #153bb0; /* Darker shade when hovered */
+        
+    }
+    
+    /* Scrollbar Styling for Firefox */
+    #Support_Navbar {
+        scrollbar-width: thin; /* "auto" or "thin" */
+        scrollbar-color: #1946da #fff; /* thumb color track color */
+
+    }
+
 }

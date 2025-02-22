@@ -38,7 +38,7 @@
         
         <div id="navMenu">
             <div id="home_option" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>index.php'"> Home</div>
-            <div id="profile_option"> Profile</div>
+            <div id="profile_option" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>profile.php'" > Profile</div>
             <div id="recordBP_option"> Record BP</div>
             <div onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>support.php'">Support</div>
             <div onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>Home/about_us.php'"> About Us</div>
@@ -46,7 +46,7 @@
 
         <div id="register_and_login_container">
             <div id="register_container" onclick="window.location.href='<?php echo htmlspecialchars($level_down)?>create_account.php' ">Create an account</div> 
-            <div id="login_container">Login</div>
+            <div id="login_container" onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>login.php'" >Login</div>
         </div>
 
     </div>
