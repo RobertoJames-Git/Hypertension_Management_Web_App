@@ -75,6 +75,8 @@
         
         $emailResult=sendMail($to,$subject,$body);
 
+        unset($_SESSION['fname'],$_SESSION['lname'],$_SESSION["username"],$_SESSION['password'],$_SESSION["token"]);
+        
         return $emailResult;
 
     }

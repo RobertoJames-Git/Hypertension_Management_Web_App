@@ -1,14 +1,16 @@
-body{
+html,body{
     font-family: sans-serif;
     background-color: rgb(230, 230, 240);
     color: black;
-    
+    margin:0;
 }
 header{
     border-bottom: 1px solid black;
     display: flex;
     justify-content: center;
     width: 100%;
+    padding-top:10px;
+
 }
 
 #navMenu{
@@ -126,6 +128,8 @@ header{
 
 #heading-for-small-screen{
     display: none;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 #sidebarclose{

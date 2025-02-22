@@ -142,7 +142,7 @@
         if($valErr==true){//redirect user if there is an error in validation
 
             header("location:../create_account.php"); 
-            
+            exit();//Prevents code from running from this point on
         }
         
 
