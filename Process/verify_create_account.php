@@ -8,6 +8,7 @@
     #redirect user if a form was not submitted to this page
     if(!isset($_POST["account_creation"])){
         header("location:../create_account.php");
+        exit();
     }
     else{
 
