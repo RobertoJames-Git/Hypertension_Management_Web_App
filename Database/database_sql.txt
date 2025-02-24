@@ -330,3 +330,32 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE GetUserPassword(
+    IN p_username VARCHAR(50)
+)
+BEGIN
+    DECLARE userPassword VARCHAR(100);
+
+    -- Check if the username exists and retrieve the password
+    SELECT password INTO userPassword
+    FROM web_users 
+    WHERE username COLLATE utf8mb4_general_ci = p_username COLLATE utf8mb4_general_ci;
+
+    -- Check if the username exists
+    IF userPassword IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid username';
+    ELSE
+        SELECT userPassword AS password;
+    END IF;
+END $$
+
+DELIMITER ;

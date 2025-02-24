@@ -2,11 +2,12 @@
 
     require_once("sendmail.php");
     require_once("../Database/database_actions.php");
-
+    require_once("sanitizeData.php");
+    
     session_start();
 
     #redirect user if a form was not submitted to this page
-    if(!isset($_POST["account_creation"])){
+    if(!isset($_POST["account_creation"],$_POST["fname"],$_POST["lname"],$_POST["gender"],$_POST["dob"],$_POST["user_type"],$_POST["email"])){
         header("location:../create_account.php");
         exit();
     }
@@ -22,11 +23,8 @@
         $valErr=false;
 
         //Calls a user defined function to sanitize input 
-        $sanitized_post = [];
-        foreach ($_POST as $key => $value) {
-            $sanitized_post[$key] = sanitizeInput($value);
-        }
-        $_POST = $sanitized_post; // Overwrite after sanitization
+
+        $_POST = sanitizeUserInput($_POST); // Overwrite after sanitization
         
         #stores the users input in a session to make their info persistent in the form
         $_SESSION["fname"]=$_POST["fname"];
@@ -46,11 +44,17 @@
             $_SESSION["fnameErr"]="Invalid First Name";
             $valErr=true;
         }
-        else if(preg_match("/^[0-9]/",$_POST["fname"])){
+        //check if the field contains any numbers
+        else if(preg_match("/[0-9]/",$_POST["fname"])){
             $_SESSION["fnameErr"]="Name cannot be a number";
             $valErr=true; 
         }
-
+        //check if the field only has alphabetical characters
+        else if (preg_match('/[^A-za-z]/', $_POST["fname"])) {
+            $_SESSION["fnameErr"] = "Remove any symbols";
+            $valErr = true; 
+        }
+        
 
         
         if($_POST["lname"]==""){
@@ -61,9 +65,13 @@
             $_SESSION["lnameErr"]="Invalid Last Name";
             $valErr=true;
         }
-        else if(preg_match("/^[0-9]/",$_POST["lname"])){
-            $_SESSION["lnameErr"]="Name cannot be a number";
+        else if(preg_match("/[0-9]/",$_POST["lname"])){
+            $_SESSION["lnameErr"]="Remove any numbers";
             $valErr=true; 
+        }
+        else if (preg_match('/[^A-Za-z]/', $_POST["lname"])) {
+            $_SESSION["lnameErr"] = "Remove any symbols";
+            $valErr = true; 
         }
         
 
@@ -91,6 +99,19 @@
         }
 
 
+        
+
+        if($_POST["email"]==""){
+            $_SESSION["emailErr"]="Field is empty";
+            $valErr=true;
+        }
+        //check if the email recieved follows a valid format
+        else if(!filter_var($_POST["email"],FILTER_VALIDATE_EMAIL)){
+            $_SESSION["emailErr"]="Invalid Email";
+            $valErr=true;
+        }
+
+
         if($_POST["user_type"]==""){
             $_SESSION["user_typeErr"]="Field is empty";
             $valErr=true;
@@ -102,7 +123,13 @@
         }
         
         if($_POST["user_type"]=="Family Member"){
-            if($_POST["family_edu_level"]==""){
+            if(!isset($_POST["family_edu_level"])){
+                $_SESSION["family_edu_level_Err"] = "Missing in Request";
+                $valErr=true; 
+                header("location:../create_account.php");
+                exit();
+            }
+            else if($_POST["family_edu_level"]==""){
                 $_SESSION["family_edu_level_Err"] = "Field is empty";
                 $valErr=true; 
             }
@@ -114,8 +141,13 @@
         }
 
         else if($_POST["user_type"]=="Healthcare Professional"){
-            
-            if($_POST["health_prov_exp"]==""){
+            if(!isset($_POST["health_prov_exp"])){
+                $_SESSION["health_prov_exp_Err"] = "Missing in Request";
+                $valErr=true; 
+                header("location:../create_account.php");
+                exit();
+            }
+            else if($_POST["health_prov_exp"]==""){
                 $_SESSION["health_prov_exp_Err"] = "Field is empty";
                 $valErr=true; 
             }
@@ -126,17 +158,6 @@
             }
         }
 
-
-
-        if($_POST["email"]==""){
-            $_SESSION["emailErr"]="Field is empty";
-            $valErr=true;
-        }
-        //check if the email recieved follows a valid format
-        else if(!filter_var($_POST["email"],FILTER_VALIDATE_EMAIL)){
-            $_SESSION["emailErr"]="Invalid Email";
-            $valErr=true;
-        }
 
 
 
@@ -195,17 +216,6 @@
         return $d && $d->format($format) === $date;
     }
 
-
-    function sanitizeInput($dataToSanitize) {
-        // Remove any leading or trailing whitespace
-        $dataToSanitize = trim($dataToSanitize);
-    
-        // Convert special characters into HTML entities to prevent XSS attacks
-        $sanitizedData = filter_var($dataToSanitize, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    
-        // Return the sanitized input
-        return $sanitizedData;
-    }
 
 
     function calculateAge($birthdate) {

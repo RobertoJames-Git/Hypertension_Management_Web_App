@@ -161,6 +161,58 @@
     }
     
 
+    function validateUser($username,$password) {
+        $dbConn = getDatabaseConnection();
+        $password_hash="";
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL GetUserPassword(?)");
+    
+            // Bind the username parameter
+            $stmt->bind_param("s", $username);
+    
+            // Execute the statement
+            $stmt->execute();
+    
+            // Fetch the result
+            $result = $stmt->get_result();
+    
+            // If there is a result, fetch the password
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $password_hash = $row['password'];
+            } else {
+                return "Unknown error occurred.";
+            }
+            
+            //if password match was successful
+            if(password_verify($password,$password_hash)){
+                return "Success";
+            }
+            else{
+                return "Invalid username and/or password";
+            }
+            
+        } catch (mysqli_sql_exception $e) {
+            // Catch MySQL errors, including SIGNAL errors from the procedure
+            /*the database will just return invalid username so in order to not give the user a 
+            clue if the username or the password is wrong i added on the string*/
+            return $e->getMessage()." and/or password";
+    
+            
+        } finally {
+            // Close resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+    
+
 
     function generateRandomPassword() {
         

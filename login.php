@@ -10,13 +10,14 @@
     <title>Login</title>
     <link rel="stylesheet" href="styles/createAccount.css">
     <link rel="stylesheet" href="styles/loginStyle.css">
+    <script src="Javascript/login.js"></script>
 </head>
 <body>
 
 
     
     <div id="database_Error">
-        <span id="errorContent">Database Error: <?php  echo isset($_SESSION["database_or_sendmail_Err"]) ? htmlspecialchars($_SESSION["database_or_sendmail_Err"]) :''; ?></span>
+        <span id="errorContent">Response: <?php  echo isset($_SESSION["dbValidate_response"]) ? htmlspecialchars($_SESSION["dbValidate_response"]) :''; ?></span>
     </div>
     
     
@@ -30,7 +31,7 @@
             <br><br><br><br><br>
             <h1> Login</h1>
             
-            <form action="Process/" method="post">
+            <form action="Process/account_login.php" method="post">
 
                 <div class="label_and_alert_containert">
                     <label for="">Username</label>
@@ -44,7 +45,7 @@
                     <label for="">Password</label>
                     <span class="formError"><?php echo isset($_SESSION["passwordErr"]) ? htmlspecialchars($_SESSION["passwordErr"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
                 </div>
-                <input type="password" name="password" id="" value="<?php echo isset($_SESSION["password"]) ? htmlspecialchars($_SESSION["password"],ENT_QUOTES,'UTF-8'):'' ?>" >
+                <input type="password" name="password" id="" >
          
                 
                 <input id="" class="button_style" type="submit" name="account_lgin" value="Login">
