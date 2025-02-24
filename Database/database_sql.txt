@@ -336,6 +336,7 @@ DELIMITER ;
 
 
 
+
 DELIMITER $$
 
 CREATE PROCEDURE GetUserPassword(
@@ -343,16 +344,20 @@ CREATE PROCEDURE GetUserPassword(
 )
 BEGIN
     DECLARE userPassword VARCHAR(100);
+    DECLARE accountStatus ENUM('pending', 'active');
 
-    -- Check if the username exists and retrieve the password
-    SELECT password INTO userPassword
+    -- Check if the username exists, retrieve the password, and account status
+    SELECT password, account_status INTO userPassword, accountStatus
     FROM web_users 
     WHERE username COLLATE utf8mb4_general_ci = p_username COLLATE utf8mb4_general_ci;
 
     -- Check if the username exists
     IF userPassword IS NULL THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Invalid username';
+        SET MESSAGE_TEXT = 'Invalid username and/or Password';
+    ELSEIF accountStatus = 'pending' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Account is not activated';
     ELSE
         SELECT userPassword AS password;
     END IF;

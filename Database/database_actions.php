@@ -195,9 +195,8 @@
             
         } catch (mysqli_sql_exception $e) {
             // Catch MySQL errors, including SIGNAL errors from the procedure
-            /*the database will just return invalid username so in order to not give the user a 
-            clue if the username or the password is wrong i added on the string*/
-            return $e->getMessage()." and/or password";
+
+            return $e->getMessage();
     
             
         } finally {
