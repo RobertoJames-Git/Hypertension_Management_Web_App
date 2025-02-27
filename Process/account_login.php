@@ -53,13 +53,22 @@
 
     //if credentials are successfult then go to recordBP page
     if($databaseResponse==="Success"){
-        unset($_SESSION["username"],$_SESSION["usernameErr"],$_SESSION["passwordErr"],$_SESSION["dbValidate_response"]);
+        
+        /* unset data and destroy session data for current session */
+        session_unset();
+        session_destroy();
+
+        //start new session with username
+        session_start();
+        //set username when user credentials are correct
+        $_SESSION["loggedIn_username"]=$_POST["username"];
         header("location:../recordBP.php");
         exit();
     }
 
     /*Store error message and redirect if login fails */
     $_SESSION["dbValidate_response"]=$databaseResponse;
+    
     header("location:../login.php");
     exit();
 
