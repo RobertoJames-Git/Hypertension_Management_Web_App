@@ -9,16 +9,21 @@
         Database password: bqRqVzWRZ6
         Port number: 3306
     */
-    $hostname="sql3.freesqldatabase.com";
-    $database_name=$database_user="sql3752921";
-    $password="bqRqVzWRZ6";
 
-    try{
-        $dbConn=mysqli_connect($hostname,$database_user,$password,$database_name);
-    }
-    catch(mysqli_sql_exception $e){
-        echo("Connection Failed");
-    }
+    function getDatabaseConnection(){
+        $hostname="localhost";
+        $database_user="root";
+        $database_name="hypMonitor";
+        $password="";
+        
+        try{
+            $dbConn=mysqli_connect($hostname,$database_user,$password,$database_name);
+        }
+        catch(mysqli_sql_exception $e){
+            echo("Connection Failed");
+        }
 
+        return $dbConn;
+    }
 
 ?>

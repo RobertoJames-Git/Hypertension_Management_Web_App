@@ -1,3 +1,8 @@
+body{
+    font-family: sans-serif;
+    background-color: rgb(230, 230, 240);
+}
+
 
 #form_container{
     display: grid;
@@ -7,10 +12,14 @@
     width: max-content;
     background-color: white;
     padding:10px;
-    margin-top: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 4px 4px gray;
     transition: box-shadow ease-in 0.3s;
+    
+}
+
+label{
+    font-size: 16px;
 }
 
 #form_container img{
@@ -21,10 +30,14 @@
 }
 
 #form_container:hover{
-    box-shadow: 0px 8px 8px 8px gray;
+    box-shadow: 0px 4px 8px 10px gray;
 }
 
-
+#form_div{
+    height: 590px;
+    overflow-y: auto; /* Enables vertical scrolling if content overflows */
+    padding-bottom: 5px;
+}
 
 h1{
     color: black;
@@ -61,7 +74,8 @@ select:focus,input:focus{
 }
 
 
-#submit-btn{
+.button_style{
+    margin: auto;
     margin-top: 20px;
     display: block;
     width: 307px;
@@ -71,9 +85,11 @@ select:focus,input:focus{
     outline: none;
     font-size: 17px;
     transition: background-color ease-in-out 0.3s;
+    border: none;
+    
 }
 
-#submit-btn:hover{
+.button_style:hover{
     outline: 1px solid #1946da;
     color: #1946da;
     background-color: white;
@@ -81,7 +97,7 @@ select:focus,input:focus{
 }
 
 
-@media (max-width: 820px) {
+@media (max-width: 840px) {
     #form_container{
         grid-template-columns: auto 350px;
         grid-column-gap: 0px;
@@ -104,4 +120,32 @@ select:focus,input:focus{
     grid-template-columns: auto auto;
     margin-top: 20px;
     width: 300px;
+}
+
+.family_attribute,.health_prof_attribute{
+    display: none;
+}
+
+#database_Error{
+    background-color: red;
+    width: max-content;
+    margin:auto;
+    padding: 10px;
+    color: white;
+    margin-top: 10px;
+    border-radius: 10px;
+    display: none;
+}
+
+p{
+    
+    margin: auto;
+    margin-top: 15px;
+    width: max-content;
+}
+
+
+a{
+    text-decoration: none;
+    color: #1946da;
 }

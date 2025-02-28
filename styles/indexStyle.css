@@ -1,14 +1,16 @@
-body{
+html,body{
     font-family: sans-serif;
     background-color: rgb(230, 230, 240);
     color: black;
-    
+    margin:0;
 }
 header{
     border-bottom: 1px solid black;
     display: flex;
     justify-content: center;
     width: 100%;
+    padding-top:10px;
+
 }
 
 #navMenu{
@@ -98,7 +100,9 @@ header{
     margin-left: auto;
 }
 
-
+#register_and_login_container div{
+    display: none;
+}
 
 
 #register_container,#register_in_about_container{
@@ -126,6 +130,8 @@ header{
 
 #heading-for-small-screen{
     display: none;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 #sidebarclose{
@@ -381,6 +387,76 @@ header{
     grid-column:1/span 2;
 }
 
+
+#register_in_about_container{
+    margin: auto;
+    font-size: 18px;
+}
+
+
+#learn_more_container{
+    display: block;
+    width: max-content;
+    margin: 0;
+    padding: 8px;
+}
+
+#user_logged_in{
+
+    display: grid;
+    grid-template-columns: auto auto auto;
+    column-gap: 5px;
+    align-items: center; /* Vertically center items */
+    justify-content: center; /* Horizontally center items, you can change this if you want a different horizontal alignment */
+    background-color: #1946da;
+    padding: 5px;
+    border-radius: 30px;
+    color: white;
+    box-shadow: 0px 2px 4px 2px grey;
+}
+
+#profilephoto{
+    border-radius: 30px;
+}
+
+
+#arrowdown{
+
+    background-color: white;
+    border-radius: 20px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+#username_span{
+    font-size:16px;
+}
+
+
+
+#dropdownContent p{
+    margin: 0px;
+    cursor: pointer;
+    margin-top: 5px; 
+    background-color: #1946da;
+    color: white;
+    padding: 3px;
+    border-radius: 5px;
+}
+
+#dropdownContent{
+    display: none;
+    position: absolute;
+    min-width: 160px;
+    z-index: 2;
+    margin-top: 40px;
+    font-size: 16px;
+    padding: 5px;
+    
+}
+
+
+
 @media (max-width:1070px){
 
 
@@ -455,6 +531,7 @@ header{
     
     
     #register_container{
+
         border-right: 2px solid #1946da;
     }
     
@@ -599,22 +676,19 @@ header{
         -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0));
         mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0));
     }
+
+    #user_logged_in{
+        width: 175px;
+        margin-left: 20px;
+        column-gap: 20px;
+    }
+
+    #arrowdown{
+        transform: rotate(180deg); /* Rotate the image by 90 degrees */
+    }
+
+  
 }
-
-
-#register_in_about_container{
-    margin: auto;
-    font-size: 18px;
-}
-
-
-#learn_more_container{
-    display: block;
-    width: max-content;
-    margin: 0;
-    padding: 8px;
-}
-
 
 
 
