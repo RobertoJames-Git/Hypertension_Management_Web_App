@@ -42,7 +42,7 @@
             <div id="profile_option"> Profile</div>
             <div id="recordBP_option"> Record BP</div>
             <div>Support</div>
-            <div onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>Home/about_us.php'"> About Us</div>
+            <div onclick="window.location.href='<?php echo htmlspecialchars($level_down) ?>about_us.php'"> About Us</div>
         </div>
 
         <div id="register_and_login_container">
