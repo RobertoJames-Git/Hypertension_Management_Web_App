@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +11,12 @@
     
     <?php
 
+        //session start already takes place in navbar.php
         require_once('navbar.php');
+
+        if(!isset($_SESSION["loggedIn_username"])|| $_SESSION["loggedIn_username"]==""){
+            header("Location:login.php");
+        }
     ?>
 
     <div id="Support_Navbar">
