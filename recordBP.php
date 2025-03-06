@@ -15,7 +15,7 @@
     <div id="recordBP_container">
         <h1>Track your blood pressure</h1>
 
-        <p>Please enter your readings</p>
+        <p>Please enter today's readings</p>
         <form action="" method="post">
 
 
@@ -23,6 +23,12 @@
             <label for="">Diastolic</label>
             <input class="RecordBP_InputField" type="number" placeholder="Enter value">
             <input class="RecordBP_InputField" type="number" name="" id="" placeholder="Enter value">
+
+            <label for="">Pulse</label>
+            <div></div><!--Acting as a empty place holder for the grid -->
+            <input class="RecordBP_InputField" type="number" name="" id="" placeholder="Enter value">
+            <div></div><!--Acting as a empty place holder for the grid -->
+
             <label for="">Time</label>
             <label for="">Date</label>
             
