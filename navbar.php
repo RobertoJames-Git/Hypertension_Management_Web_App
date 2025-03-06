@@ -21,8 +21,8 @@
 
         <div id="navMenu">
             <div id="home_option" onclick="window.location.href='index.php'"> Home</div>
-            <div id="profile_option"> Profile</div>
-            <div id="recordBP_option"> Record BP</div>
+            <div id="profile_option" > Profile</div>
+            <div id="recordBP_option" onclick="window.location.href='recordBP.php'" > Record BP</div>
             <div onclick="window.location.href='support.php'">Support</div>
             <div onclick="window.location.href='about_us.php'"> About Us</div>
         </div>
