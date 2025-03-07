@@ -16,7 +16,7 @@
         <h1>Track your blood pressure</h1>
 
         <p>Please enter today's readings</p>
-        <form action="Process/process_recordBP.php" method="post" >
+        <form action="Process/validate_recordBP.php" method="post" >
 
 
             <label for="">Systolic</label>
