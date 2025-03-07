@@ -176,7 +176,8 @@
     
             // Fetch the result
             $result = $stmt->get_result();
-    
+            
+
             // If there is a result, fetch the password
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
@@ -192,6 +193,7 @@
             else{
                 return "Invalid username and/or password";
             }
+            
             
         } catch (mysqli_sql_exception $e) {
             // Catch MySQL errors, including SIGNAL errors from the procedure
@@ -231,5 +233,4 @@
 
         return $password;
     }
-
 

@@ -16,28 +16,28 @@
         <h1>Track your blood pressure</h1>
 
         <p>Please enter today's readings</p>
-        <form action="" method="post">
+        <form action="Process/process_recordBP.php" method="post" >
 
 
             <label for="">Systolic</label>
             <label for="">Diastolic</label>
-            <input class="RecordBP_InputField" type="number" placeholder="Enter value">
-            <input class="RecordBP_InputField" type="number" name="" id="" placeholder="Enter value">
+            <input class="RecordBP_InputField" type="number" placeholder="Enter value" name="systolic">
+            <input class="RecordBP_InputField" type="number" name="diastolic" id="" placeholder="Enter value">
 
-            <label for="">Pulse</label>
+            <label for="">Pulse / Heart Rate</label>
             <div></div><!--Acting as a empty place holder for the grid -->
-            <input class="RecordBP_InputField" type="number" name="" id="" placeholder="Enter value">
+            <input class="RecordBP_InputField" type="number" name="heart_rate" id="" placeholder="Enter value" >
             <div></div><!--Acting as a empty place holder for the grid -->
 
             <label for="">Time</label>
             <label for="">Date</label>
             
 
-            <input class="RecordBP_InputField" type="time" name="" id="">
+            <input class="RecordBP_InputField" type="time" name="time" id="">
             <input class="RecordBP_InputField" type="date">
 
 
-            <input type="submit"value="Confirm Reading" name="">
+            <input type="submit"value="Confirm Reading" name="bp_record">
             <input type="reset" value="Cancel">
             
         </form>

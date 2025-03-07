@@ -47,7 +47,7 @@
             padding:10px;
         } 
 
-        #backtohome_link{
+        #backtologin_link{
             background-color: #1946da;
             cursor: pointer;
             color: white;
@@ -68,7 +68,7 @@
             </p>
         </div>
 
-        <div id="backtohome_link" onclick="window.location.href='logout.php'">Back to Home</div>
+        <div id="backtologin_link" onclick="window.location.href='login.php'">Go to login</div>
     </div>
 </body>
 </html>

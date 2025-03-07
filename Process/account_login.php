@@ -41,15 +41,17 @@
         $valErr=true;
     }
 
+    
+
     //if there are errors then the user is redirected back to the login page
     if($valErr==true){
         header("location:../login.php");
         exit();
     }
 
-    //if there were no validation errors then then the credential will be checked using th database
+    
+    //if there were no validation errors then the credential will be checked using th database
     $databaseResponse=validateUser($_POST["username"],$_POST["password"]);
-
 
     //if credentials are successfult then go to recordBP page
     if($databaseResponse==="Success"){

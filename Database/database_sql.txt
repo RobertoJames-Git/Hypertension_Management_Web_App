@@ -1,7 +1,10 @@
 -- Drop all tables and procedure
 
-DROP PROCEDURE ActivateUser;
-DROP PROCEDURE AddWebUser;
+DROP PROCEDURE if EXISTS ActivateUser;
+DROP PROCEDURE if EXISTS AddWebUser;
+DROP PROCEDURE if EXISTS GetUserPassword;
+DROP PROCEDURE if EXISTS UpdateUserTokenAndPassword;
+
 DROP TABLE IF EXISTS support;
 DROP TABLE IF EXISTS communicate;
 DROP TABLE IF EXISTS monitor;
@@ -69,11 +72,15 @@ CREATE TABLE patient (
 
 -- Create Reading Table
 CREATE TABLE reading (
-    reading_id VARCHAR(50) NOT NULL,
+    userid INT NOT NULL,
+    username VARCHAR(50) NOT NULL,
     readingdate DATE NOT NULL,
+    readingtime TIME NOT NULL,
     systolic INT NOT NULL,
     diastolic INT NOT NULL,
-    PRIMARY KEY (reading_id)
+    heart_rate INT NOT NULL,
+    PRIMARY KEY (userid, username, readingdate),-- ensure persons can only send in readings once
+    FOREIGN KEY (userid, username) REFERENCES patient(userid, username)
 );
 
 -- Create Message Table
@@ -260,42 +267,6 @@ DELIMITER ;
 
 
 
-DELIMITER $$
-
-CREATE PROCEDURE UpdateUserTokenAndPassword(
-    IN p_current_token VARCHAR(150),
-    IN p_new_token VARCHAR(150),
-    IN p_new_password_hashed VARCHAR(100)
-)
-BEGIN
-    DECLARE userExists INT;
-
-    -- Check if a user exists with the given current token
-    SELECT COUNT(*) INTO userExists FROM web_users WHERE token = p_current_token;
-
-    IF userExists = 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Invalid token. No matching user found.';
-    ELSE
-        -- Update the token, expiration, and password
-        UPDATE web_users 
-        SET 
-            token = p_new_token,
-            token_expiration = NOW() + INTERVAL 10 MINUTE,
-            password = p_new_password_hashed
-        WHERE token = p_current_token;
-
-        -- Return the updated user details as a result set
-        SELECT fname, lname, username 
-        FROM web_users 
-        WHERE token = p_new_token;
-    END IF;
-END $$
-
-DELIMITER ;
-
-
-
 
 DELIMITER $$
 
@@ -349,7 +320,7 @@ BEGIN
     -- Check if the username exists, retrieve the password, and account status
     SELECT password, account_status INTO userPassword, accountStatus
     FROM web_users 
-    WHERE username COLLATE utf8mb4_general_ci = p_username COLLATE utf8mb4_general_ci;
+    WHERE username = p_username ;
 
     -- Check if the username exists
     IF userPassword IS NULL THEN
@@ -361,6 +332,49 @@ BEGIN
     ELSE
         SELECT userPassword AS password;
     END IF;
+END $$
+
+DELIMITER ;
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE AddBloodPressureReading(
+    IN p_username VARCHAR(50),
+    IN p_reading_date DATE,
+    IN p_reading_time TIME,
+    IN p_systolic INT,
+    IN p_diastolic INT,
+    IN p_heart_rate INT
+)
+BEGIN
+    DECLARE user_exists INT;
+    DECLARE reading_exists INT;
+    DECLARE user_id INT;
+    
+    -- Check if the username exists in the patient table and get the userID
+    SELECT userid INTO user_id FROM patient WHERE username = p_username;
+    SET user_exists = (user_id IS NOT NULL);
+
+    IF user_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'User is not a registered patient';
+    END IF;
+
+    -- Check if a reading already exists for this user on the given date
+    SELECT COUNT(*) INTO reading_exists FROM reading 
+    WHERE userid = user_id AND username = p_username AND readingdate = p_reading_date;
+
+    IF reading_exists > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'A reading already exists for the selected date';
+    END IF;
+
+    -- Insert the new reading
+    INSERT INTO reading (userid, username, readingdate, readingtime, systolic, diastolic, heart_rate)
+    VALUES (user_id, p_username, p_reading_date, p_reading_time, p_systolic, p_diastolic, p_heart_rate);
+
 END $$
 
 DELIMITER ;
