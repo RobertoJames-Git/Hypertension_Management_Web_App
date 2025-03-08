@@ -113,29 +113,34 @@
     </div>
 
     <script>
-
         const ctx = document.getElementById('bpChart').getContext('2d');
 
+        // Reverse the dates and corresponding data arrays
+        const reversedDates = <?php echo json_encode($dates); ?>.reverse(); // Reverse the labels (dates)
+        const reversedSystolic = <?php echo json_encode($systolic); ?>.reverse(); // Reverse systolic readings
+        const reversedDiastolic = <?php echo json_encode($diastolic); ?>.reverse(); // Reverse diastolic readings
+        const reversedHeartRate = <?php echo json_encode($heartRate); ?>.reverse(); // Reverse heart rate readings
+
         const data = {
-            labels: <?php echo json_encode($dates); ?>, // X-axis (Dates)
+            labels: reversedDates, // X-axis (Dates)
             datasets: [
                 {
                     label: 'Systolic (mmHg)',
-                    data: <?php echo json_encode($systolic); ?>,
+                    data: reversedSystolic,
                     borderColor: 'red',
                     backgroundColor: 'rgba(255, 0, 0, 0.2)',
                     fill: false
                 },
                 {
                     label: 'Diastolic (mmHg)',
-                    data: <?php echo json_encode($diastolic); ?>,
+                    data: reversedDiastolic,
                     borderColor: 'blue',
                     backgroundColor: 'rgba(0, 0, 255, 0.2)',
                     fill: false
                 },
                 {
                     label: 'Heart Rate (bpm)',
-                    data: <?php echo json_encode($heartRate); ?>,
+                    data: reversedHeartRate,
                     borderColor: 'green',
                     backgroundColor: 'rgba(0, 255, 0, 0.2)',
                     fill: false
@@ -167,9 +172,6 @@
         };
 
         new Chart(ctx, config);
-
-
-
 
         function fetchReadings(page) {
             window.location.href = "recordBP.php?page=" + page; // Reload with new page number
