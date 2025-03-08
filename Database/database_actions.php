@@ -213,7 +213,70 @@
     }
     
     
+    function addBloodPressureReading($username, $readingDate, $readingTime, $systolic, $diastolic, $heartRate) {
+        $dbConn = getDatabaseConnection(); 
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL AddBloodPressureReading(?, ?, ?, ?, ?, ?)");
+    
+            // Bind parameters
+            $stmt->bind_param("sssiii", $username, $readingDate, $readingTime, $systolic, $diastolic, $heartRate);
+    
+            // Execute the statement
+            $stmt->execute();
+    
+            // If execution reaches here, the reading was successfully added
+            $message = true;
+    
+            return $message;
+        } catch (mysqli_sql_exception $e) {
+            // Catch MySQL errors, including SIGNAL errors from the procedure
+            $message = $e->getMessage();
+            return $message;
+        } finally {
+            // Close resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    
+        return $message;
+    }
+    
 
+    function getBloodPressureReadings($username, $page = 1) {
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            $stmt = $dbConn->prepare("CALL GetBloodPressureReadings(?, ?)");
+            $stmt->bind_param("si", $username, $page);
+            $stmt->execute();
+            
+            $result = $stmt->get_result();
+            $readings = [];
+    
+            while ($row = $result->fetch_assoc()) {
+                $readings[] = $row;
+            }
+    
+            return $readings;
+        } catch (mysqli_sql_exception $e) {
+            return ["error" => $e->getMessage()]; // Capture error messages from the procedure
+        } finally {
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+    
 
     function generateRandomPassword() {
         

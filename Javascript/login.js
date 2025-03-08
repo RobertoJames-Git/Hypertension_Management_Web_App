@@ -10,7 +10,7 @@ function displayDatabaseErr(){
     
 }
 
-// Call the function on page load to display the specialized fields
+// Call the function on page load to display the error if one exits
 window.onload = function() {
     displayDatabaseErr();
 };
