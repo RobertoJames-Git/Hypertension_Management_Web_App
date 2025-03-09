@@ -381,13 +381,12 @@ DELIMITER ;
 
 
 
-
-
 DELIMITER $$
 
 CREATE PROCEDURE GetBloodPressureReadings(
     IN p_username VARCHAR(50),
-    IN p_page INT
+    IN p_page INT,
+    IN p_limit INT
 )
 BEGIN
     DECLARE user_exists INT;
@@ -396,8 +395,8 @@ BEGIN
     DECLARE total_records INT;
     DECLARE records_in_period INT;
 
-    -- Calculate offset for pagination (each page shows 7 readings)
-    SET offset_value = (p_page - 1) * 7;
+    -- Calculate offset for pagination based on the user-specified limit
+    SET offset_value = (p_page - 1) * p_limit;
 
     -- Check if the username exists in the patient table and get the userID
     SELECT userid INTO user_id FROM patient WHERE username = p_username;
@@ -422,9 +421,9 @@ BEGIN
         SET MESSAGE_TEXT = 'No more records available';
     END IF;
 
-    -- Check if there are records in the requested period (7-day batch)
+    -- Check if there are records in the requested period (user-specified limit)
     SELECT COUNT(*) INTO records_in_period 
-    FROM (SELECT readingdate FROM reading WHERE userid = user_id ORDER BY readingdate DESC LIMIT 7 OFFSET offset_value) AS subquery;
+    FROM (SELECT readingdate FROM reading WHERE userid = user_id ORDER BY readingdate DESC LIMIT p_limit OFFSET offset_value) AS subquery;
 
     IF records_in_period = 0 THEN
         SIGNAL SQLSTATE '45000'
@@ -432,11 +431,11 @@ BEGIN
     END IF;
 
     -- Retrieve the readings for the requested period
-    SELECT readingdate, systolic, diastolic, heart_rate
+    SELECT readingdate, readingtime, systolic, diastolic, heart_rate
     FROM reading 
     WHERE userid = user_id
     ORDER BY readingdate DESC
-    LIMIT 7 OFFSET offset_value;
+    LIMIT p_limit OFFSET offset_value;
 
 END $$
 

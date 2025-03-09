@@ -17,7 +17,7 @@
     }
 
     // Initialize error session variables
-    $_SESSION["dbMessage"]=$_SESSION["systolicErr"] = $_SESSION["diastolicErr"] = $_SESSION["heart_rateErr"]  = $_SESSION["dateErr"] = "";
+    $_SESSION["dbMessage"]=$_SESSION["systolicErr"] = $_SESSION["diastolicErr"] = $_SESSION["heart_rateErr"]  = $_SESSION["dateErr"]=$_SESSION["timeErr"] = "";
 
     // Flag to track validation errors
     $valErr = false;
@@ -82,17 +82,32 @@
     }
 
 
+    // Validate Time
+    if ($_POST["time"] == "") {
+        $_SESSION["timeErr"] = "Field is empty";
+        $valErr = true;
+    } elseif (!preg_match("/^(?:[01]\d|2[0-3]):[0-5]\d$/", $_POST["time"])) {
+        $_SESSION["timeErr"] = "Invalid time";
+        $valErr = true;
+    } elseif (strtotime($_POST["date"] . " " . $_POST["time"]) > strtotime(date("Y-m-d H:i"))) { 
+        // Combines date and time to check if they exceed the current server date and time
+        $_SESSION["timeErr"] = "Time cannot be in the future";
+        $valErr = true;
+    }
+
+
     // Keep user input persistent in form
     $_SESSION["systolic"] = $_POST["systolic"];
     $_SESSION["diastolic"] = $_POST["diastolic"];
     $_SESSION["heart_rate"] = $_POST["heart_rate"];
+    $_SESSION["time"] = $_POST["time"];
     $_SESSION["date"] = $_POST["date"];
 
     // If no validation errors, proceed to insert data into the database
     if (!$valErr) {
         $username = $_SESSION["loggedIn_username"];
         $readingDate = $_POST["date"];
-        $readingTime = date("H:i:s");//get corrent time in the format HH:MM:SS (24-hour format).
+        $readingTime = $_POST["time"];
         $systolic = (int)$_POST["systolic"];
         $diastolic = (int)$_POST["diastolic"];
         $heartRate = (int)$_POST["heart_rate"];
@@ -122,3 +137,6 @@
         header("location:../recordBP.php");
         exit();
     }
+
+
+    

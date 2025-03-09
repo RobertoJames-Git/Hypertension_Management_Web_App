@@ -27,12 +27,57 @@ function displayRecordsAlert() {
 }
 
 
+function styleDisabledButtons() {
+    // Get all buttons with the class 'recordBtns'
+    const buttons = document.querySelectorAll('.recordBtns');
+    
+    // Iterate over each button
+    buttons.forEach(button => {
+        // Check if the button is disabled
+        if (button.disabled) {
+            // Set the cursor to default
+            button.style.cursor = 'default';
+            
+            // Change the background color to a less intense blue
+            button.style.backgroundColor = '#6c8efb'; // Lighter shade of blue
+        }
+    });
+}
+
+function checkRecords() {
+    // Select all <p> elements with the class "record_details"
+    const recordElements = document.querySelectorAll('.record_details');
+
+    // Get the element with id "table_data"
+    const tableData = document.getElementById('table_data');
+
+    // If no <p> elements with class "record_details" exist, hide "table_data"
+    if (recordElements.length === 0) {
+        tableData.style.display = 'none';
+    }
+}
+
+
+
+
+
+
+
+
+function fetchReadings(page,numOfRecordsToDisplay) {
+    window.location.href = "recordBP.php?page=" + page+ "&no_of_records_to_display="+ numOfRecordsToDisplay; // Reload with new page number
+}
+
+
+
+
+
 // Add the event listener for when the window loads
 window.addEventListener("load", function () {
+    
+    styleDisabledButtons();
     displayDatabaseErr();
     displayRecordsAlert()
+    checkRecords();
 });
-
-
-
 

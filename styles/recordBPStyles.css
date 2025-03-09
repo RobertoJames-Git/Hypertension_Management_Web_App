@@ -94,3 +94,61 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
     width: 400px;
     margin-bottom: 10px;
 }
+
+.recordBtns{
+    border-style: none;
+    background-color: #1946da;
+    color: white;
+    padding: 5px;
+    cursor:pointer;
+}
+
+
+
+#table_container{
+    background-color: white;
+    margin-top: 20px;
+}
+#table_data{
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+}
+
+.record_details {
+
+    border-bottom: 1px solid #ccc; /* Adds a light gray border under each record */
+}
+
+#table_data h3{
+    background-color: #1946da;
+    color: white;
+    padding: 5px;
+}
+
+#heading_and_rec_amt{
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 500px;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#modify_records_amt_container{
+    background-color: white;
+    color: black;
+    padding: 4px;
+    outline: 2px solid #1946da;
+    border-radius: 5px;
+
+}
+#modify_records_amt_container form input[type="number"]{
+    width:100px;
+    height:20px;
+}
+
+#modify_records_amt_container form input[type="submit"]{
+    padding: 4px;
+    border-radius: 5px;
+}
+

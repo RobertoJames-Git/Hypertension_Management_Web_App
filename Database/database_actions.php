@@ -248,12 +248,27 @@
     }
     
 
-    function getBloodPressureReadings($username, $page = 1) {
+    function getBloodPressureReadings($username, $page = 1,$numOfRecordsToDisplay) {
         $dbConn = getDatabaseConnection();
     
         try {
-            $stmt = $dbConn->prepare("CALL GetBloodPressureReadings(?, ?)");
-            $stmt->bind_param("si", $username, $page);
+
+            // Ensure the variable is an integer (sanitize user input)
+            $numOfRecordsToDisplay = (int) $numOfRecordsToDisplay;
+
+            // If the value is invalid (e.g., 0 or non-numeric), set it to the default value (10)
+            if ($numOfRecordsToDisplay <= 0) {
+                $numOfRecordsToDisplay = 10;
+            }
+
+            // If the number of records exceeds the maximum limit (60), set it to the max
+            if ($numOfRecordsToDisplay > 60) {
+                $numOfRecordsToDisplay = 60;
+            }
+
+
+            $stmt = $dbConn->prepare("CALL GetBloodPressureReadings(?, ?, ?)");
+            $stmt->bind_param("sii", $username, $page,$numOfRecordsToDisplay);
             $stmt->execute();
             
             $result = $stmt->get_result();
