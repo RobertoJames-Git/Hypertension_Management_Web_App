@@ -52,22 +52,26 @@
     
     //if there were no validation errors then the credential will be checked using th database
     $databaseResponse=validateUser($_POST["username"],$_POST["password"]);
-
-    //if credentials are successfult then go to recordBP page
-    if($databaseResponse==="Success"){
-        
-        /* unset data and destroy session data for current session */
+    
+    // If credentials are successful, proceed to the next page
+    if (is_array($databaseResponse) && $databaseResponse["status"] === "Success") {
+        // Unset data and destroy session data for current session
         session_unset();
         session_destroy();
 
-        //start new session with username
+        // Start a new session with the username
         session_start();
-        //set username when user credentials are correct
-        $_SESSION["loggedIn_username"]=$_POST["username"];
+
+        // Set session variables for the logged-in user
+        $_SESSION["loggedIn_username"] = $_POST["username"];
+
+        //ise set to either 'Patient' or 'Family Member' or 'Health Care Professional'
+        $_SESSION["userType"] = $databaseResponse["user_type"];
+
+        // Redirect to the record blood pressure page
         header("location:../recordBP.php");
         exit();
     }
-
     /*Store error message and redirect if login fails */
     $_SESSION["dbValidate_response"]=$databaseResponse;
     

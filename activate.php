@@ -97,7 +97,7 @@
 
         </div>
 
-        <div id="backtohome_link" onclick="window.location.href='logout.php'">Back to Home</div>
+        <div id="backtohome_link" onclick="window.location.href='login.php'">Go to Login</div>
     </div>
 
 </body>

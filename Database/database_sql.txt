@@ -13,7 +13,6 @@ DROP TABLE IF EXISTS reading;
 DROP TABLE IF EXISTS patient;
 DROP TABLE IF EXISTS family_member;
 DROP TABLE IF EXISTS health_care_prof;
-DROP TABLE IF EXISTS monitor_request;
 DROP TABLE IF EXISTS web_users;
 
 create table web_users(
@@ -32,17 +31,6 @@ create table web_users(
 );
 
 
-CREATE TABLE monitor_request (
-    request_id INT AUTO_INCREMENT PRIMARY KEY,
-    sender_id INT NOT NULL,
-    sender_username VARCHAR(50) NOT NULL,
-    role ENUM('Health care Professional', 'Patient', 'Family Member') NOT NULL,
-    request_date DATETIME NOT NULL,
-    request_status ENUM('pending', 'accepted', 'rejected') NOT NULL,
-    recipient_info VARCHAR(255) NOT NULL,
-    FOREIGN KEY (sender_id, sender_username) REFERENCES web_users(userid, username)
-);
-
 -- Create Family Member Table
 CREATE TABLE family_member (
     userid INT NOT NULL,
@@ -56,7 +44,7 @@ CREATE TABLE family_member (
 CREATE TABLE health_care_prof (
     userid INT NOT NULL,
     username VARCHAR(50) NOT NULL,
-    years_of_exp INT NOT NULL,
+    years_of_exp ENUM('Less than a year','One to two years','Three to Fours years','Five years or more','Over a decade'),
     PRIMARY KEY (userid, username),
     FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
 );
@@ -96,18 +84,21 @@ CREATE TABLE message (
     FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
 );
 
--- Create Monitor Table
 CREATE TABLE monitor (
     monitor_id INT AUTO_INCREMENT PRIMARY KEY,
     healthcare_prof_userid INT NOT NULL,
     healthcare_prof_username VARCHAR(50) NOT NULL,
     patient_userid INT NOT NULL,
     patient_username VARCHAR(50) NOT NULL,
-    start_date DATETIME NOT NULL,
-    end_date DATETIME NOT NULL,
+    start_date DATETIME,
+    end_date DATETIME,
+    monitor_status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending', -- New field for status
+    sentby VARCHAR(50) NOT NULL, -- Keeps track of the sender username
     FOREIGN KEY (healthcare_prof_userid, healthcare_prof_username) REFERENCES health_care_prof(userid, username),
     FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
 );
+
+
 
 -- Create Communicate Table
 CREATE TABLE communicate (
@@ -131,12 +122,11 @@ CREATE TABLE support (
     patient_username VARCHAR(50) NOT NULL,
     start_date DATETIME NOT NULL,
     end_date DATETIME,
-    relation_to_patient VARCHAR(50),
+    support_status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
     FOREIGN KEY (family_member_userid, family_username) REFERENCES family_member(userid, username),
-    FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username),
+    UNIQUE (patient_userid, family_member_userid) -- Enforce uniqueness for each patient-family member pair
 );
-
-
 
 
 
@@ -154,7 +144,7 @@ CREATE PROCEDURE AddWebUser(
     IN p_password_hashed VARCHAR(100),
     IN p_userType ENUM('Hypertensive Individual', 'Family Member', 'Healthcare Professional'),
     IN p_education_level VARCHAR(50),  -- For Family Member
-    IN p_years_of_exp INT,             -- For Healthcare Professional
+    IN p_years_of_exp ENUM('Less than a year','One to two years','Three to Fours years','Five years or more','Over a decade'),             -- For Healthcare Professional
     OUT p_generated_username VARCHAR(50)
 )
 BEGIN
@@ -197,7 +187,7 @@ BEGIN
                 INSERT INTO family_member (userid, username, education_level) VALUES (newUserID, p_username, p_education_level);
             WHEN p_userType = 'Healthcare Professional' THEN
                 INSERT INTO health_care_prof (userid, username, years_of_exp) 
-                VALUES (newUserID, p_username);
+                VALUES (newUserID, p_username,p_years_of_exp);
             ELSE SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Invalid userType';
         END CASE;
@@ -310,17 +300,18 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE PROCEDURE GetUserPassword(
+CREATE PROCEDURE GetUserCredentialsAndType(
     IN p_username VARCHAR(50)
 )
 BEGIN
     DECLARE userPassword VARCHAR(100);
     DECLARE accountStatus ENUM('pending', 'active');
+    DECLARE userType VARCHAR(50);
 
     -- Check if the username exists, retrieve the password, and account status
     SELECT password, account_status INTO userPassword, accountStatus
     FROM web_users 
-    WHERE username = p_username ;
+    WHERE username = p_username;
 
     -- Check if the username exists
     IF userPassword IS NULL THEN
@@ -330,11 +321,28 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Account is not activated';
     ELSE
-        SELECT userPassword AS password;
+        -- Determine the user type by checking which table the username exists in
+        IF EXISTS (SELECT 1 FROM patient WHERE username = p_username) THEN
+            SET userType = 'Patient';
+        ELSEIF EXISTS (SELECT 1 FROM family_member WHERE username = p_username) THEN
+            SET userType = 'Family Member';
+        ELSEIF EXISTS (SELECT 1 FROM health_care_prof WHERE username = p_username) THEN
+            SET userType = 'Health Care Professional';
+        ELSE
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'User type not found.';
+        END IF;
+
+        -- Return the password and user type
+        SELECT userPassword AS password, userType AS user_type;
     END IF;
 END $$
 
 DELIMITER ;
+
+
+
+
 
 
 
@@ -437,6 +445,260 @@ BEGIN
     ORDER BY readingdate DESC
     LIMIT p_limit OFFSET offset_value;
 
+END $$
+
+DELIMITER ;
+
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE GetMatchingUsers(
+    IN p_username_prefix VARCHAR(50),
+    IN p_account_type VARCHAR(20),
+    IN p_sender_username VARCHAR(50) -- Sender's username to check for existing requests
+)
+BEGIN
+    -- Validate the account type
+    IF p_account_type NOT IN ('Family member', 'Health Prof','Patient') THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid account type. Must be "Family member" or "Health Prof" or "Patient".';
+    END IF;
+
+    -- Select users based on the account type and include request status logic
+    IF p_account_type = 'Family member' THEN
+        SELECT 
+            fm.username AS family_member_username,
+            CASE 
+                -- Check if the sender already sent a request (pending/rejected)
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM support 
+                    WHERE support.family_member_userid = fm.userid
+                      AND support.patient_username = p_sender_username
+                      AND support.support_status IN ('pending', 'rejected')
+                ) THEN 'Request pending'
+
+                -- Check if the receiver (family member) sent a request to the sender
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM support 
+                    WHERE support.family_member_userid = fm.userid
+                      AND support.family_username = fm.username
+                      AND support.patient_username = p_sender_username
+                      AND support.support_status = 'pending'
+                ) THEN 'Manage request'
+
+                ELSE 'No Request Sent'
+            END AS request_status
+        FROM family_member fm
+        WHERE fm.username LIKE CONCAT(p_username_prefix, '%');
+    ELSEIF p_account_type = 'Health Prof' THEN
+        SELECT 
+            hp.username AS healthcare_prof_username,
+            CASE 
+                -- Check if the sender already sent a request (pending/rejected)
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM monitor_request 
+                    WHERE monitor_request.sender_username = p_sender_username 
+                      AND monitor_request.recipient_info = hp.username
+                      AND monitor_request.request_status IN ('pending', 'rejected')
+                ) THEN 'Request pending'
+
+                -- Check if the receiver (healthcare professional) sent a request to the sender
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM monitor_request 
+                    WHERE monitor_request.recipient_info = p_sender_username
+                      AND monitor_request.sender_username = hp.username
+                      AND monitor_request.request_status = 'pending'
+                ) THEN 'Manage request'
+
+                ELSE 'No Request Sent'
+            END AS request_status
+        FROM health_care_prof hp
+        WHERE hp.username LIKE CONCAT(p_username_prefix, '%');
+    
+    ELSEIF p_account_type = 'Patient' THEN
+        SELECT 
+            pt.username AS matching_username,
+            'Patient' AS role,
+            CASE 
+                -- Check if the sender (e.g., healthcare professional or family member) already sent a request
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM monitor 
+                    WHERE monitor.patient_username = pt.username
+                      AND monitor.healthcare_prof_username = p_sender_username
+                      AND monitor.end_date IS NULL
+                ) THEN 'Request pending'
+
+                -- Check if the sender (e.g., healthcare professional) is already monitoring the patient
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM monitor 
+                    WHERE monitor.patient_username = pt.username
+                      AND monitor.healthcare_prof_username = p_sender_username
+                      AND monitor.end_date IS NULL
+                ) THEN 'Manage request'
+
+                ELSE 'No Request Sent'
+            END AS request_status
+        FROM patient pt
+        WHERE pt.username LIKE CONCAT(p_username_prefix, '%');
+
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE PopulateSupportTable(
+    IN p_patient_username VARCHAR(50),
+    IN p_family_username VARCHAR(50),
+    IN p_start_date DATETIME
+)
+BEGIN
+    DECLARE patient_user_id INT;
+    DECLARE family_user_id INT;
+    DECLARE existing_request INT;
+
+    -- Check if the patient username is valid and get their userID
+    SELECT userid INTO patient_user_id 
+    FROM patient 
+    WHERE username = p_patient_username;
+
+    IF patient_user_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid patient username.';
+    END IF;
+
+    -- Check if the family member username is valid and get their userID
+    SELECT userid INTO family_user_id 
+    FROM family_member 
+    WHERE username = p_family_username;
+
+    IF family_user_id IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid family member username.';
+    END IF;
+
+    -- Check if a record already exists in the support table
+    SELECT COUNT(*) INTO existing_request 
+    FROM support 
+    WHERE patient_userid = patient_user_id 
+      AND family_member_userid = family_user_id;
+
+    -- If the record exists, delete it. Otherwise, insert a new one.
+    IF existing_request > 0 THEN
+        DELETE FROM support 
+        WHERE patient_userid = patient_user_id 
+          AND family_member_userid = family_user_id;
+    ELSE
+        INSERT INTO support (family_member_userid, family_username, patient_userid, patient_username, start_date, support_status)
+        VALUES (family_user_id, p_family_username, patient_user_id, p_patient_username, p_start_date, 'pending');
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE ManageMonitorRequest(
+    IN p_sender_username VARCHAR(50), 
+    IN p_recipient_username VARCHAR(50), 
+    IN p_current_date DATETIME 
+)
+BEGIN
+    DECLARE sender_userid INT;
+    DECLARE recipient_userid INT;
+    DECLARE sender_role ENUM('Health Care Professional', 'Patient');
+    DECLARE recipient_role ENUM('Health Care Professional', 'Patient');
+    DECLARE existing_monitor_id INT;
+    DECLARE existing_monitor_status ENUM('pending', 'accepted', 'rejected');
+    DECLARE existing_sentby VARCHAR(50);
+
+    -- Determine sender role and user ID
+    SELECT userid INTO sender_userid FROM health_care_prof WHERE username = p_sender_username;
+    IF sender_userid IS NOT NULL THEN
+        SET sender_role = 'Health Care Professional';
+    ELSE
+        SELECT userid INTO sender_userid FROM patient WHERE username = p_sender_username;
+        IF sender_userid IS NOT NULL THEN
+            SET sender_role = 'Patient';
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid sender: Must be a healthcare professional or patient.';
+        END IF;
+    END IF;
+
+    -- Determine recipient role and user ID
+    SELECT userid INTO recipient_userid FROM health_care_prof WHERE username = p_recipient_username;
+    IF recipient_userid IS NOT NULL THEN
+        SET recipient_role = 'Health Care Professional';
+    ELSE
+        SELECT userid INTO recipient_userid FROM patient WHERE username = p_recipient_username;
+        IF recipient_userid IS NOT NULL THEN
+            SET recipient_role = 'Patient';
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid recipient: Must be a healthcare professional or patient.';
+        END IF;
+    END IF;
+
+    -- Ensure sender and recipient have different roles
+    IF sender_role = recipient_role THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sender and recipient cannot have the same role.';
+    END IF;
+
+    -- Check for existing monitor request
+    SELECT monitor_id, monitor_status, sentby INTO existing_monitor_id, existing_monitor_status, existing_sentby
+    FROM monitor
+    WHERE (healthcare_prof_username = p_sender_username AND patient_username = p_recipient_username)
+       OR (healthcare_prof_username = p_recipient_username AND patient_username = p_sender_username);
+
+    IF existing_monitor_id IS NOT NULL THEN
+        -- Handle role reversal acceptance
+        IF existing_monitor_status = 'pending' AND existing_sentby != p_sender_username THEN
+            UPDATE monitor 
+            SET monitor_status = 'accepted', start_date = p_current_date 
+            WHERE monitor_id = existing_monitor_id;
+        -- Handle duplicate request (simulate cancellation)
+        ELSEIF existing_sentby = p_sender_username AND existing_monitor_status = 'pending' THEN
+            DELETE FROM monitor WHERE monitor_id = existing_monitor_id;
+        -- If already accepted, prevent further requests
+        ELSEIF existing_monitor_status = 'accepted' THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Monitor request already accepted. No further requests allowed.';
+        END IF;
+    ELSE
+        -- Insert new monitor request
+        INSERT INTO monitor (
+            healthcare_prof_userid, healthcare_prof_username,
+            patient_userid, patient_username,
+            start_date, monitor_status, sentby
+        ) VALUES (
+            CASE sender_role WHEN 'Health Care Professional' THEN sender_userid ELSE recipient_userid END,
+            CASE sender_role WHEN 'Health Care Professional' THEN p_sender_username ELSE p_recipient_username END,
+            CASE sender_role WHEN 'Patient' THEN sender_userid ELSE recipient_userid END,
+            CASE sender_role WHEN 'Patient' THEN p_sender_username ELSE p_recipient_username END,
+            NULL, 'pending', p_sender_username
+        );
+    END IF;
 END $$
 
 DELIMITER ;

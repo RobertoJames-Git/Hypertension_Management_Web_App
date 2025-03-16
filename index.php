@@ -24,8 +24,8 @@
         <img src="images/indexImages/patient-with-support-cropped.jpg" alt="" width="600px">
         <div id="welcome_container">
             <p>Empowering Patients, Families, and Healthcare Providers to Manage Hypertension Together</p>
-            <div id="register_in_about_container">Get Started Now</div> 
-            <div id="aboutus_container">About Us</div> 
+            <div id="register_in_about_container" onclick="window.location.href='create_account.php'">Get Started Now</div> 
+            <div id="aboutus_container" onclick="window.location.href='about_us.php'">About Us</div> 
         </div>
     </div>
     <br>
@@ -51,7 +51,7 @@
             <div id="alert_info">     
                 <h2> Alert</h2>
 
-                <p>Sends daily reminders to upload blood pressure readings and emergency notifications to family and healthcare professionals if levels are too </p>
+                <p>Sends daily reminders to upload blood pressure readings and emergency notifications to your support network if readings are at a critical level.</p>
 
                 <div id="learn_more_container">Learn more</div>
             </div>
@@ -79,7 +79,7 @@
             </div>
             <div id="support_info">
                 <h2>Support</h2>
-                <p>Add family members and a healthcare professional to your support network so you can collaboratively monitor your health and provide encouragement</p>
+                <p>Add family members and a healthcare professional to your support network so you can collaboratively monitor your health and provide encouragement.</p>
                 
                 <div id="learn_more_container">Learn more</div>
             </div>

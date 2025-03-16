@@ -68,3 +68,124 @@
     }
 
 }
+
+#support_network_container{
+    background-color: white;
+    width: 400px;
+    margin: auto;
+    padding: 10px;
+    margin-top: 20px;
+    box-shadow: 0px 0px 5px 4px grey;
+    border-radius: 10px;
+}
+
+.support_net_details{
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+
+}
+
+
+#family_mem_in_sup_network, #prof_in_sup_network{
+    border-top: 1px solid black;
+}
+
+#prof_in_sup_network{
+    margin-bottom: 20px;
+}
+
+#family_mem_in_sup_network{
+    border-bottom: 1px solid black;
+    padding-bottom: 20px;
+
+}
+
+#support_network_container button{
+    border-style: none;
+    background-color: #153bb0;
+    color: white;
+    padding: 5px;
+    height: 30px;
+}
+
+.support_net_details{
+    margin-bottom: 10px;
+    border: 1px solid #153bb0;
+    padding: 5px;
+}
+
+.username{
+    border-right: 1px solid #153bb0;
+    margin-right: 10px;
+}
+
+.support_network_containers{
+    margin: auto;
+    width: 400px;
+    box-shadow: 0px 0px 4px 3px grey;
+    height: 420px;
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 10px;
+    background-color: white;
+}
+
+
+#add_supp_net_container input{
+    width: 350px;
+    height: 25px;
+    border-radius: 8px;
+    border-style: none;
+    outline: 1px solid black;
+}
+
+#add_supp_net_container label{
+    margin-bottom: 30px;
+}
+
+
+
+
+#userSearchID{
+    margin-top: 20px;
+}
+
+
+#modify_support_network_container{
+    display: grid;
+    grid-template-columns: 440px 440px;
+    margin: auto;
+    width: max-content;
+
+}
+
+
+
+.search_result{
+    display: grid;
+    margin-top: 15px;
+    border-bottom:1px solid black;
+    grid-template-columns: auto auto;
+    justify-items: center;
+    align-items: center;
+    padding-bottom: 5px;
+
+}
+
+.send_request_button{
+
+    width: 130px;
+    border-style: none;
+    background-color: #1946da;
+    color: white;
+    height: 25px;
+    padding: 5px;
+    cursor: pointer;
+
+
+}
+
+#pending_container h2{
+    border-bottom: 1px solid black;
+    padding-bottom: 20px;
+}

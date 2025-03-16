@@ -1,0 +1,8 @@
+create a store procedure in mariadbsql that allows:
+1) a health care prof to send a monitor request to the patient so they can monitor them
+2) a patient to send a monitor request to the health care prof so they can monitored by them
+
+Edge Cases:
+1) We may have situations where a healthcare prof sends a request that is currently pending and the patient may also send a request to the health prof. In that instance what i want you to do is to modify the existing record to accepted and the attribute 'sentby' should still be username of the person that first sent the pending monitor request.
+2) If the same person sends another monitor request then that record should be removed from the table and the procedure should just end. 
+(Example:A health care prof sent a monitor request to a patient already then they try to send another one again or vice versa) In this instance their previous record should just be remove. What i am trying to simualate is a cancellation of the monitor request if it is sent twice. If it is the first time a request is being sent then it is added to the table but if a record already exist when a monitor request is being sent then the existsing record is removed.

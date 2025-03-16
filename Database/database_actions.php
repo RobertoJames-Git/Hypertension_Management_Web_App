@@ -17,7 +17,7 @@
             $account_status = "pending";
     
             // Bind parameters
-            $stmt->bind_param("ssssssssssi",  
+            $stmt->bind_param("sssssssssss",  
                 $_SESSION["fname"], 
                 $_SESSION["lname"], 
                 $_SESSION["gender"], 
@@ -161,12 +161,14 @@
     }
     
 
-    function validateUser($username,$password) {
+    function validateUser($username, $password) {
         $dbConn = getDatabaseConnection();
-        $password_hash="";
+        $password_hash = "";
+        $user_type = "";
+    
         try {
             // Prepare the stored procedure call
-            $stmt = $dbConn->prepare("CALL GetUserPassword(?)");
+            $stmt = $dbConn->prepare("CALL GetUserCredentialsAndType(?)");
     
             // Bind the username parameter
             $stmt->bind_param("s", $username);
@@ -176,31 +178,28 @@
     
             // Fetch the result
             $result = $stmt->get_result();
-            
-
-            // If there is a result, fetch the password
+    
+            // If there is a result, fetch the password and user type
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 $password_hash = $row['password'];
+                $user_type = $row['user_type'];
             } else {
                 return "Unknown error occurred.";
             }
-            
-            //if password match was successful
-            if(password_verify($password,$password_hash)){
-                return "Success";
+    
+            // If password matches
+            if (password_verify($password, $password_hash)) {
+                return [
+                    "status" => "Success",
+                    "user_type" => $user_type
+                ];
+            } else {
+                return "Invalid username and/or password.";
             }
-            else{
-                return "Invalid username and/or password";
-            }
-            
-            
         } catch (mysqli_sql_exception $e) {
             // Catch MySQL errors, including SIGNAL errors from the procedure
-
             return $e->getMessage();
-    
-            
         } finally {
             // Close resources
             if (isset($stmt) && $stmt instanceof mysqli_stmt) {
@@ -290,6 +289,185 @@
             }
         }
     }
+    
+    
+    function getMatchingUsers($usernamePrefix, $accountType, $loggedInUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Validate account type to avoid unnecessary calls to the procedure
+            if ($accountType !== 'Family member' && $accountType !== 'Health Prof' && $accountType !== 'Patient' ) {
+                throw new InvalidArgumentException('Invalid account type. Must be "Family member" or "Health Prof" or "Patient".');
+            }
+    
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL GetMatchingUsers(?, ?, ?)");
+    
+            // Bind parameters to the procedure
+            $stmt->bind_param("sss", $usernamePrefix, $accountType, $loggedInUsername);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Fetch results
+            $result = $stmt->get_result();
+            $matchingUsers = [];
+            if ($result) {
+
+                //print_r($result->fetch_assoc());
+                // Process each row returned from the procedure
+                while ($row = $result->fetch_assoc()) {
+                    // Add both the username and request_status to the result array
+                    $matchingUsers[] = [
+                        'username' =>  $row['family_member_username'] ?? $row['healthcare_prof_username'] ?? $row['patient_username'],
+                        'request_status' => $row['request_status']
+                    ];
+                }
+            }
+    
+            // Return the array of matching users with their request status
+            return $matchingUsers;
+        } catch (mysqli_sql_exception $e) {
+            // Catch MySQL errors, including SIGNAL errors from the procedure
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Close resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+    
+
+    function populateSupportTable($patientUsername, $familyUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            
+            //use local timezone
+            date_default_timezone_set("America/Jamaica");
+
+            $startDate_and_Time= date("Y-m-d H:i:s");
+            // Prepare the stored procedure call
+
+            $stmt = $dbConn->prepare("CALL PopulateSupportTable(?, ?, ?)");
+    
+            // Bind parameters to the procedure
+            $stmt->bind_param("sss", $patientUsername, $familyUsername, $startDate_and_Time);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Success message if the execution reaches here
+            $message = "Support network relationship successfully added with status 'pending'.";
+            return $message;
+    
+        } catch (mysqli_sql_exception $e) {
+            // Catch MySQL errors, including any SIGNAL errors from the procedure
+            $message = $e->getMessage();
+            return $message;
+    
+        } finally {
+            // Close resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+
+
+    function getPendingRequestsForPatient($patientUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL GetPatientPendingRequests(?)");
+    
+            // Bind the input parameter (patient username)
+            $stmt->bind_param("s", $patientUsername);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Fetch the results
+            $result = $stmt->get_result();
+            $pendingRequests = [];
+    
+            // Process each row in the result set
+            while ($row = $result->fetch_assoc()) {
+                // Format the request date as "Mar 10, 2025"
+                $formattedDate = date("M j, Y", strtotime($row['request_date']));
+    
+                $pendingRequests[] = [
+                    'sender_role' => $row['sender_role'],          // Role of the sender
+                    'sender_username' => $row['sender_username'],  // Username of the sender
+                    'request_date' => $formattedDate,              // Formatted date
+                    'request_status' => $row['request_status'],    // Status of the request (e.g., pending)
+                ];
+            }
+    
+            // Return the array of pending requests
+            return $pendingRequests;
+        } catch (mysqli_sql_exception $e) {
+            // Handle MySQL errors
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Close the resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+
+    function sendMonitorRequest($senderUsername, $recipientUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Set the timezone to Jamaica
+            $jamaicanTime = new DateTime("now", new DateTimeZone("America/Jamaica"));
+            $startDate = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
+    
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL ManageMonitorRequest(?, ?, ?)");
+    
+            // Bind parameters to the procedure
+            $stmt->bind_param("sss", $senderUsername, $recipientUsername, $startDate);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Return success if the procedure executes without errors
+            return  "Monitor request processed.";
+        } catch (mysqli_sql_exception $e) {
+            // Catch MySQL exceptions and return the error message
+            return $e->getMessage();
+        } finally {
+            // Close the statement and database connection
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
     
     
 
