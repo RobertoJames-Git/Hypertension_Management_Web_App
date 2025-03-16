@@ -344,45 +344,6 @@
     
     
 
-    function populateSupportTable($patientUsername, $familyUsername) {
-        // Get the database connection
-        $dbConn = getDatabaseConnection();
-    
-        try {
-            
-            //use local timezone
-            date_default_timezone_set("America/Jamaica");
-
-            $startDate_and_Time= date("Y-m-d H:i:s");
-            // Prepare the stored procedure call
-
-            $stmt = $dbConn->prepare("CALL PopulateSupportTable(?, ?, ?)");
-    
-            // Bind parameters to the procedure
-            $stmt->bind_param("sss", $patientUsername, $familyUsername, $startDate_and_Time);
-    
-            // Execute the procedure
-            $stmt->execute();
-    
-            // Success message if the execution reaches here
-            $message = "Support network relationship successfully added with status 'pending'.";
-            return $message;
-    
-        } catch (mysqli_sql_exception $e) {
-            // Catch MySQL errors, including any SIGNAL errors from the procedure
-            $message = $e->getMessage();
-            return $message;
-    
-        } finally {
-            // Close resources
-            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
-                $stmt->close();
-            }
-            if (isset($dbConn) && $dbConn instanceof mysqli) {
-                $dbConn->close();
-            }
-        }
-    }
     
 
 
@@ -434,7 +395,7 @@
     }
     
 
-    function sendMonitorRequest($senderUsername, $recipientUsername) {
+    function sendRequest($senderUsername, $recipientUsername) {
         // Get the database connection
         $dbConn = getDatabaseConnection();
     
@@ -444,7 +405,7 @@
             $startDate = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
     
             // Prepare the stored procedure call
-            $stmt = $dbConn->prepare("CALL ManageMonitorRequest(?, ?, ?)");
+            $stmt = $dbConn->prepare("CALL ManageRequest(?, ?, ?)");
     
             // Bind parameters to the procedure
             $stmt->bind_param("sss", $senderUsername, $recipientUsername, $startDate);
@@ -453,7 +414,7 @@
             $stmt->execute();
     
             // Return success if the procedure executes without errors
-            return  "Monitor request processed.";
+            return  "Request Successfully processed.";
         } catch (mysqli_sql_exception $e) {
             // Catch MySQL exceptions and return the error message
             return $e->getMessage();

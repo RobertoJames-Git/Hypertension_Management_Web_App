@@ -19,7 +19,7 @@
 
     //check if either is empty
     if (empty($type) || empty($username)) {
-        echo json_encode([]);
+        echo json_encode([['success' => false, 'message' => 'Username and Type is required']]);
         exit;
     }
 

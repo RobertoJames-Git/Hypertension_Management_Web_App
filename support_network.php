@@ -223,6 +223,9 @@
                             fetch(`Process/support_network_send_request.php?username=${encodeURIComponent(username)}&type=${encodeURIComponent(userType)}`, { method: 'GET' })
                                 .then(response => response.json())
                                 .then(result => {
+
+                               
+                                    
                                     if (result.success) {
                                         // Handle button state dynamically
                                         if (sendRequestButton.textContent === "Send Request") {
@@ -256,6 +259,7 @@
                             });
                         }
 
+                        console.log(user);
                         // Append the username and button to the result div
                         resultDiv.appendChild(usernameSpan);
                         resultDiv.appendChild(sendRequestButton);
