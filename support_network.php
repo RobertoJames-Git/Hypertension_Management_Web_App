@@ -249,11 +249,11 @@
                         });
 
                         // Update the button text and behavior based on request_status
-                        if (user.request_status === "Request pending") {
+                        if (user.request_status === "pending") {
                             sendRequestButton.textContent = "Request Pending";
                             sendRequestButton.style.backgroundColor = "#153bb0";
-                        } else if (user.request_status === "Manage request") {
-                            sendRequestButton.textContent = "Manage Request";
+                        } else if (user.request_status === "accepted") {
+                            sendRequestButton.textContent = "Request Accepted";
                             sendRequestButton.addEventListener('click', () => {
                                 window.location.href = `Process/manage_request.php?username=${encodeURIComponent(username)}`;
                             });

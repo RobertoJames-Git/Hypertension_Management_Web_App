@@ -444,36 +444,121 @@ BEGIN
     IF p_account_type = 'Family member' THEN
         SELECT 
             fm.username AS family_member_username,
-            COALESCE(r.request_status, 'No Request Sent') AS request_status
+            CASE 
+                -- Return accepted if logged-in user is the sender or receiver of an accepted request
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = fm.username
+                      AND request.request_status = 'accepted'
+                ) OR EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.recipient_username = p_logged_in_username
+                      AND request.sender_username = fm.username
+                      AND request.request_status = 'accepted'
+                ) THEN 'accepted'
+                -- Return other statuses or no request
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = fm.username
+                      AND request.request_status = 'pending'
+                ) THEN 'pending'
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = fm.username
+                      AND request.request_status = 'rejected'
+                ) THEN 'rejected'
+                ELSE 'No Request Sent'
+            END AS request_status
         FROM family_member fm
-        LEFT JOIN request r
-            ON r.recipient_username = fm.username
-            AND r.sender_username = p_logged_in_username
         WHERE fm.username LIKE CONCAT(p_username_prefix, '%');
 
     ELSEIF p_account_type = 'Health Care Professional' THEN
         SELECT 
             hp.username AS healthcare_prof_username,
-            COALESCE(r.request_status, 'No Request Sent') AS request_status
+            CASE 
+                -- Return accepted if logged-in user is the sender or receiver of an accepted request
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = hp.username
+                      AND request.request_status = 'accepted'
+                ) OR EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.recipient_username = p_logged_in_username
+                      AND request.sender_username = hp.username
+                      AND request.request_status = 'accepted'
+                ) THEN 'accepted'
+                -- Return other statuses or no request
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = hp.username
+                      AND request.request_status = 'pending'
+                ) THEN 'pending'
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = hp.username
+                      AND request.request_status = 'rejected'
+                ) THEN 'rejected'
+                ELSE 'No Request Sent'
+            END AS request_status
         FROM health_care_prof hp
-        LEFT JOIN request r
-            ON r.recipient_username = hp.username
-            AND r.sender_username = p_logged_in_username
         WHERE hp.username LIKE CONCAT(p_username_prefix, '%');
 
     ELSEIF p_account_type = 'Patient' THEN
         SELECT 
             pt.username AS patient_username,
-            COALESCE(r.request_status, 'No Request Sent') AS request_status
+            CASE 
+                -- Return accepted if logged-in user is the sender or receiver of an accepted request
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = pt.username
+                      AND request.request_status = 'accepted'
+                ) OR EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.recipient_username = p_logged_in_username
+                      AND request.sender_username = pt.username
+                      AND request.request_status = 'accepted'
+                ) THEN 'accepted'
+                -- Return other statuses or no request
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = pt.username
+                      AND request.request_status = 'pending'
+                ) THEN 'pending'
+                WHEN EXISTS (
+                    SELECT 1 
+                    FROM request
+                    WHERE request.sender_username = p_logged_in_username
+                      AND request.recipient_username = pt.username
+                      AND request.request_status = 'rejected'
+                ) THEN 'rejected'
+                ELSE 'No Request Sent'
+            END AS request_status
         FROM patient pt
-        LEFT JOIN request r
-            ON r.recipient_username = pt.username
-            AND r.sender_username = p_logged_in_username
         WHERE pt.username LIKE CONCAT(p_username_prefix, '%');
     END IF;
 END $$
 
 DELIMITER ;
+
 
 
 
