@@ -16,9 +16,7 @@
     $type = $_GET['type'] ?? '';
     $username = $_GET['username'] ?? '';
 
-    /*$type="Patient";
-    $username="d";
-    echo $_SESSION["loggedIn_username"];*/
+
     //check if either is empty
     if (empty($type) || empty($username)) {
         echo json_encode([]);

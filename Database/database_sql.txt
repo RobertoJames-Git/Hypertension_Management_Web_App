@@ -458,14 +458,14 @@ DELIMITER $$
 
 CREATE PROCEDURE GetMatchingUsers(
     IN p_username_prefix VARCHAR(50),
-    IN p_account_type VARCHAR(20),
+    IN p_account_type VARCHAR(30),
     IN p_sender_username VARCHAR(50) -- Sender's username to check for existing requests
 )
 BEGIN
     -- Validate the account type
-    IF p_account_type NOT IN ('Family member', 'Health Prof','Patient') THEN
+    IF p_account_type NOT IN ('Family member', 'Health Care Professional','Patient') THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Invalid account type. Must be "Family member" or "Health Prof" or "Patient".';
+        SET MESSAGE_TEXT = 'Invalid account type. Must be "Family member" or "Health Care Professional" or "Patient".';
     END IF;
 
     -- Select users based on the account type and include request status logic
@@ -496,7 +496,7 @@ BEGIN
             END AS request_status
         FROM family_member fm
         WHERE fm.username LIKE CONCAT(p_username_prefix, '%');
-    ELSEIF p_account_type = 'Health Prof' THEN
+    ELSEIF p_account_type = 'Health Care Professional' THEN
         SELECT 
             hp.username AS healthcare_prof_username,
             CASE 
@@ -555,7 +555,6 @@ BEGIN
 END $$
 
 DELIMITER ;
-
 
 
 

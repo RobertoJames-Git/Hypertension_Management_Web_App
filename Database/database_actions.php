@@ -297,8 +297,8 @@
     
         try {
             // Validate account type to avoid unnecessary calls to the procedure
-            if ($accountType !== 'Family member' && $accountType !== 'Health Prof' && $accountType !== 'Patient' ) {
-                throw new InvalidArgumentException('Invalid account type. Must be "Family member" or "Health Prof" or "Patient".');
+            if ($accountType !== 'Family member' && $accountType !== 'Health Care Professional' && $accountType !== 'Patient' ) {
+                throw new InvalidArgumentException('Invalid account type. Must be "Family member" or "Health Care Professional" or "Patient".');
             }
     
             // Prepare the stored procedure call

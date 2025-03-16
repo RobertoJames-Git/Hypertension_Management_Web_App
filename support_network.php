@@ -140,7 +140,7 @@
             // Patient can see Family Member and Health Care Professional
             userTypeOptions.innerHTML = `
                 <option value="Family member">Family Member</option>
-                <option value="Health Prof">Health Care Professional</option>
+                <option value="Health Care Professional">Health Care Professional</option>
             `;
         } else if (userType === "Family Member") {
             // Family Member can see Patient
@@ -168,6 +168,7 @@
 
         // Function to fetch and display results
         async function fetchSearchResults() {
+            
             const userType = userTypeDropdown.value;
             const searchText = searchBox.value;
 
@@ -210,14 +211,16 @@
                         sendRequestButton.addEventListener('click', () => {
 
                             if (sendRequestButton.textContent === "Request Pending") {
-                            // Show a confirmation alert for canceling the request
-                            const confirmCancel = confirm("Are you sure you want to cancel your request?");
-                            if (!confirmCancel) {
-                                return; // Exit if the user cancels the confirmation
-                            }
+                                
+                                // Show a confirmation alert for canceling the request
+                                const confirmCancel = confirm("Are you sure you want to cancel your request?");
+                                
+                                if (!confirmCancel) {
+                                    return; // Exit if the user cancels the confirmation
+                                }
                             }
 
-                            fetch(`Process/support_network_send_request.php?username=${encodeURIComponent(username)}`, { method: 'GET' })
+                            fetch(`Process/support_network_send_request.php?username=${encodeURIComponent(username)}&type=${encodeURIComponent(userType)}`, { method: 'GET' })
                                 .then(response => response.json())
                                 .then(result => {
                                     if (result.success) {
