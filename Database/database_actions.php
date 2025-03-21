@@ -541,7 +541,101 @@
         }
     }
     
+    function getSupportNetwork($loggedInUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Call the stored procedure
+            $stmt = $dbConn->prepare("CALL getSupportNetwork(?)");
+            $stmt->bind_param("s", $loggedInUsername);
+            $stmt->execute();
+    
+            // Fetch results
+            $result = $stmt->get_result();
+            $supportNetwork = [];
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $supportNetwork[] = $row;
+                }
+            }
+    
+            return $supportNetwork;
+        } catch (mysqli_sql_exception $e) {
+            return ['error' => $e->getMessage()];
+        } finally {
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
 
+    function getAcceptedPatients($loggedInUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL getAcceptedPatients(?)");
+    
+            // Bind the logged-in username
+            $stmt->bind_param("s", $loggedInUsername);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Fetch the result
+            $result = $stmt->get_result();
+            $patients = [];
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $patients[] = $row;
+                }
+            }
+    
+            return $patients;
+        } catch (mysqli_sql_exception $e) {
+            // Return an error message in case of an exception
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Cleanup resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+    function removeSupportNetworkConnection($loggedInUsername, $supportUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL removeSupportNetwork(?, ?)");
+            $stmt->bind_param("ss", $loggedInUsername, $supportUsername);
+            $stmt->execute();
+    
+            return ['success' => true];
+        } catch (mysqli_sql_exception $e) {
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Cleanup resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
 
     function generateRandomPassword() {
         

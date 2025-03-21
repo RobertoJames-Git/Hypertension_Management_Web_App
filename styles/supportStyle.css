@@ -13,9 +13,7 @@
     align-items: center;
     box-shadow: 0px 0px 4px 3px grey;
 
-        /* Add horizontal scrolling if the screen is too small */
-        overflow-x: auto;  
-        white-space: nowrap; /* Prevents content from wrapping */
+    white-space: nowrap; /* Prevents content from wrapping */
 }
 #support_selected{
     background-color: white;
@@ -29,6 +27,7 @@
     #Support_Navbar{
         width: 500px;
         column-gap: 20px;
+        overflow-x: auto;  
     }
 
     #support_selected{
@@ -69,40 +68,19 @@
 
 }
 
-#support_network_container{
-    background-color: white;
-    width: 400px;
-    margin: auto;
-    padding: 10px;
-    margin-top: 20px;
-    box-shadow: 0px 0px 5px 4px grey;
-    border-radius: 10px;
+
+#support_network_ID{
+    width: 515px;
+
 }
 
-
-
-
-#family_mem_in_sup_network, #prof_in_sup_network{
-    border-top: 1px solid black;
-}
-
-#prof_in_sup_network{
-    margin-bottom: 20px;
-}
-
-#family_mem_in_sup_network{
+#support_network_ID h2{
     border-bottom: 1px solid black;
-    padding-bottom: 20px;
-
+    padding-bottom: 10px;
+    display: inline-block;
+    width: 100%;
 }
 
-#support_network_container button{
-    border-style: none;
-    background-color: #153bb0;
-    color: white;
-    padding: 5px;
-    height: 30px;
-}
 
 button{
     cursor: pointer;
@@ -110,16 +88,12 @@ button{
 
 .support_net_details{
     display: grid;
-    grid-template-columns: 300px auto;
+    grid-template-columns: 180px auto;
     margin-bottom: 10px;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid grey;
     padding: 5px;
 }
 
-.username{
-
-
-}
 
 .support_network_containers{
     margin: auto;
@@ -131,6 +105,12 @@ button{
     border-radius: 10px;
     background-color: white;
 }
+
+
+#add_supp_net_container,#pending_container,#rejected_container{
+    display: none;
+}
+
 
 
 #add_supp_net_container input{
@@ -154,8 +134,6 @@ button{
 
 
 #modify_support_network_container{
-    display: grid;
-    grid-template-columns: 440px 440px;
     margin: auto;
     width: max-content;
 
@@ -190,6 +168,11 @@ button{
 #pending_container h2, #rejected_container h2{
     border-bottom: 1px solid black;
     padding-bottom: 20px;
+
+}
+
+#rejected_container button{
+    margin-left:145px;
 }
 
 
@@ -199,4 +182,67 @@ button{
     border-style: none;
     color: white;
     padding: 5px;
+}
+
+
+
+#members_of_support_net_container{
+    display: grid;
+    grid-template-columns: 250px 250px;
+    column-gap: 10px;
+}
+
+#prof_in_sup_network,#family_mem_in_sup_network{
+    width: 250px;
+}
+
+
+
+
+
+
+
+/* Style the dropdown container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+
+}
+
+/* Hide the dropdown content by default */
+.dropdown_content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    width: 190px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+    padding: 10px 0;
+    border-radius: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    box-shadow: 0px 0px 2px 1px black;
+
+}
+
+/* Style the links inside the dropdown */
+.dropdown_content a {
+    color: black;
+    text-decoration: none;
+    padding: 8px 16px;
+    display: block;
+    font-size: 14px;
+    border-bottom: 1px solid gray;
+}
+
+/* Change color on hover */
+.dropdown_content a:hover {
+    background-color: #1946da;
+    color: white;
+}
+
+/* Show the dropdown content on hover */
+.dropdown:hover .dropdown_content {
+    display: block;
 }

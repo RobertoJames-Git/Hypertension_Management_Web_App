@@ -13,6 +13,7 @@
 
         //session start already takes place in navbar.php
         require_once('navbar.php');
+        require_once("Database/database_actions.php");
 
         if(!isset($_SESSION["loggedIn_username"],$_SESSION["userType"])|| $_SESSION["loggedIn_username"]==""||$_SESSION["userType"]==""){
             header("Location:logout.php");
@@ -21,42 +22,137 @@
     ?>
 
     <div id="Support_Navbar">
-        <div id="support_selected">Manage Support Network</div>
+        <div id="support_selected" class="dropdown">
+            Manage Support Network
+            <div class="dropdown_content">
+                <a onclick="onlyShow('support_network_ID')">View Support Network</a>
+                <a onclick="onlyShow('add_supp_net_container')">Add to Support Network</a>
+                <a onclick="onlyShow('pending_container')">Pending Requests</a>
+                <a onclick="onlyShow('rejected_container')">Rejected Request</a>
+            </div>
+        </div>
         <div>Family Chat</div>
         <div>Healthcare Professional Chat</div>
     </div>
 
 
+
     <div id="modify_support_network_container">
 
-        <div class="support_network_containers" id="support_network_container">
-            <h2>Modify your support network</h2>
-
-            <div id="prof_in_sup_network">
-                <h3>Healthcare Professional</h3>
+        <div class="support_network_containers" id="support_network_ID">
+            <h2>Support Network</h2>
+            <div id="members_of_support_net_container">
                 
-                <div class="support_net_details">   
-                    <span class="username">Username</span> 
-                    <div> <span>Jan 1, 2025</span> </div> 
-                </div>
+            <div id="patient_in_sup_network">
+                <?php 
+                    if ($_SESSION["userType"]=="Health Care Professional") {
+                        echo"<h3>Patient</h3>";
+                    }
+                    else if ($_SESSION["userType"]=="Family Member"){
+                        echo"<h3>Hypertensive Family Member</h3>";
+                    }
+                ?>
 
-                <button>Add a Health Care Professional</button>
+                <?php
+
+                $supportNetwork = getSupportNetwork($_SESSION["loggedIn_username"]);
+                $patientRecord = FALSE;
+
+                if (isset($supportNetwork['error'])) {
+                    echo '<p class="error_message">Error: ' . htmlspecialchars($supportNetwork['error']) . '</p>';
+                } elseif (!empty($supportNetwork)) {
+                    foreach ($supportNetwork as $contact) {
+                        if (isset($contact['role']) && $contact['role'] === 'Patient') {
+                            echo '<div class="support_net_details" class="patient_details" user-on-support-network="' . htmlspecialchars($contact['support_username']) . '">';
+                            echo '<span class="username">'  . htmlspecialchars($contact['support_username']) . '</span>';
+                            echo '<div><button class="remove_button">Remove</button></div>';
+                            echo '</div>';
+                            $patientRecord = TRUE;
+                        }
+                    }
+                }
+
+                // Show message if no Patient record found
+                if ($patientRecord === FALSE) {
+                    if ($_SESSION["userType"]=="Health Care Professional") {
+                        echo '<p class="no_requests_message">No Patients .</p>';
+                    }
+                    else if ($_SESSION["userType"]=="Family Member"){
+                        echo"<h3>Hypertensive Family Member</h3>";
+                        echo '<p class="no_requests_message">No Hypertensive Family Member.</p>';
+                    }
+    
+                }
+                ?>
             </div>
 
+
+                
+            <div id="prof_in_sup_network">
+                <h3>Healthcare Professional</h3>
+                <?php
+                if ($_SESSION["userType"]=="Patient") {
+
+
+                    $healthProfRecord = FALSE;
+
+                    if (isset($supportNetwork['error'])) {
+                        echo '<p class="error_message">Error: ' . htmlspecialchars($supportNetwork['error']) . '</p>';
+                    } elseif (!empty($supportNetwork)) {
+                        foreach ($supportNetwork as $contact) {
+                            if ($contact['role'] === 'Healthcare Professional') {
+                                echo '<div class="support_net_details" user-on-support-network="' . htmlspecialchars($contact['support_username']) . '">';
+                                echo '<span class="username">' . htmlspecialchars($contact['support_username']) . '</span>';
+                                echo '<div><button class="remove_button">Remove</button></div>';
+                                echo '</div>';
+                                $healthProfRecord = TRUE;
+                            }
+                        }
+                    }
+
+                    // Show message if no Healthcare Professional record found
+                    if ($healthProfRecord === FALSE) {
+                        echo '<p class="no_requests_message">No Healthcare Professionals.</p>';
+                    }
+                }
+                ?>
+            </div>
 
             <div id="family_mem_in_sup_network">
                 <h3>Family Members</h3>
-                <div class="support_net_details">   
-                    <span class="username">Username</span> 
-                    <div> <span>Jan 1, 2025</span> </div> 
-                </div>
-                <button>Add a Family Member</button>
+                <?php
+
+                if ($_SESSION["userType"]=="Patient") {
+                    $famMemRecord = FALSE;
+
+                    if (isset($supportNetwork['error'])) {
+                        echo '<p class="error_message">Error: ' . htmlspecialchars($supportNetwork['error']) . '</p>';
+                    } elseif (!empty($supportNetwork)) {
+                        foreach ($supportNetwork as $contact) {
+                            if ($contact['role'] === 'Family Member') {
+                                echo '<div class="support_net_details" user-on-support-network="' . htmlspecialchars($contact['support_username']) . '">';
+                                echo '<span class="username">' . htmlspecialchars($contact['support_username']) . '</span>';
+                                echo '<div><button class="remove_button">Remove</button></div>';
+                                echo '</div>';
+                                $famMemRecord = TRUE;
+                            }
+                        }
+                    }
+
+                    // Show message if no Family Member record found
+                    if ($famMemRecord === FALSE) {
+                        echo '<p class="no_requests_message">No Family Members.</p>';
+                    }
+                }
+                ?>
             </div>
 
-            <br>
-            <button>Remove from Support Network</button>
-            
+
+                
+
+            </div>
         </div>
+
 
 
 
@@ -77,8 +173,6 @@
             <h2>Pending Requests</h2>
 
             <?php
-
-                require_once("Database/database_actions.php");
                 
                 // Retrieve pending requests for the logged-in user
                 $pendingData = getPendingRequests($_SESSION["loggedIn_username"]);
@@ -114,7 +208,7 @@
 
         
         <div class="support_network_containers" id="rejected_container">
-        <h2>Rejected Request</h2>
+            <h2>Rejected Request</h2>
             <?php
             $rejectedData = getRejectedRequests($_SESSION["loggedIn_username"]);
             ?>
@@ -378,6 +472,90 @@
                 }
             });
         });
+
+    </script>
+
+    <script>
+
+        var loggedInuserType='<?php echo htmlspecialchars($_SESSION["userType"]) ?>';
+        
+        if(userType !='Patient'){
+            document.getElementById('family_mem_in_sup_network').style.display="none";
+            document.getElementById('prof_in_sup_network').style.display="none";
+
+            document.getElementById('support_network_ID').style.width="420px";
+            document.getElementById('members_of_support_net_container').style.display="block";
+            
+            document.querySelectorAll('.support_net_details').forEach(element => {
+
+                element.style.gridTemplateColumns = "340px auto"; // Set the desired grid column layout
+            });
+
+        }
+        else{
+            document.getElementById('patient_in_sup_network').style.display="none";
+        }
+    </script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const supportNetworkContainer = document.getElementById("support_network_ID");
+
+            supportNetworkContainer.addEventListener("click", async (event) => {
+                const target = event.target;
+
+                // Check if the clicked element is a "Remove" button
+                if (target.classList.contains("remove_button")) {
+                    const supportUsername = target.closest(".support_net_details").getAttribute("user-on-support-network");
+
+                    try {
+                        // Send a GET request to Process/manageSupportNetworkRemoval.php
+                        const response = await fetch(`Process/manageSupportNetworkRemoval.php?supportUsername=${encodeURIComponent(supportUsername)}`, { method: 'GET' });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Remove the corresponding DOM element upon successful deletion
+                            const parentRecord = target.closest(".support_net_details");
+                            if (parentRecord) {
+                                parentRecord.remove();
+                            }
+                            alert(`The connection with ${supportUsername} has been removed.`);
+                        } else {
+                            alert(`Failed to remove the connection: ${result.error}`);
+                        }
+                    } catch (error) {
+                        console.error("Error removing connection:", error);
+                        alert("An error occurred while removing the connection.");
+                    }
+                }
+            });
+        });
+
+    </script>
+
+
+    <script>
+
+        function onlyShow(containerID) {
+            // List of all container IDs
+            const allContainer = ['support_network_ID', 'add_supp_net_container', 'pending_container', 'rejected_container'];
+
+            // Iterate through each container in the list
+            allContainer.forEach(id => {
+                const element = document.getElementById(id);
+
+                if (element) {
+                    // Show the element if it matches the passed containerID, otherwise hide it
+                    if (id === containerID) {
+                        element.style.display = "block"; // Display this container
+                    } else {
+                        element.style.display = "none"; // Hide all others
+                    }
+                }
+            });
+        }
+
 
     </script>
 

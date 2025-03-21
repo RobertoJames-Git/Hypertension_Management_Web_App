@@ -897,3 +897,57 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE removeSupportNetwork(
+    IN p_loggedInUsername VARCHAR(50),  -- Logged-in user's username
+    IN p_supportUsername VARCHAR(50)      -- The username of the support contact to remove
+)
+BEGIN
+    DECLARE v_requestId INT DEFAULT NULL;
+
+    -- Look-up the accepted record between the two users.
+    SELECT request_id 
+    INTO v_requestId
+    FROM request
+    WHERE request_status = 'accepted'
+      AND (
+            (sender_username = p_loggedInUsername AND recipient_username = p_supportUsername)
+         OR (sender_username = p_supportUsername AND recipient_username = p_loggedInUsername)
+      )
+    LIMIT 1;
+
+    -- If no record is found then signal an error.
+    IF v_requestId IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'No accepted support network record found between these users.';
+    ELSE
+        DELETE FROM request WHERE request_id = v_requestId;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE removeSupportNetwork(
+    IN p_loggedInUsername VARCHAR(50),  -- Logged-in user's username
+    IN p_supportUsername VARCHAR(50)   -- Support contact's username
+)
+BEGIN
+    DELETE FROM request
+    WHERE request_status = 'accepted'
+      AND (
+            (sender_username = p_loggedInUsername AND recipient_username = p_supportUsername)
+         OR (sender_username = p_supportUsername AND recipient_username = p_loggedInUsername)
+      );
+END $$
+
+DELIMITER ;
