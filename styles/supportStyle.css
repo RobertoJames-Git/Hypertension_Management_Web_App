@@ -79,11 +79,7 @@
     border-radius: 10px;
 }
 
-.support_net_details{
-    display: grid;
-    grid-template-columns: auto auto auto auto;
 
-}
 
 
 #family_mem_in_sup_network, #prof_in_sup_network{
@@ -108,15 +104,21 @@
     height: 30px;
 }
 
+button{
+    cursor: pointer;
+}
+
 .support_net_details{
+    display: grid;
+    grid-template-columns: 300px auto;
     margin-bottom: 10px;
-    border: 1px solid #153bb0;
+    border-bottom: 1px solid black;
     padding: 5px;
 }
 
 .username{
-    border-right: 1px solid #153bb0;
-    margin-right: 10px;
+
+
 }
 
 .support_network_containers{
@@ -185,7 +187,16 @@
 
 }
 
-#pending_container h2{
+#pending_container h2, #rejected_container h2{
     border-bottom: 1px solid black;
     padding-bottom: 20px;
+}
+
+
+.support_net_details button{
+    width: max-content;
+    background-color: #1946da;
+    border-style: none;
+    color: white;
+    padding: 5px;
 }

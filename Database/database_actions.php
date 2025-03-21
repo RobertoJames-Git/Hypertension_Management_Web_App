@@ -342,58 +342,7 @@
         }
     }
     
-    
-
-    
-
-
-    function getPendingRequestsForPatient($patientUsername) {
-        // Get the database connection
-        $dbConn = getDatabaseConnection();
-    
-        try {
-            // Prepare the stored procedure call
-            $stmt = $dbConn->prepare("CALL GetPatientPendingRequests(?)");
-    
-            // Bind the input parameter (patient username)
-            $stmt->bind_param("s", $patientUsername);
-    
-            // Execute the procedure
-            $stmt->execute();
-    
-            // Fetch the results
-            $result = $stmt->get_result();
-            $pendingRequests = [];
-    
-            // Process each row in the result set
-            while ($row = $result->fetch_assoc()) {
-                // Format the request date as "Mar 10, 2025"
-                $formattedDate = date("M j, Y", strtotime($row['request_date']));
-    
-                $pendingRequests[] = [
-                    'sender_role' => $row['sender_role'],          // Role of the sender
-                    'sender_username' => $row['sender_username'],  // Username of the sender
-                    'request_date' => $formattedDate,              // Formatted date
-                    'request_status' => $row['request_status'],    // Status of the request (e.g., pending)
-                ];
-            }
-    
-            // Return the array of pending requests
-            return $pendingRequests;
-        } catch (mysqli_sql_exception $e) {
-            // Handle MySQL errors
-            return ['error' => $e->getMessage()];
-        } finally {
-            // Close the resources
-            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
-                $stmt->close();
-            }
-            if (isset($dbConn) && $dbConn instanceof mysqli) {
-                $dbConn->close();
-            }
-        }
-    }
-    
+     
 
     function sendRequest($senderUsername, $recipientUsername) {
         // Get the database connection
@@ -405,7 +354,7 @@
             $startDate = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
     
             // Prepare the stored procedure call
-            $stmt = $dbConn->prepare("CALL ManageRequest(?, ?, ?)");
+            $stmt = $dbConn->prepare("CALL sendRequest(?, ?, ?)");
     
             // Bind parameters to the procedure
             $stmt->bind_param("sss", $senderUsername, $recipientUsername, $startDate);
@@ -430,7 +379,169 @@
     }
     
     
+    function getPendingRequests($username) {
+        $dbConn = getDatabaseConnection(); 
+        
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL GetPendingRequests(?)");
+        
+            // Bind the input parameter
+            $stmt->bind_param("s", $username);
+        
+            // Execute the statement
+            $stmt->execute();
+        
+            // Fetch the results
+            $result = $stmt->get_result();
+            $pendingRequests = [];
+            
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $pendingRequests[] = [
+                        'from_username' => $row['from_username'],
+                        'request_status' => $row['request_status'],
+                        'request_status' => $row['request_status'],
+                        'request_date' => $row['formatted_request_date']
+                    ];
+                }
+            }
+        
+            // Return the list of pending requests
+            return $pendingRequests;
+        } catch (mysqli_sql_exception $e) {
+            // Catch MySQL errors, including SIGNAL errors from the procedure
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Close resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
     
+
+
+    function managePendingRequest($senderUsername, $loggedInUsername, $decision) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Validate the decision to avoid invalid calls to the procedure
+            if ($decision !== 'accepted' && $decision !== 'rejected') {
+                throw new InvalidArgumentException('Invalid decision. Must be "accepted" or "rejected".');
+            }
+    
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL managePendingRequest(?, ?, ?)");
+    
+            // Bind parameters to the procedure
+            $stmt->bind_param("sss", $senderUsername, $loggedInUsername, $decision);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Fetch the result to check if there were any errors or feedback
+            $result = $stmt->get_result();
+    
+            if ($result) {
+                // Handle the result as needed (optional)
+                $message = "The request has been successfully updated to '$decision'.";
+            } else {
+                $message = "No additional information returned.";
+            }
+    
+            // Return success message
+            return ['success' => true, 'message' => $message];
+        } catch (mysqli_sql_exception $e) {
+            // Catch MySQL errors, including SIGNAL errors from the procedure
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Close resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+
+    function getRejectedRequests($loggedInUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL getRejectedRequests(?)");
+    
+            // Bind parameters
+            $stmt->bind_param("s", $loggedInUsername);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Fetch results
+            $result = $stmt->get_result();
+            $rejectedRequests = [];
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $rejectedRequests[] = $row;
+                }
+            }
+    
+            // Return the rejected requests
+            return $rejectedRequests;
+        } catch (mysqli_sql_exception $e) {
+            // Handle SQL errors
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Cleanup resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+
+    function deleteRejectedRequest($requestId) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL deleteRejectedRequest(?)");
+    
+            // Bind parameters
+            $stmt->bind_param("i", $requestId);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Return success message
+            return ['success' => true];
+        } catch (mysqli_sql_exception $e) {
+            // Handle SQL errors
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Cleanup resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+    
+
 
     function generateRandomPassword() {
         

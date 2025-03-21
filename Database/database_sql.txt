@@ -562,13 +562,6 @@ DELIMITER ;
 
 
 
-
-
-
-
-
-
-
 DELIMITER $$
 
 CREATE PROCEDURE PopulateSupportTable(
@@ -625,7 +618,7 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE PROCEDURE ManageRequest(
+CREATE PROCEDURE sendRequest(
     IN p_sender_username VARCHAR(50), 
     IN p_recipient_username VARCHAR(50), 
     IN p_current_date DATETIME 
@@ -788,6 +781,119 @@ BEGIN
             WHERE healthcare_prof_userid = user_id AND monitor_status = 'pending';
 
     END CASE;
+END $$
+
+DELIMITER ;
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE GetPendingRequests(
+    IN p_username VARCHAR(50) -- The username of the recipient
+)
+BEGIN
+    -- Check if the provided username exists in the web_users table
+    IF NOT EXISTS (SELECT 1 FROM web_users WHERE username = p_username) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid username. User does not exist.';
+    END IF;
+
+    -- Retrieve all pending requests where the username is the recipient
+    SELECT 
+        request_id,
+        sender_username AS from_username,
+        request_status,
+        -- Format the date to "Jan 1, 2025"
+        DATE_FORMAT(request_date, '%b %e, %Y') AS formatted_request_date
+    FROM request
+    WHERE recipient_username = p_username AND request_status = 'pending';
+END $$
+
+DELIMITER ;
+
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE managePendingRequest(
+    IN p_sender_username VARCHAR(50), -- Sender's username
+    IN p_user_loggedIn VARCHAR(50), -- Logged-in user's username
+    IN p_decision ENUM('accepted', 'rejected') -- Decision made by the user
+)
+BEGIN
+    DECLARE requestExists INT DEFAULT 0;
+    DECLARE p_request_id INT;
+
+    -- Check if a pending request exists between the sender and the logged-in user
+    SELECT request_id INTO p_request_id
+    FROM request
+    WHERE sender_username = p_sender_username
+      AND recipient_username = p_user_loggedIn
+      AND request_status = 'pending';
+
+    -- Check if a valid request_id was found
+    SET requestExists = (p_request_id IS NOT NULL);
+
+    -- Case 1: Request does not exist
+    IF requestExists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No matching pending request found.';
+    END IF;
+
+    -- Case 2: Update the request status based on the decision
+    UPDATE request
+    SET request_status = p_decision
+    WHERE request_id = p_request_id;
+
+END $$
+
+DELIMITER ;
+
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE getRejectedRequests(
+    IN p_user_loggedIn VARCHAR(50) -- The username of the logged-in user
+)
+BEGIN
+    SELECT 
+        request_id,
+        sender_username AS Sender,
+        recipient_username AS Recipient,
+        request_status AS Status,
+        request_date AS Date
+    FROM 
+        request
+    WHERE 
+        (sender_username = p_user_loggedIn OR recipient_username = p_user_loggedIn)
+        AND request_status = 'rejected'
+    ORDER BY 
+        request_date DESC; -- Show the most recent requests first
+END $$
+
+DELIMITER ;
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE deleteRejectedRequest(
+    IN p_request_id INT -- The ID of the request to delete
+)
+BEGIN
+    DELETE FROM request
+    WHERE request_id = p_request_id
+      AND request_status = 'rejected';
 END $$
 
 DELIMITER ;
