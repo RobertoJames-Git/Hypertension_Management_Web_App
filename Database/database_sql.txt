@@ -951,3 +951,50 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE GetAcceptedPatients(
+    IN p_loggedInUsername VARCHAR(50) -- The username of the logged-in user
+)
+BEGIN
+    DECLARE user_role VARCHAR(50);
+    DECLARE user_exists INT;
+
+    -- Check if the logged-in user is a Family Member or Health Care Professional
+    IF EXISTS (SELECT 1 FROM family_member WHERE username = p_loggedInUsername) THEN
+        SET user_role = 'Family Member';
+    ELSEIF EXISTS (SELECT 1 FROM health_care_prof WHERE username = p_loggedInUsername) THEN
+        SET user_role = 'Health Care Professional';
+    ELSE
+        -- Raise an error if the user is neither a Family Member nor Health Care Professional
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'You are not authorized to run this procedure.';
+    END IF;
+
+    -- Retrieve patients where the logged-in user is the sender and the request is accepted
+    SELECT 
+        pt.username AS patient_username
+    FROM request r
+    INNER JOIN patient pt ON r.recipient_username = pt.username
+    WHERE r.sender_username = p_loggedInUsername
+      AND r.request_status = 'accepted'
+
+    UNION
+
+    -- Retrieve patients where the logged-in user is the recipient and the request is accepted
+    SELECT 
+        pt.username AS patient_username
+    FROM request r
+    INNER JOIN patient pt ON r.sender_username = pt.username
+    WHERE r.recipient_username = p_loggedInUsername
+      AND r.request_status = 'accepted';
+
+END $$
+
+DELIMITER ;
+
+

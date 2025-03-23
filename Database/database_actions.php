@@ -574,44 +574,6 @@
     }
     
 
-    function getAcceptedPatients($loggedInUsername) {
-        // Get the database connection
-        $dbConn = getDatabaseConnection();
-    
-        try {
-            // Prepare the stored procedure call
-            $stmt = $dbConn->prepare("CALL getAcceptedPatients(?)");
-    
-            // Bind the logged-in username
-            $stmt->bind_param("s", $loggedInUsername);
-    
-            // Execute the procedure
-            $stmt->execute();
-    
-            // Fetch the result
-            $result = $stmt->get_result();
-            $patients = [];
-            if ($result) {
-                while ($row = $result->fetch_assoc()) {
-                    $patients[] = $row;
-                }
-            }
-    
-            return $patients;
-        } catch (mysqli_sql_exception $e) {
-            // Return an error message in case of an exception
-            return ['error' => $e->getMessage()];
-        } finally {
-            // Cleanup resources
-            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
-                $stmt->close();
-            }
-            if (isset($dbConn) && $dbConn instanceof mysqli) {
-                $dbConn->close();
-            }
-        }
-    }
-    
     function removeSupportNetworkConnection($loggedInUsername, $supportUsername) {
         // Get the database connection
         $dbConn = getDatabaseConnection();
@@ -636,6 +598,47 @@
         }
     }
     
+
+    function getAcceptedPatients($loggedInUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL GetAcceptedPatients(?)");
+    
+            // Bind the logged-in username as a parameter
+            $stmt->bind_param("s", $loggedInUsername);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Fetch the result set
+            $result = $stmt->get_result();
+            $patients = [];
+    
+            // Process the result set
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $patients[] = $row; // Add each row to the patients array
+                }
+            }
+    
+            return $patients; // Return the list of patients
+        } catch (mysqli_sql_exception $e) {
+            // Handle SQL exceptions and return the error
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Clean up resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+
 
     function generateRandomPassword() {
         

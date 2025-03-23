@@ -21,6 +21,7 @@
             exit();
         }
 
+        require_once("Database/database_actions.php");
     ?>
 
     <div id="database_Error">
@@ -64,20 +65,57 @@
     <div id="Select_Patient_container">
         <p id="select_patient_text"></p>
 
-        <select name="selected_patient" id="selected_patient_id">
-            <option value="">Select your Patient</option>
-        </select>
+        <?php  
+            // Check if the user type is either 'Health Care Professional' or 'Family Member'
+            if ($_SESSION["userType"] === "Health Care Professional" || $_SESSION["userType"] === "Family Member") {
+                // Retrieve the accepted patients from the procedure
+                $accepted_Patients = getAcceptedPatients($_SESSION["loggedIn_username"]);
+            ?>
+            <select name="selected_patient" id="selected_patient_id">
 
+                <?php
+                // Check if the array is not empty
+                if (!empty($accepted_Patients)) {
+                    // Iterate through the array and create dropdown options
+                    foreach ($accepted_Patients as $patient) {
+                        echo '<option value="' . htmlspecialchars($patient['patient_username']) . '">' . htmlspecialchars($patient['patient_username']) . '</option>';
+                    }
+                } else {
+                    // Fallback message when no patients are found
+                    echo '<option value="" disabled>No patients available</option>';
+                }
+                ?>
+            </select>
+            <?php
+            } else {
+                // If the user type is not authorized, display a message or leave empty
+                echo '<p>You do not have access to this functionality.</p>';
+            }
+        ?>
     </div>
     
 
     <?php
 
-        require_once("Database/database_actions.php");
-        $page = isset($_GET["page"]) ? intval($_GET["page"]) : 1; // Default page 1 (most recent 10)
+
+        $page = isset($_GET["page"]) ? intval($_GET["page"]) : 1; // Default page 1 
         $numOfRecordsToDisplay = $_GET["no_of_records_to_display"] ?? 10;//if the get variable is set then I get the value otherwise the value stored is 10
 
-        $readings = getBloodPressureReadings($_SESSION["loggedIn_username"],$page,$numOfRecordsToDisplay);
+        
+        //if a patient is logged in then their reading will be shown
+        
+        if($_SESSION["userType"]=="Patient"){
+            $patient=$_SESSION["loggedIn_username"];
+        }
+        // if the person is logged in as a health care professional or a family member then the webpage will show the first person in the drop down list
+
+        else if ($_SESSION["userType"] === "Health Care Professional" || $_SESSION["userType"] === "Family Member") {
+
+            $patient=$accepted_Patients[0]['patient_username'];
+
+        }
+        
+        $readings = getBloodPressureReadings($patient,$page,$numOfRecordsToDisplay);
 
 
         // Extract data for Chart.js
