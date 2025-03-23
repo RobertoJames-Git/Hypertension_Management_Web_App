@@ -24,11 +24,7 @@
 }
 
 @media (max-width:730px) {
-    #Support_Navbar{
-        width: 500px;
-        column-gap: 20px;
-        overflow-x: auto;  
-    }
+
 
     #support_selected{
         padding-left: 5px;

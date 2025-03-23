@@ -173,3 +173,16 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
 #Select_Patient_container select{
     height: 25px;
 }
+
+
+#no_support_message{
+    background-color: red;
+    margin:auto;
+    width: max-content;
+    color: white;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 20px;
+    display: none;
+}

@@ -61,39 +61,83 @@
     </div>
 
 
-    
     <div id="Select_Patient_container">
         <p id="select_patient_text"></p>
 
         <?php  
-            // Check if the user type is either 'Health Care Professional' or 'Family Member'
+            // Ensure the user type is either 'Health Care Professional' or 'Family Member'
             if ($_SESSION["userType"] === "Health Care Professional" || $_SESSION["userType"] === "Family Member") {
                 // Retrieve the accepted patients from the procedure
                 $accepted_Patients = getAcceptedPatients($_SESSION["loggedIn_username"]);
-            ?>
-            <select name="selected_patient" id="selected_patient_id">
+                
+                $previously_selected = isset($_POST["selected_patient"]) ? $_POST["selected_patient"] : (isset($_SESSION["selected_patient"]) ? $_SESSION["selected_patient"] : null);
 
+        ?>
+            <select name="selected_patient" id="selected_patient_id">
                 <?php
                 // Check if the array is not empty
                 if (!empty($accepted_Patients)) {
                     // Iterate through the array and create dropdown options
                     foreach ($accepted_Patients as $patient) {
-                        echo '<option value="' . htmlspecialchars($patient['patient_username']) . '">' . htmlspecialchars($patient['patient_username']) . '</option>';
+                        
+                        echo '<option value="' . htmlspecialchars($patient['patient_username']) . '" ' . ($previously_selected === $patient['patient_username'] ? 'selected' : '') . '>' . htmlspecialchars($patient['patient_username']) . '</option>';
+                        
                     }
                 } else {
-                    // Fallback message when no patients are found
+                    // Fallback option when no patients are found
                     echo '<option value="" disabled>No patients available</option>';
                 }
                 ?>
+
             </select>
-            <?php
-            } else {
-                // If the user type is not authorized, display a message or leave empty
-                echo '<p>You do not have access to this functionality.</p>';
-            }
+                 
+        <?php
+            }#end of if statement
         ?>
     </div>
-    
+
+    <?php
+        
+        // Only include the script if the user is a Family Member or Health Care Professional
+        if ($_SESSION["userType"] === "Family Member" || $_SESSION["userType"] === "Health Care Professional") {
+    ?>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const dropdown = document.getElementById("selected_patient_id");
+
+            // Listen for the 'change' event on the dropdown
+            dropdown.addEventListener("change", function () {
+                const selectedValue = this.value; // Get the selected value
+
+                // Check if a valid value is selected
+                if (selectedValue) {
+                    // Create a form dynamically and submit the POST request
+                    const form = document.createElement("form");
+                    form.method = "POST";
+                    form.action = window.location.href; // Send the request to the current page
+
+                    // Add the selected value as a hidden input
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "selected_patient";
+                    input.value = selectedValue;
+
+                    // Append the input to the form and submit
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        });
+            
+    </script>
+
+    <?php
+        }//end of if
+    ?>
+
 
     <?php
 
@@ -101,7 +145,7 @@
         $page = isset($_GET["page"]) ? intval($_GET["page"]) : 1; // Default page 1 
         $numOfRecordsToDisplay = $_GET["no_of_records_to_display"] ?? 10;//if the get variable is set then I get the value otherwise the value stored is 10
 
-        
+        $patient="";
         //if a patient is logged in then their reading will be shown
         
         if($_SESSION["userType"]=="Patient"){
@@ -111,11 +155,31 @@
 
         else if ($_SESSION["userType"] === "Health Care Professional" || $_SESSION["userType"] === "Family Member") {
 
-            $patient=$accepted_Patients[0]['patient_username'];
+            //check if the user selected a option previously so that the record for that person will be displayed
+            if($previously_selected !== null){
+                $patient= $previously_selected;
+            }
+            //if the user did not select any option then we will store the first patient in the  drop down list and display the records for that patient
+            else if (empty($patient) && !empty($accepted_Patients)){
+                $patient = $accepted_Patients[0]['patient_username'];
+            }
+            //if the health care prof or family member is not apart of any patients support network
+            else if( empty($accepted_Patients[0])){
+                $no_patient_message="You are not part of a support network.";
+            }
 
         }
         
-        $readings = getBloodPressureReadings($patient,$page,$numOfRecordsToDisplay);
+        $readings=[];
+
+        //Only search for blood pressure records if the health care prof or family member is in a patient's support network
+        if(!empty($patient)){
+            $readings = getBloodPressureReadings($patient,$page,$numOfRecordsToDisplay);
+
+            //stores the users selected patient persistenly because the data in the post request is lost on refresh
+            $_SESSION["selected_patient"]=$patient;
+        }
+
 
 
         // Extract data for Chart.js
@@ -129,7 +193,7 @@
         /*if records were found and there were no errors then they will be stored in the variables 
         to be displayed in the chart*/
 
-        if (!isset($readings["error"])){
+        if (!isset($readings["error"]) && !empty($readings)){
 
             foreach ($readings as $reading) {
                 $dates[] = $reading["readingdate"];
@@ -150,6 +214,8 @@
             $recordMsg="No records Found";
         }
     ?>
+
+    <p id="no_support_message"><?php echo isset($no_patient_message) ? htmlspecialchars($no_patient_message) : ""?></p>
 
     
     <div id="graph_container">
@@ -318,7 +384,7 @@
 
 
         // only family member and health care professsionals can see the option to view hypertensive readings of different patients
-        if (userType === "Health Care Professional") {
+        if (userType === "Health Care Professional" || userType === "Family Member") {
             selectPatientText.textContent = "Select your Patient";
             document.getElementById("Select_Patient_container").style.display ="grid"
 
@@ -326,6 +392,18 @@
             selectPatientText.textContent = "Select your Hypertensive Family Member";
             document.getElementById("Select_Patient_container").style.display ="gird"
         }
+
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const noSupportMessage = document.getElementById("no_support_message"); // Get the paragraph element
+
+            // Check if the paragraph has any text
+            if (noSupportMessage.textContent.trim() !== "") {
+                noSupportMessage.style.display = "block"; // Display the paragraph if it contains text
+            }
+        });
+
     </script>
 
     <br>

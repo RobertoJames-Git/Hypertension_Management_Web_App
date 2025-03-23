@@ -1,13 +1,13 @@
 <?php
 
     session_start();
-    require_once("sanitizeData.php");
-    require_once("../Database/database_actions.php"); // Include the file where addBloodPressureReading() is defined
 
-    // Check if user is still logged in
-    if (!isset($_SESSION["loggedIn_username"])) {
-        header("location:../login.php");
-        exit(); // Remaining code not executed
+
+
+    //ensure the user is logged in
+    if(!isset($_SESSION["loggedIn_username"],$_SESSION["userType"])|| $_SESSION["loggedIn_username"]==""||$_SESSION["userType"]==""){
+        header("Location:logout.php");
+        exit();
     }
 
     // Check if all required POST variables are set
@@ -15,6 +15,9 @@
         header("location:../recordBP.php");
         exit(); // Remaining code not executed
     }
+
+    require_once("sanitizeData.php");
+    require_once("../Database/database_actions.php"); // Include the file where addBloodPressureReading() is defined
 
     // Initialize error session variables
     $_SESSION["dbMessage"]=$_SESSION["systolicErr"] = $_SESSION["diastolicErr"] = $_SESSION["heart_rateErr"]  = $_SESSION["dateErr"]=$_SESSION["timeErr"] = "";
@@ -119,10 +122,13 @@
         // Handle result
         if ($result===true) {
             
+            $userType =  $_SESSION["userType"];
+            
             //unset all variables 
             session_unset(); 
             $_SESSION["loggedIn_username"] = $username; // Restore username
-            
+            $_SESSION["userType"] = $userType; // Restore user Type
+
             $_SESSION["dbMessage"] = "Record Added Successfully";
             header("location:../recordBP.php");
             exit();

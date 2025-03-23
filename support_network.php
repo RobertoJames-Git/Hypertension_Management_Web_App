@@ -26,13 +26,22 @@
             Manage Support Network
             <div class="dropdown_content">
                 <a onclick="onlyShow('support_network_ID')">View Support Network</a>
-                <a onclick="onlyShow('add_supp_net_container')">Add to Support Network</a>
+
+                <?php
+                    if ($_SESSION["userType"]==="Patient"){
+                        $dropdown_Search_msg="Add to Support Network";
+                    }
+                    else if ($_SESSION["userType"]==="Health Care Profession" || $_SESSION["userType"]==="Family Member") {
+                        $dropdown_Search_msg="Search for Patient";
+                    }
+                ?>
+                <a onclick="onlyShow('add_supp_net_container')"><?php echo htmlspecialchars($dropdown_Search_msg)?></a>
                 <a onclick="onlyShow('pending_container')">Pending Requests</a>
                 <a onclick="onlyShow('rejected_container')">Rejected Request</a>
             </div>
         </div>
         <div>Family Chat</div>
-        <div>Healthcare Professional Chat</div>
+        <div>Healthcare Prof Chat</div>
     </div>
 
 
@@ -78,7 +87,6 @@
                         echo '<p class="no_requests_message">No Patients .</p>';
                     }
                     else if ($_SESSION["userType"]=="Family Member"){
-                        echo"<h3>Hypertensive Family Member</h3>";
                         echo '<p class="no_requests_message">No Hypertensive Family Member.</p>';
                     }
     
@@ -153,11 +161,18 @@
             </div>
         </div>
 
-
-
-
         <div class="support_network_containers" id="add_supp_net_container">
-            <h2>Add to your Support Network</h2>
+            <?php
+
+                #Specialize message 
+                if($_SESSION["userType"]=="Patient"){
+                    $headerTxt="Add to your Support Network";
+                }
+                else{
+                    $headerTxt="Find a Patient";
+                }
+            ?>
+            <h2> <?php echo htmlspecialchars($headerTxt) ?></h2>
 
             <label>Searching for a </label>
             <select name="type_of_user" id="type_of_user_ID">
@@ -223,7 +238,7 @@
                 <?php foreach ($rejectedData as $request): ?>
                     <div class="support_net_details">
                         <span class="username"><?php echo htmlspecialchars($request['Sender']); ?></span>
-                        <button class="remove_button" data-request-id="<?php echo htmlspecialchars($request['request_id']); ?>">Remove</button>
+                        <button class="reject-Btn" class="remove_button" data-request-id="<?php echo htmlspecialchars($request['request_id']); ?>">Remove</button>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
@@ -486,9 +501,9 @@
             document.getElementById('support_network_ID').style.width="420px";
             document.getElementById('members_of_support_net_container').style.display="block";
             
-            document.querySelectorAll('.support_net_details').forEach(element => {
-
-                element.style.gridTemplateColumns = "340px auto"; // Set the desired grid column layout
+            // Ensure modifications are only applied to elements with class 'support_net_details' inside 'pending_container'
+            document.querySelectorAll('#support_network_ID .support_net_details').forEach(element => {
+                element.style.gridTemplateColumns = "330px auto"; // Set the desired grid column layout
             });
 
         }
