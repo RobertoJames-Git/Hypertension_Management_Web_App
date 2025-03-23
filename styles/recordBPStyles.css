@@ -7,7 +7,8 @@
     box-shadow: 0px 1px 7px 1px black;
     transition: box-shadow 0.5s ease;
     border-radius: 10px;
-    margin-bottom: 30px;
+
+    display: none;
 }
 
 #recordBP_container:hover{
@@ -80,6 +81,7 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
     width: 1200px;
     margin: auto;
     outline: 1px solid black;
+    margin-top: 30px;
 }
 
 
@@ -152,3 +154,22 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
     border-radius: 5px;
 }
 
+
+#Select_Patient_container{
+    display: none;
+    grid-template-columns: auto auto;
+    column-gap: 10px;
+    width: 300px;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    margin-top: 10px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    box-shadow: 0px 0px 5px 1px black;
+    
+}
+
+#Select_Patient_container select{
+    height: 25px;
+}

@@ -15,11 +15,12 @@
     <?php
         require_once("navbar.php");
 
-        // Check if user is logged in
-        if (!isset($_SESSION["loggedIn_username"])) {
-            header("location:login.php");
+        //ensure the user is logged in
+        if(!isset($_SESSION["loggedIn_username"],$_SESSION["userType"])|| $_SESSION["loggedIn_username"]==""||$_SESSION["userType"]==""){
+            header("Location:logout.php");
             exit();
         }
+
     ?>
 
     <div id="database_Error">
@@ -58,6 +59,16 @@
         <button id="edit_prev_readings">Edit Previous Readings</button>
     </div>
 
+
+    
+    <div id="Select_Patient_container">
+        <p id="select_patient_text"></p>
+
+        <select name="selected_patient" id="selected_patient_id">
+            <option value="">Select your Patient</option>
+        </select>
+
+    </div>
     
 
     <?php
@@ -256,9 +267,30 @@
 
     </script>
 
+    <script>
+        userType = "<?php echo htmlspecialchars($_SESSION["userType"]) ?>"
+
+        //only display the form to enter blood pressure reading to the patient
+        if(userType == "Patient"){
+            document.getElementById("recordBP_container").style.display ="block"
+        }
+
+        // Get the paragraph element inside the Select_Patient_container div
+        const selectPatientText = document.getElementById("select_patient_text");
 
 
-        <br>
+        // only family member and health care professsionals can see the option to view hypertensive readings of different patients
+        if (userType === "Health Care Professional") {
+            selectPatientText.textContent = "Select your Patient";
+            document.getElementById("Select_Patient_container").style.display ="grid"
+
+        } else if (userType === "Family Member") {
+            selectPatientText.textContent = "Select your Hypertensive Family Member";
+            document.getElementById("Select_Patient_container").style.display ="gird"
+        }
+    </script>
+
+    <br>
 </body>
 </html>
 
