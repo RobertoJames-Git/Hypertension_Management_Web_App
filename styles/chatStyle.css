@@ -1,0 +1,125 @@
+
+#chat_and_input_container{
+    margin: auto;
+    margin-top: 10px;
+    border: 2px solid #1946da;
+    width: max-content;
+    border-radius: 10px;
+    height: 550px;
+    margin-bottom: 20px;
+}
+
+
+/* Style for the chat container */
+#chat_container {
+
+    width: 500px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 440px;
+    overflow-y: scroll; /* Enables scrolling */
+
+}
+
+
+
+/* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+#chat_container::-webkit-scrollbar {
+    width: 8px;  /* Width of the scrollbar */
+
+}
+
+/* Track (background of scrollbar) */
+#chat_container::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light gray background */
+    border-radius: 20px; /* Rounded track */
+}
+
+/* Handle (draggable part of scrollbar) */
+#chat_container::-webkit-scrollbar-thumb {
+    background: #888; /* Darker gray handle */
+    border-radius: 20px; /* Rounded handle */
+}
+
+/* Handle on hover */
+#chat_container::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Even darker gray */
+}
+
+
+
+
+/* Styling for received messages */
+.reciever {
+    align-self: flex-start;
+    background-color: #d1e7ff;
+    color: #000;
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 80%;
+    word-wrap: break-word;
+    font-size: 14px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for sent messages */
+.sender {
+    align-self: flex-end;
+    background-color: #1946da;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 80%;
+    word-wrap: break-word;
+    font-size: 14px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Fixed styling for input container */
+#chat_input_container {
+
+    width: 510px;
+    margin: auto;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f0f0f0; /* Slightly different background for the input box */
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+/* Style for the textarea */
+#chat_textarea {
+    flex: 1; /* Allow it to take up available space */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    width:10px;
+    resize: none; /* Prevent resizing */
+    overflow-y: auto; /* Enable scrolling within the textarea */
+    max-height: 70px; /* Set a maximum height for the textarea */
+    max-width: 400px; /* Set a maximum height for the textarea */
+}
+
+/* Style for the send button */
+#send_button {
+    background-color: #1946da;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+#send_button:hover {
+    background-color: #153ba1;
+}

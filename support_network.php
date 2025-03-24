@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support</title>
     <link rel="stylesheet" href="styles/supportStyle.css">
+    <script src="Javascript/supportNetwork.js"></script>
 </head>
 <body>
     
@@ -19,37 +20,12 @@
             header("Location:logout.php");
             exit();
         }
+
+
+        require_once('support_net_navbar.php');
     ?>
 
-    <div id="Support_Navbar">
-        <div id="support_selected" class="dropdown">
-            Manage Support Network
-            <div class="dropdown_content">
-                <a onclick="onlyShow('support_network_ID')">View Support Network</a>
 
-                <?php
-                    if ($_SESSION["userType"]==="Patient"){
-                        $dropdown_Search_msg="Add to Support Network";
-                    }
-                    else if ($_SESSION["userType"]==="Health Care Profession" || $_SESSION["userType"]==="Family Member") {
-                        $dropdown_Search_msg="Search for Patient";
-                    }
-                ?>
-                <a onclick="onlyShow('add_supp_net_container')"><?php echo htmlspecialchars($dropdown_Search_msg)?></a>
-                <a onclick="onlyShow('pending_container')">Pending Requests</a>
-                <a onclick="onlyShow('rejected_container')">Rejected Request</a>
-            </div>
-        </div>
-        <div class="dropdown" >
-            Chat with
-            <div class="dropdown_content" id="chat-with-dropdown">
-                <a onclick="startChat('Family Member')">Family Member</a>
-                <a onclick="startChat('Health Care Professional')">Health Care Professional</a>
-            </div>
-        </div>
-
- 
-    </div>
 
 
 
@@ -558,25 +534,6 @@
 
 
     <script>
-
-        function onlyShow(containerID) {
-            // List of all container IDs
-            const allContainer = ['support_network_ID', 'add_supp_net_container', 'pending_container', 'rejected_container'];
-
-            // Iterate through each container in the list
-            allContainer.forEach(id => {
-                const element = document.getElementById(id);
-
-                if (element) {
-                    // Show the element if it matches the passed containerID, otherwise hide it
-                    if (id === containerID) {
-                        element.style.display = "block"; // Display this container
-                    } else {
-                        element.style.display = "none"; // Hide all others
-                    }
-                }
-            });
-        }
 
 
     </script>
