@@ -40,8 +40,15 @@
                 <a onclick="onlyShow('rejected_container')">Rejected Request</a>
             </div>
         </div>
-        <div>Family Chat</div>
-        <div>Healthcare Prof Chat</div>
+        <div class="dropdown" >
+            Chat with
+            <div class="dropdown_content" id="chat-with-dropdown">
+                <a onclick="startChat('Family Member')">Family Member</a>
+                <a onclick="startChat('Health Care Professional')">Health Care Professional</a>
+            </div>
+        </div>
+
+ 
     </div>
 
 

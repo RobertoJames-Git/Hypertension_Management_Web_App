@@ -1,7 +1,7 @@
 #Support_Navbar{
     display: grid;
-    grid-template-columns: auto auto auto;
-    width: 700px;
+    grid-template-columns: 260px 260px;
+    width: max-content;
     background-color: #1946da;
     color: white;
     padding: 10px;
@@ -23,46 +23,6 @@
     border-radius: 5px;
 }
 
-@media (max-width:730px) {
-
-
-    #support_selected{
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-
-        /* Scrollbar Styling for Webkit Browsers (Chrome, Edge, Safari) */
-    #Support_Navbar::-webkit-scrollbar {
-        height: 8px; /* Adjust scrollbar thickness */
-    
-    }
-
-    #Support_Navbar::-webkit-scrollbar-track {
-        background: #e0e0e0; /* Track color */
-        border-radius: 10px; 
-        
-    }
-
-    #Support_Navbar::-webkit-scrollbar-thumb {
-        background: #1946da; /* Scrollbar color */
-        border-radius: 10px;
-        transition: background 0.3s ease-in-out;
-    }
-
-
-    #Support_Navbar::-webkit-scrollbar-thumb:hover {
-        background: #153bb0; /* Darker shade when hovered */
-        
-    }
-    
-    /* Scrollbar Styling for Firefox */
-    #Support_Navbar {
-        scrollbar-width: thin; /* "auto" or "thin" */
-        scrollbar-color: #1946da #fff; /* thumb color track color */
-
-    }
-
-}
 
 
 #support_network_ID{
@@ -241,4 +201,9 @@ button{
 /* Show the dropdown content on hover */
 .dropdown:hover .dropdown_content {
     display: block;
+}
+
+
+#chat-with-dropdown{
+    margin-left: 50px;
 }
