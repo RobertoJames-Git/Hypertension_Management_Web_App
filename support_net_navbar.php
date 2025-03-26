@@ -2,7 +2,7 @@
 
 
 <div id="Support_Navbar">
-    <div class="dropdown" onclick="window.location.href='support_network.php'">
+    <div class="dropdown" >
         Manage Support Network
         <div class="dropdown_content">
             <a onclick="onlyShow('support_network_ID')" >View Support Network</a>
@@ -11,7 +11,7 @@
                 if ($_SESSION["userType"]==="Patient"){
                     $dropdown_Search_msg="Add to Support Network";
                 }
-                else if ($_SESSION["userType"]==="Health Care Profession" || $_SESSION["userType"]==="Family Member") {
+                else if ($_SESSION["userType"]==="Health Care Professional" || $_SESSION["userType"]==="Family Member") {
                     $dropdown_Search_msg="Search for Patient";
                 }
             ?>
@@ -32,7 +32,6 @@
 </div>
 
 <script>
-
     document.addEventListener("DOMContentLoaded", function () {
         // Get the current page filename
         let currentPage = window.location.pathname.split("/").pop();
@@ -43,13 +42,22 @@
         dropdowns.forEach(div => {
             let text = div.textContent.trim();
 
+            // Apply id to a div depending on what page I am in for styling
             if (currentPage === "support_network.php" && text.includes("Manage Support Network")) {
                 div.id = "support_selected";
             } else if (currentPage === "chat.php" && text.includes("Chat with")) {
                 div.id = "support_selected";
             }
+
+            // Add click functionality for "Manage Support Network"
+            if (text.includes("Manage Support Network")) {
+                div.addEventListener("click", function () {
+                    // Redirect only if not already on the page
+                    if (currentPage !== "support_network.php") {
+                        window.location.href = "support_network.php";
+                    }
+                });
+            }
         });
     });
-
 </script>
-

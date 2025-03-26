@@ -34,39 +34,39 @@
 
 
 
-<div id="chat_and_input_container">
+    <div id="chat_and_input_container">
 
-    <div id="chat_container">
-        <!-- Chat message bubbles -->
-        <div class="reciever">Hi, how are you?</div>
-        <div class="sender">I'm great, thank you! What about you?</div>
+        <div id="chat_container">
+            <!-- Chat message bubbles -->
+            <div class="reciever">Hi, how are you?</div>
+            <div class="sender">I'm great, thank you! What about you?</div>
 
-        <!-- Chat message bubbles -->
-        <div class="reciever">Hi, how are you?</div>
-        <div class="sender">I'm great, thank you! What about you?</div>
-        
-        <!-- Chat message bubbles -->
-        <div class="reciever">Hi, how are you?</div>
-        <div class="sender">I'm great, thank you! What about you?</div>
-        
-        <!-- Chat message bubbles -->
-        <div class="reciever">Hi, how are you?</div>
-        <div class="sender">I'm great, thank you! What about you?</div>
-        
-        <!-- Chat message bubbles -->
-        <div class="reciever">Hi, how are you?</div>
-        <div class="sender">I'm great, thank you! What about you?</div>
+            <!-- Chat message bubbles -->
+            <div class="reciever">Hi, how are you?</div>
+            <div class="sender">I'm great, thank you! What about you?</div>
+            
+            <!-- Chat message bubbles -->
+            <div class="reciever">Hi, how are you?</div>
+            <div class="sender">I'm great, thank you! What about you?</div>
+            
+            <!-- Chat message bubbles -->
+            <div class="reciever">Hi, how are you?</div>
+            <div class="sender">I'm great, thank you! What about you?</div>
+            
+            <!-- Chat message bubbles -->
+            <div class="reciever">Hi, how are you?</div>
+            <div class="sender">I'm great, thank you! What about you?</div>
 
+
+        </div>
+
+        <!-- Fixed Input Box and Send Button -->
+        <div id="chat_input_container">
+            <textarea id="chat_textarea" placeholder="Type your message..." rows="2"></textarea>
+            <button id="send_button">Send</button>
+        </div>
 
     </div>
-
-    <!-- Fixed Input Box and Send Button -->
-    <div id="chat_input_container">
-        <textarea id="chat_textarea" placeholder="Type your message..." rows="2"></textarea>
-        <button id="send_button">Send</button>
-    </div>
-
-</div>
 
 
     
