@@ -640,6 +640,136 @@
     }
 
 
+
+    function getAcceptedHealthProfessional($loggedInUsername) {
+        // Get the database connection
+        $connection = getDatabaseConnection();
+        if (!$connection) {
+            return ["error" => "Failed to connect to the database"];
+        }
+
+        // Call the stored procedure
+        $query = "CALL GetAcceptedHealthCareProfessionalsByUsername(?)";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $loggedInUsername);
+
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            $healthCareProfessionals = [];
+
+            // Fetch all results
+            while ($row = $result->fetch_assoc()) {
+                $healthCareProfessionals[] = $row;
+            }
+
+            $stmt->close();
+            $connection->close();
+
+            // Return the list of professionals or an error message
+            return $healthCareProfessionals;
+        } else {
+            $stmt->close();
+            $connection->close();
+            return ["error" => "Failed to execute the stored procedure"];
+        }
+    }
+
+
+    function getChatMessages($senderId, $recipientId) {
+        $conn = getDatabaseConnection();  //  Assuming $conn is your database connection
+
+        $query = "SELECT c.*, u.username as sender_username 
+                FROM communicate c
+                JOIN web_users u ON c.sender_userid = u.userID
+                WHERE (c.sender_userid = ? AND c.recipient_userid = ?) 
+                    OR (c.sender_userid = ? AND c.recipient_userid = ?)
+                ORDER BY c.message_date";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("iiii", $senderId, $recipientId, $recipientId, $senderId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $messages = [];
+        while ($row = $result->fetch_assoc()) {
+            $messages[] = $row;
+        }
+        return $messages;
+    }
+
+
+    function storeChatMessage($senderId, $recipientId, $message) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call (if you have one)
+            // $stmt = $dbConn->prepare("CALL your_stored_procedure(?, ?, ?)"); 
+            // If you are using a direct query, prepare that instead:
+            $query = "INSERT INTO communicate (sender_userid, sender_username, recipient_userid, recipient_username, message_date, message_content)
+                      VALUES (?, (SELECT username FROM web_users WHERE userID = ?), ?, (SELECT username FROM web_users WHERE userID = ?), NOW(), ?)";
+            $stmt = $dbConn->prepare($query);
+    
+            if (!$stmt) {
+                throw new mysqli_sql_exception("Error preparing statement: " . $dbConn->error);
+            }
+    
+            $stmt->bind_param("iiiis", $senderId, $senderId, $recipientId, $recipientId, $message);
+    
+            $stmt->execute();
+    
+            // Check for errors after execution
+            if ($stmt->errno) {
+                throw new mysqli_sql_exception("Error executing statement: " . $stmt->error);
+            }
+    
+            return ['success' => true];
+        } catch (mysqli_sql_exception $e) {
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Cleanup resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+
+
+    function getPatientsForSupportUser($loggedInUsername) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+
+        try {
+            // Call the stored procedure
+            $stmt = $dbConn->prepare("CALL GetPatientsForSupportUser(?)");
+            $stmt->bind_param("s", $loggedInUsername);
+            $stmt->execute();
+
+            // Fetch results
+            $result = $stmt->get_result();
+            $patients = [];
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $patients[] = $row;
+                }
+            }
+
+            return $patients;
+        } catch (mysqli_sql_exception $e) {
+            return ['error' => $e->getMessage()];
+        } finally {
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+
+
     function generateRandomPassword() {
         
         do{
@@ -658,4 +788,5 @@
 
         return $password;
     }
+
 

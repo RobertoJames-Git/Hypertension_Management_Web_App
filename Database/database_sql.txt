@@ -76,7 +76,7 @@ CREATE TABLE reading (
 
 
 CREATE TABLE communicate (
-    communicate_id INT AUTO_INCREMENT PRIMARY KEY,
+    communicate_id AUTO_INCREMENT PRIMARY KEY,
     sender_userid INT NOT NULL,
     sender_username VARCHAR(50) NOT NULL,
     recipient_userid INT NOT NULL,
@@ -998,3 +998,70 @@ END $$
 DELIMITER ;
 
 
+
+
+DELIMITER $$
+CREATE PROCEDURE GetAcceptedHealthCareProfessionalsByUsername(IN loggedInUsername VARCHAR(50))
+BEGIN
+    -- Check if the user is a patient using their username
+    IF EXISTS (SELECT 1 FROM patient WHERE username = loggedInUsername) THEN
+        -- Retrieve healthcare professionals associated with accepted requests
+        SELECT 
+            web_users.userID, 
+            web_users.username,
+            web_users.fname,  -- Include first name
+            web_users.lname   -- Include last name
+        FROM web_users
+        INNER JOIN request 
+            ON (
+                (request.sender_username = loggedInUsername AND request.recipient_userid = web_users.userID AND request.request_status = 'accepted')
+                OR 
+                (request.recipient_username = loggedInUsername AND request.sender_userid = web_users.userID AND request.request_status = 'accepted')
+            )
+        INNER JOIN health_care_prof 
+            ON health_care_prof.userid = web_users.userID;
+    ELSE
+        -- Return a message if the user is not a patient
+        SELECT "Error: User is not a patient" AS error_message;
+    END IF;
+END$$
+DELIMITER ;
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE GetPatientsForSupportUser(IN loggedInUsername VARCHAR(50))
+BEGIN
+    -- Check if the user is a health care professional or family member
+    IF EXISTS (SELECT 1 FROM health_care_prof WHERE username = loggedInUsername) OR 
+       EXISTS (SELECT 1 FROM family_member WHERE username = loggedInUsername) THEN
+
+        -- Retrieve patients where the logged-in user is the sender and the request is accepted
+        SELECT 
+            pt.username AS patient_username
+        FROM request r
+        INNER JOIN patient pt ON r.recipient_username = pt.username
+        WHERE r.sender_username = loggedInUsername
+          AND r.request_status = 'accepted'
+
+        UNION
+
+        -- Retrieve patients where the logged-in user is the recipient and the request is accepted
+        SELECT 
+            pt.username AS patient_username
+        FROM request r
+        INNER JOIN patient pt ON r.sender_username = pt.username
+        WHERE r.recipient_username = loggedInUsername
+          AND r.request_status = 'accepted';
+
+    ELSE
+        -- Return an error message if the user is not a health care professional or family member
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: User is not a health care professional or family member';
+    END IF;
+END $$
+
+DELIMITER ;

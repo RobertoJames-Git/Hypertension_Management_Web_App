@@ -66,6 +66,15 @@
     word-wrap: break-word;
     font-size: 14px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    display: grid;
+    
+}
+
+.reciever_username{
+    font-size: 12px;
+    font-style: italic;
+    color: #153ba1;
+    margin-bottom: 4px;
 }
 
 /* Styling for sent messages */
@@ -122,4 +131,33 @@
 
 #send_button:hover {
     background-color: #153ba1;
+}
+
+
+#chatHeader{
+    margin: auto;
+    width: max-content;
+
+}
+
+#chat_header_and_Select{
+
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 30px;
+    width:max-content;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    outline: 1px solid black;
+}
+
+#chat_to_patientID{
+    height: 25px;
+    outline:1px solid white;
+    display: none;
 }
