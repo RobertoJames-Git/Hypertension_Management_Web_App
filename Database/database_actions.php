@@ -808,55 +808,89 @@
 
 
 
-function addFamilyChatMessage( string $senderUsername, int $senderId, string $content, string $patientUsername, int $patientId) {
+    function addFamilyChatMessage( string $senderUsername, int $senderId, string $content, string $patientUsername, int $patientId) {
 
-    $conn = getDatabaseConnection();
-    
-    if (!$conn) {
-        return ["error" => "Failed to connect to the database"];
+        $conn = getDatabaseConnection();
+        
+        if (!$conn) {
+            return ["error" => "Failed to connect to the database"];
+        }
+
+        try {
+            
+            // Set the timezone to Jamaica
+            $jamaicanTime = new DateTime("now", new DateTimeZone("America/Jamaica"));
+            $currentTime = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
+
+            // Construct the SQL query
+            $query = "INSERT INTO family_chat (sender_username, sender_id, message_date, content, patient_username, patient_id)
+                    VALUES (?, ?, ?, ?, ?, ?)";
+
+            // Prepare the query
+            $stmt = $conn->prepare($query);
+
+            // Bind the parameters
+            $stmt->bind_param(
+                "sisssi",
+                $senderUsername,
+                $senderId,
+                $currentTime,
+                $content,
+                $patientUsername,
+                $patientId
+            );
+
+            // Execute the query
+            if ($stmt->execute()) {
+                $stmt->close();
+                $conn->close();
+                return ["success" => "Message added successfully"];
+            } else {
+                $stmt->close();
+                $conn->close();
+                return ["error" => "Failed to add message: " . $stmt->error];
+            }
+        } catch (Exception $e) {
+            // Handle errors (e.g., log them)
+            error_log("Error: " . $e->getMessage());
+            return ["error" => "Database error: " . $e->getMessage()];
+        }
     }
 
-    try {
-        
-        // Set the timezone to Jamaica
-        $jamaicanTime = new DateTime("now", new DateTimeZone("America/Jamaica"));
-        $currentTime = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
+    
 
-        // Construct the SQL query
-        $query = "INSERT INTO family_chat (sender_username, sender_id, message_date, content, patient_username, patient_id)
-                  VALUES (?, ?, ?, ?, ?, ?)";
+    function getUserDetailsByUsername() {
+        $conn = getDatabaseConnection(); // Assuming getDatabaseConnection() is defined elsewhere
 
-        // Prepare the query
+        $query = "SELECT CONCAT(fname, ' ', lname) AS full_name,
+                        gender,
+                        email,
+                        dob
+                FROM web_users
+                WHERE username = ?";
+
         $stmt = $conn->prepare($query);
 
-        // Bind the parameters
-        $stmt->bind_param(
-            "sisssi",
-            $senderUsername,
-            $senderId,
-            $currentTime,
-            $content,
-            $patientUsername,
-            $patientId
-        );
+        if ($stmt) {
+            $stmt->bind_param("s", $_SESSION["loggedIn_username"]);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-        // Execute the query
-        if ($stmt->execute()) {
+            if ($result->num_rows > 0) {
+                $userDetails = $result->fetch_assoc();
+            } else {
+                $userDetails = null; // User not found
+            }
+
             $stmt->close();
-            $conn->close();
-            return ["success" => "Message added successfully"];
         } else {
-            $stmt->close();
-            $conn->close();
-            return ["error" => "Failed to add message: " . $stmt->error];
+            // Handle prepare error (log it, display a message, etc.)
+            $userDetails = false;
         }
-    } catch (Exception $e) {
-        // Handle errors (e.g., log them)
-        error_log("Error: " . $e->getMessage());
-        return ["error" => "Database error: " . $e->getMessage()];
-    }
-}
 
+        $conn->close();
+        return $userDetails;
+    }
 
 
     function generateRandomPassword() {

@@ -1,0 +1,60 @@
+#profile_container{
+    margin: auto;
+    width: max-content;
+    margin-top: 20px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 0px 2px 5px 5px grey;
+    margin-bottom: 10px;
+}
+
+#profile_container img{
+    border-radius: 10px;
+}
+
+#fullname{
+    margin: auto;
+    width: max-content;
+    margin-top: 10px;
+    font-size: 22px;
+    font-weight:600;
+}
+
+#email{
+    margin: auto;
+    width: max-content;
+    margin-top: 10px;
+    background-color: #1946da;
+    font-size: 20px;
+    color: white;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+}
+
+
+.profile_details{
+    display: grid;
+    grid-template-columns: 200px auto;
+    background-color: #375cd6;
+    color: white;
+    margin-top: 8px;
+    padding: 5px;
+    font-size: 16px;
+    border-radius: 8px;
+
+
+}
+
+
+#profile_container #profile_image_and_heading img {
+    position: relative;
+    width: 400px; /* Or whatever width you have set */
+    height: auto;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0));
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0));
+    /* If you have any border-radius, apply it here as well */
+    /* border-radius: 10px; */
+}

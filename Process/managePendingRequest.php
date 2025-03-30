@@ -3,7 +3,7 @@
     session_start();
 
     if(!isset($_SESSION["loggedIn_username"],$_SESSION["userType"])|| $_SESSION["loggedIn_username"]==""||$_SESSION["userType"]==""){
-        header("Location:logout.php");
+        header("Location:../logout.php");
         exit();
     }
 
