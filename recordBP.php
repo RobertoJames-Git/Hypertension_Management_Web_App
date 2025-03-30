@@ -57,7 +57,7 @@
             
         </form>
 
-        <button id="edit_prev_readings">Edit Previous Readings</button>
+        <!--<button id="edit_prev_readings">Edit Previous Readings</button>-->
     </div>
 
 
