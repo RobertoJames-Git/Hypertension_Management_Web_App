@@ -35,14 +35,14 @@
 
     <?php
 
-        function extractIDFromUsername($username){
+        function extractIDAndUSername($username) {
+            preg_match('/(\D+)(\d+)/', $username, $matches);
 
-            preg_match('/\d+/', $username, $matches);
-            $userID = isset($matches[0]) ? intval($matches[0]) : null;
-            
+            $userID = isset($matches[2]) ? intval($matches[2]) : null;
+
             return $userID;
         }
-        
+
         $chatWithUserID = "";
         $chatWithUserUsername = "";
 
@@ -54,16 +54,37 @@
             $headingData="Health Professional Chat : ".$healthProfData[0]["fname"]. " ". $healthProfData[0]["lname"] ;
         }
 
-        else if($_GET['chatWith'] == "Patient" && $_SESSION["userType"] == "Health Care Professional"){
+        else if($_GET['chatWith'] == "Patient" ){
             
-            $patientData= getPatientsForSupportUser($_SESSION["loggedIn_username"]);
-            $chatWithUserID = extractIDFromUsername($_GET["chat_with_patient"]);
-            $chatWithUserUsername = $_GET["chat_with_patient"];
-            $headingData="Patient Chat";
+            //if a Health care professional or Family Member selected Patient chat
+            if( $_SESSION["userType"] == "Health Care Professional" ||$_SESSION["userType"] == "Family Member"){
+                $patientData= getPatientsForSupportUser($_SESSION["loggedIn_username"]);
+                
+                if(isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!= ""){
+                    $chatWithUserID = extractIDAndUSername($_GET["chat_with_patient"]);
+                    $chatWithUserUsername = $_GET["chat_with_patient"];
+                }
+
+                $headingData="Patient Chat";
+            }
+
+        }
+        else if($_GET['chatWith'] == "Family Member" ){
+            
+            //if the patient is the one that is sending a message then extract their userID and username from session
+            if($_SESSION["userType"] == "Patient"){
+
+                $chatWithUserID = extractIDAndUSername($_SESSION["loggedIn_username"]);
+                $chatWithUserUsername = $_SESSION["loggedIn_username"];
+                $headingData="Family Chat";
+            }
+            
+
+
         }
 
         // Extract the numeric part from the logged-in username
-        $extractedID = extractIDFromUsername($_SESSION["loggedIn_username"]);
+        $extractedID = extractIDAndUSername($_SESSION["loggedIn_username"]);
         
 
     ?>
@@ -103,21 +124,32 @@
     </div>
     
 
-
-
-
     <script>
 
+        userType = "<?php echo htmlspecialchars($_SESSION['userType']); ?>";
+        userOption = "<?php echo htmlspecialchars($_GET['chatWith']); ?>";
         
+            
+        //Only display drop down to select what patient you want to talk to if the logged in user is a Family Member or Health Care Professional
+        if(userType ==="Family Member"|| userType ==="Health Care Professional"){
+
+            const patientDropDown = document.getElementById('chat_to_patientID');
+            patientDropDown.style.display="block";
+            document.getElementById('chat_header_and_Select').style.columnGap = '30px';
+
+        }
+
         $(document).ready(function() {
             // Function to load chat messages
             function loadChat() {
                 $.ajax({
                     url: 'Process/get_messages.php',
                     type: 'GET',
-                    data: { 
+                    data: {
                         senderId: <?php echo $extractedID; ?>,
-                        recipientId: <?php echo json_encode($chatWithUserID); ?>
+                        <?php echo (isset($chatWithUserUsername) && $chatWithUserUsername != "") ? "patientUsername: '" . htmlentities($chatWithUserUsername) . "'," : ""; ?>
+                        recipientId: <?php echo json_encode($chatWithUserID); ?>,
+                        chatWith: userOption
                     },
                     success: function(data) {
                         $('#chat_container').html(data);
@@ -126,41 +158,49 @@
             }
 
             // Load chat messages initially
-            loadChat();
+
+            <?php 
+            
+            // Periodically update the chat (using setInterval for simplicity, consider WebSockets for production)
+            // // Reload chat every 1 seconds
+            if((isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!="" && ($_SESSION['userType']=="Family Member"||$_SESSION['userType']=="Health Care Professional"))||($_SESSION['userType']=="Patient")){
+                    echo "loadChat();\n\t\t\tsetInterval(loadChat, 2000);";
+                
+            }
+
+            ?>
+            
 
             // Send message on button click
             $('#send_button').click(function() {
-
                 var message = $('#chat_textarea').val();
-                if(message.trim() != '') {
+                if (message.trim() != '') {
                     $.ajax({
                         url: 'Process/send_message.php',
                         type: 'POST',
                         data: {
-                            senderId: <?php echo $extractedID;?>,
-                            recipientId: <?php echo $chatWithUserID; ?>,
-                            message: message 
-                            },
+                            senderId: <?php echo $extractedID; ?>,
+                            <?php echo (isset($chatWithUserID) && $chatWithUserID != "") ? "recipientId: '" . htmlentities($chatWithUserID) . "'," : ""; ?>
+                            <?php echo (isset($chatWithUserUsername) && $chatWithUserUsername != "") ? "patientUsername: '" . htmlentities($chatWithUserUsername) . "'," : ""; ?>
+                            message: message,
+                            chatWith: userOption
+                        },
                         success: function() {
                             $('#chat_textarea').val('');
-
                         },
                         error: function(xhr, status, error) {
-                            // This function will be called if there's an error
                             console.error("Error sending message:", status, error);
                             console.error("Response Text:", xhr.responseText);
-                            // Optionally, display an error message to the user
                             $('#chat_container').append("<div class='error-message'>Failed to send message. Please try again.</div>");
                         }
                     });
                 }
             });
-
-            // Periodically update the chat (using setInterval for simplicity, consider WebSockets for production)
-            setInterval(loadChat, 2000); // Reload chat every 2 seconds
-        });
             
+        
 
+        });
+        
 
         document.addEventListener('DOMContentLoaded', function() {
             const selectElement = document.getElementById('chat_to_patientID');
@@ -179,19 +219,8 @@
                 
             });
         });
-
-
-        userType= "<?php echo htmlspecialchars($_SESSION["userType"]);?>";
         
-        if(userType =="Family Member"|| userType =="Health Care Professional"){
-            const patientDropDown = document.getElementById('chat_to_patientID');
-            patientDropDown.style.display="block";
 
-        }
-        else if(userType =="Patient"){
-            
-            document.getElementById('chat_header_and_Select').style.columnGap = '0px';
-        }
 
     </script>
             

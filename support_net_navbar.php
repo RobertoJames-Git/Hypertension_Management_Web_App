@@ -68,7 +68,7 @@
     const chatLinks = chatDropdown.querySelectorAll("a");
 
     // Determine which links to show/hide based on userType
-    userType = "<?php echo htmlspecialchars($_SESSION["userType"]); ?>";
+    const userType = "<?php echo htmlspecialchars($_SESSION["userType"]); ?>";
 
     if (userType === "Patient") {
       chatLinks.forEach(link => {

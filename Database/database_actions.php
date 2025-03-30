@@ -696,24 +696,25 @@
         return $messages;
     }
 
-
     function storeChatMessage($senderId, $recipientId, $message) {
         // Get the database connection
         $dbConn = getDatabaseConnection();
     
         try {
-            // Prepare the stored procedure call (if you have one)
-            // $stmt = $dbConn->prepare("CALL your_stored_procedure(?, ?, ?)"); 
-            // If you are using a direct query, prepare that instead:
+
+            // Set the timezone to Jamaica
+            $jamaicanTime = new DateTime("now", new DateTimeZone("America/Jamaica"));
+            $currentTime = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
+    
             $query = "INSERT INTO communicate (sender_userid, sender_username, recipient_userid, recipient_username, message_date, message_content)
-                      VALUES (?, (SELECT username FROM web_users WHERE userID = ?), ?, (SELECT username FROM web_users WHERE userID = ?), NOW(), ?)";
+                      VALUES (?, (SELECT username FROM web_users WHERE userID = ?), ?, (SELECT username FROM web_users WHERE userID = ?), ?, ?)";
             $stmt = $dbConn->prepare($query);
     
             if (!$stmt) {
                 throw new mysqli_sql_exception("Error preparing statement: " . $dbConn->error);
             }
     
-            $stmt->bind_param("iiiis", $senderId, $senderId, $recipientId, $recipientId, $message);
+            $stmt->bind_param("iiiiss", $senderId, $senderId, $recipientId, $recipientId, $currentTime,$message);
     
             $stmt->execute();
     
@@ -737,6 +738,7 @@
     }
 
 
+    
     function getPatientsForSupportUser($loggedInUsername) {
         // Get the database connection
         $dbConn = getDatabaseConnection();
@@ -768,6 +770,93 @@
             }
         }
     }
+
+
+
+    function getFamilyChatMessages(string $loggedInUsername,string $patientUsername) {
+        // Get the database connection
+        $conn = getDatabaseConnection();
+        if (!$conn) {
+            return ["error" => "Failed to connect to the database"];
+        }
+    
+        // Call the stored procedure
+        $query = "CALL GetFamilyChatMessages(?,?)";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ss", $loggedInUsername,$patientUsername);
+    
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            $messages = [];
+    
+            // Fetch all results
+            while ($row = $result->fetch_assoc()) {
+                $messages[] = $row;
+            }
+    
+            $stmt->close();
+            $conn->close();
+    
+            // Return the list of messages or an error message
+            return $messages;
+        } else {
+            $stmt->close();
+            $conn->close();
+            return ["error" => "Failed to execute the stored procedure"];
+        }
+    }
+
+
+
+function addFamilyChatMessage( string $senderUsername, int $senderId, string $content, string $patientUsername, int $patientId) {
+
+    $conn = getDatabaseConnection();
+    
+    if (!$conn) {
+        return ["error" => "Failed to connect to the database"];
+    }
+
+    try {
+        
+        // Set the timezone to Jamaica
+        $jamaicanTime = new DateTime("now", new DateTimeZone("America/Jamaica"));
+        $currentTime = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
+
+        // Construct the SQL query
+        $query = "INSERT INTO family_chat (sender_username, sender_id, message_date, content, patient_username, patient_id)
+                  VALUES (?, ?, ?, ?, ?, ?)";
+
+        // Prepare the query
+        $stmt = $conn->prepare($query);
+
+        // Bind the parameters
+        $stmt->bind_param(
+            "sisssi",
+            $senderUsername,
+            $senderId,
+            $currentTime,
+            $content,
+            $patientUsername,
+            $patientId
+        );
+
+        // Execute the query
+        if ($stmt->execute()) {
+            $stmt->close();
+            $conn->close();
+            return ["success" => "Message added successfully"];
+        } else {
+            $stmt->close();
+            $conn->close();
+            return ["error" => "Failed to add message: " . $stmt->error];
+        }
+    } catch (Exception $e) {
+        // Handle errors (e.g., log them)
+        error_log("Error: " . $e->getMessage());
+        return ["error" => "Database error: " . $e->getMessage()];
+    }
+}
+
 
 
     function generateRandomPassword() {

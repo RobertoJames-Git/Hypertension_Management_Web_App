@@ -13,16 +13,26 @@
     $senderId = $_POST['senderId'] ?? '';
     $recipientId = $_POST['recipientId'] ?? '';
     $message = $_POST['message'] ?? '';
+    $chatType = $_POST['chatWith'] ?? '';
+    $patientUsername = $_POST["patientUsername"] ?? '';
 
     
-    if(empty($senderId)||empty($recipientId)||empty($message)){
+    if(empty($senderId)||empty($recipientId)||empty($message)||empty($chatType)){
         echo json_encode(["status" => "error", "Parameter" => "Insufficent parameter"]);
         exit();
     }
 
+    // If patient and health Care communication is taking place then data is retirved from a different fucntion
+    if(($chatType=="Patient" && $_SESSION["userType"]!="Family Member" )||$chatType=="Health Care Professional"){
+        $result=storeChatMessage($senderId, $recipientId, $message);
+    }
+    // If family member and patient communication is taking place then data is retirved from a different function
+    else if($chatType=="Family Member"||  ($chatType=="Patient" && $_SESSION["userType"]=="Family Member" )){
+        $result=addFamilyChatMessage($_SESSION["loggedIn_username"],$senderId,$message,$patientUsername,$recipientId);
+    }
 
-    
-    if (storeChatMessage($senderId, $recipientId, $message)) {
+
+    if ($result) {
         echo json_encode(["status" => "success", "message" => "Message sent successfully"]);
     } else {
         echo json_encode(["status" => "error", "message" => "Error sending message"]);

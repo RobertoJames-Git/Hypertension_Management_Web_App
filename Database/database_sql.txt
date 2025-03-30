@@ -101,6 +101,17 @@ CREATE TABLE request (
 );
 
 
+CREATE TABLE family_chat (
+    chat_id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_username VARCHAR(50) NOT NULL,
+    sender_id INT NOT NULL,
+    message_date DATETIME NOT NULL,
+    content TEXT NOT NULL,
+    patient_username VARCHAR(50) NOT NULL,
+    patient_id INT NOT NULL,
+    FOREIGN KEY (sender_id, sender_username) REFERENCES web_users(userID, username),
+    FOREIGN KEY (patient_id, patient_username) REFERENCES patient(userid, username)
+);
 
 
 
@@ -1062,6 +1073,43 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Error: User is not a health care professional or family member';
     END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE GetFamilyChatMessages(
+    IN p_loggedInUsername VARCHAR(50)
+)
+BEGIN
+    DECLARE user_role VARCHAR(20);
+
+    -- Check if the logged-in user is a patient or family member
+    IF EXISTS (SELECT 1 FROM patient WHERE username = p_loggedInUsername) THEN
+        SET user_role = 'Patient';
+    ELSEIF EXISTS (SELECT 1 FROM family_member WHERE username = p_loggedInUsername) THEN
+        SET user_role = 'Family Member';
+    ELSE
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'User is not authorized to view family chat messages.';
+    END IF;
+
+    -- Retrieve messages, sender, and order by date
+    SELECT 
+        fc.content AS message_content,
+        fc.message_date,
+        wu.username AS sender_username
+    FROM family_chat fc
+    JOIN web_users wu ON fc.sender_id = wu.userID
+    WHERE fc.patient_username IN (SELECT patient.username from patient WHERE patient.username = p_loggedInUsername)
+    ORDER BY fc.message_date;
+
 END $$
 
 DELIMITER ;

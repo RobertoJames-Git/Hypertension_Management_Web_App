@@ -144,7 +144,7 @@
 
     display: grid;
     grid-template-columns: auto auto;
-    column-gap: 30px;
+    column-gap: 0px;
     width:max-content;
     margin: auto;
     align-items: center;
