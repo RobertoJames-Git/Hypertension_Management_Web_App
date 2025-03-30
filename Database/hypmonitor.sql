@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 22, 2025 at 12:19 AM
+-- Generation Time: Mar 30, 2025 at 05:52 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -155,38 +155,63 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `deleteRejectedRequest` (IN `p_reque
       AND request_status = 'rejected';
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetAcceptedHealthCareProfessionalsByUsername` (IN `loggedInUsername` VARCHAR(50))   BEGIN
+    -- Check if the user is a patient using their username
+    IF EXISTS (SELECT 1 FROM patient WHERE username = loggedInUsername) THEN
+        -- Retrieve healthcare professionals associated with accepted requests
+        SELECT 
+            web_users.userID, 
+            web_users.username,
+            web_users.fname,  -- Include first name
+            web_users.lname   -- Include last name
+        FROM web_users
+        INNER JOIN request 
+            ON (
+                (request.sender_username = loggedInUsername AND request.recipient_userid = web_users.userID AND request.request_status = 'accepted')
+                OR 
+                (request.recipient_username = loggedInUsername AND request.sender_userid = web_users.userID AND request.request_status = 'accepted')
+            )
+        INNER JOIN health_care_prof 
+            ON health_care_prof.userid = web_users.userID;
+    ELSE
+        -- Return a message if the user is not a patient
+        SELECT "Error: User is not a patient" AS error_message;
+    END IF;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getAcceptedPatients` (IN `p_loggedInUsername` VARCHAR(50))   BEGIN
-    -- Fetch patients where the logged-in user is the sender and the request is accepted
+    DECLARE user_role VARCHAR(50);
+    DECLARE user_exists INT;
+
+    -- Check if the logged-in user is a Family Member or Health Care Professional
+    IF EXISTS (SELECT 1 FROM family_member WHERE username = p_loggedInUsername) THEN
+        SET user_role = 'Family Member';
+    ELSEIF EXISTS (SELECT 1 FROM health_care_prof WHERE username = p_loggedInUsername) THEN
+        SET user_role = 'Health Care Professional';
+    ELSE
+        -- Raise an error if the user is neither a Family Member nor Health Care Professional
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'You are not authorized to run this procedure.';
+    END IF;
+
+    -- Retrieve patients where the logged-in user is the sender and the request is accepted
     SELECT 
-        r.recipient_username AS patient_username,
-        wu.fname,
-        wu.lname,
-        r.request_date AS connection_date
+        pt.username AS patient_username
     FROM request r
-    INNER JOIN web_users wu ON r.recipient_username = wu.username
+    INNER JOIN patient pt ON r.recipient_username = pt.username
     WHERE r.sender_username = p_loggedInUsername
       AND r.request_status = 'accepted'
-      AND EXISTS (
-          SELECT 1 FROM patient WHERE username = r.recipient_username
-      )
 
     UNION
 
-    -- Fetch patients where the logged-in user is the recipient and the request is accepted
+    -- Retrieve patients where the logged-in user is the recipient and the request is accepted
     SELECT 
-        r.sender_username AS patient_username,
-        wu.fname,
-        wu.lname,
-        r.request_date AS connection_date
+        pt.username AS patient_username
     FROM request r
-    INNER JOIN web_users wu ON r.sender_username = wu.username
+    INNER JOIN patient pt ON r.sender_username = pt.username
     WHERE r.recipient_username = p_loggedInUsername
-      AND r.request_status = 'accepted'
-      AND EXISTS (
-          SELECT 1 FROM patient WHERE username = r.sender_username
-      )
+      AND r.request_status = 'accepted';
 
-    ORDER BY connection_date DESC; -- Sort by most recent connections
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetBloodPressureReadings` (IN `p_username` VARCHAR(50), IN `p_page` INT, IN `p_limit` INT)   BEGIN
@@ -237,6 +262,31 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetBloodPressureReadings` (IN `p_us
     WHERE userid = user_id
     ORDER BY readingdate DESC
     LIMIT p_limit OFFSET offset_value;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetFamilyChatMessages` (IN `p_loggedInUsername` VARCHAR(50), IN `p_patientUsername` VARCHAR(50))   BEGIN
+    DECLARE user_role VARCHAR(20);
+
+    -- Check if the logged-in user is a patient or family member
+    IF EXISTS (SELECT 1 FROM patient WHERE username = p_loggedInUsername) THEN
+        SET user_role = 'Patient';
+    ELSEIF EXISTS (SELECT 1 FROM family_member WHERE username = p_loggedInUsername) THEN
+        SET user_role = 'Family Member';
+    ELSE
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'User is not authorized to view family chat messages.';
+    END IF;
+
+    -- Retrieve messages for the specified patient
+    SELECT
+        fc.content AS message_content,
+        fc.message_date,
+        wu.username AS sender_username
+    FROM family_chat fc
+    JOIN web_users wu ON fc.sender_id = wu.userID
+    WHERE fc.patient_username = p_patientUsername
+    ORDER BY fc.message_date;
 
 END$$
 
@@ -386,6 +436,36 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPatientPendingRequests` (IN `p_p
     FROM support
     WHERE patient_username = p_patient_username
       AND end_date IS NULL; -- Assuming pending requests have no end date
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPatientsForSupportUser` (IN `loggedInUsername` VARCHAR(50))   BEGIN
+    -- Check if the user is a health care professional or family member
+    IF EXISTS (SELECT 1 FROM health_care_prof WHERE username = loggedInUsername) OR 
+       EXISTS (SELECT 1 FROM family_member WHERE username = loggedInUsername) THEN
+
+        -- Retrieve patients where the logged-in user is the sender and the request is accepted
+        SELECT 
+            pt.username AS patient_username
+        FROM request r
+        INNER JOIN patient pt ON r.recipient_username = pt.username
+        WHERE r.sender_username = loggedInUsername
+          AND r.request_status = 'accepted'
+
+        UNION
+
+        -- Retrieve patients where the logged-in user is the recipient and the request is accepted
+        SELECT 
+            pt.username AS patient_username
+        FROM request r
+        INNER JOIN patient pt ON r.sender_username = pt.username
+        WHERE r.recipient_username = loggedInUsername
+          AND r.request_status = 'accepted';
+
+    ELSE
+        -- Return an error message if the user is not a health care professional or family member
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: User is not a health care professional or family member';
+    END IF;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPendingRequests` (IN `p_username` VARCHAR(50))   BEGIN
@@ -756,6 +836,60 @@ CREATE TABLE `communicate` (
   `message_content` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `communicate`
+--
+
+INSERT INTO `communicate` (`communicate_id`, `sender_userid`, `sender_username`, `recipient_userid`, `recipient_username`, `message_date`, `message_content`) VALUES
+(25, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-03-28 08:36:07', 'run'),
+(26, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-03-28 08:36:35', 'hello doc whats up'),
+(27, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-03-28 15:03:33', 'Remember to take your readings'),
+(28, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-03-28 19:41:22', 'I will'),
+(29, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-03-28 19:41:52', 'So what are they\n'),
+(30, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-03-28 19:42:14', 'who cares'),
+(31, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-03-28 19:42:28', 'I do I\'m you\'re damn doctor'),
+(32, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-03-28 19:42:42', 'whatever\n'),
+(33, 7, 'Wil_Sam7', 10, 'Fre_Lew10', '2025-03-28 19:51:11', 'Sup lew'),
+(34, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-03-29 00:53:39', 'sup bro\n'),
+(35, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-03-29 00:53:55', 'My reading be great yzt 😂'),
+(36, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-03-29 20:15:26', 'hey');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `family_chat`
+--
+
+CREATE TABLE `family_chat` (
+  `chat_id` int(11) NOT NULL,
+  `sender_username` varchar(50) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `message_date` datetime NOT NULL,
+  `content` text NOT NULL,
+  `patient_username` varchar(50) NOT NULL,
+  `patient_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `family_chat`
+--
+
+INSERT INTO `family_chat` (`chat_id`, `sender_username`, `sender_id`, `message_date`, `content`, `patient_username`, `patient_id`) VALUES
+(1, 'San_Ros2', 2, '2025-03-30 01:23:21', 'Hey fam', 'Dav_Rob1', 1),
+(2, 'San_Ros2', 2, '2025-03-29 01:23:21', 'Hey fam', 'Dav_Rob1', 1),
+(3, 'Dav_Rob1', 1, '2025-03-29 21:01:46', 'u?', 'Dav_Rob1', 1),
+(4, 'Fre_Lew10', 10, '2025-03-29 22:20:13', 'hey yo', 'Fre_Lew10', 10),
+(5, 'San_Ros2', 2, '2025-03-29 22:41:13', 'how you doing?', 'Fre_Lew10', 10),
+(6, 'San_Ros2', 2, '2025-03-29 22:41:25', 'you fine?\n', 'Fre_Lew10', 10),
+(7, 'San_Ros2', 2, '2025-03-29 22:41:33', 'one', 'Fre_Lew10', 10),
+(8, 'Fre_Lew10', 10, '2025-03-29 22:41:44', 'I\'m okay', 'Fre_Lew10', 10),
+(9, 'Fre_Lew10', 10, '2025-03-29 22:41:58', 'Thing are going well', 'Fre_Lew10', 10),
+(10, 'San_Ros2', 2, '2025-03-29 22:43:23', 'i', 'Fre_Lew10', 10),
+(11, 'San_Ros2', 2, '2025-03-29 22:43:30', 'k', 'Fre_Lew10', 10),
+(12, 'San_Ros2', 2, '2025-03-29 22:43:35', 's', 'Fre_Lew10', 10),
+(13, 'Fre_Lew10', 10, '2025-03-29 22:43:48', 'Stop sending soo many messages', 'Fre_Lew10', 10),
+(14, 'Fre_Lew10', 10, '2025-03-29 22:43:55', '..', 'Fre_Lew10', 10);
+
 -- --------------------------------------------------------
 
 --
@@ -812,7 +946,8 @@ CREATE TABLE `patient` (
 --
 
 INSERT INTO `patient` (`userid`, `username`, `hyp_status`) VALUES
-(1, 'Dav_Rob1', NULL);
+(1, 'Dav_Rob1', NULL),
+(10, 'Fre_Lew10', NULL);
 
 -- --------------------------------------------------------
 
@@ -847,7 +982,10 @@ INSERT INTO `reading` (`userid`, `username`, `readingdate`, `readingtime`, `syst
 (1, 'Dav_Rob1', '2025-03-07', '01:03:28', 165, 102, 80),
 (1, 'Dav_Rob1', '2025-03-08', '01:04:00', 180, 110, 95),
 (1, 'Dav_Rob1', '2025-03-10', '09:00:00', 130, 80, 80),
-(1, 'Dav_Rob1', '2025-03-11', '09:00:00', 120, 100, 83);
+(1, 'Dav_Rob1', '2025-03-11', '09:00:00', 120, 100, 83),
+(10, 'Fre_Lew10', '2025-03-18', '08:00:00', 130, 101, 90),
+(10, 'Fre_Lew10', '2025-03-19', '09:00:00', 120, 100, 77),
+(10, 'Fre_Lew10', '2025-03-20', '14:00:00', 119, 95, 87);
 
 -- --------------------------------------------------------
 
@@ -871,7 +1009,9 @@ CREATE TABLE `request` (
 
 INSERT INTO `request` (`request_id`, `sender_userid`, `sender_username`, `recipient_userid`, `recipient_username`, `request_status`, `request_date`) VALUES
 (27, 8, 'Nat_Dre8', 1, 'Dav_Rob1', 'rejected', '2025-03-20 12:42:03'),
-(30, 7, 'Wil_Sam7', 1, 'Dav_Rob1', 'accepted', '2025-03-21 16:36:48');
+(30, 7, 'Wil_Sam7', 1, 'Dav_Rob1', 'accepted', '2025-03-21 16:36:48'),
+(31, 10, 'Fre_Lew10', 7, 'Wil_Sam7', 'accepted', '2025-03-23 14:37:47'),
+(32, 2, 'San_Ros2', 10, 'Fre_Lew10', 'accepted', '2025-03-23 18:12:03');
 
 -- --------------------------------------------------------
 
@@ -901,7 +1041,8 @@ INSERT INTO `web_users` (`userID`, `username`, `fname`, `lname`, `gender`, `dob`
 (1, 'Dav_Rob1', 'Dave', 'Robinson', 'male', '2006-03-12', 'daveRob@gmail.com', 'f34c57e2072afbf409b21c2fb7328a5adb7f2025d8a73035665e41cfeab0a2da', '2025-03-07 07:08:36', 'active', '$2y$10$wgmT0s1sR6LyllZDPD/Siu8ahaYzjCKXDCXUUmm6z1EVNunp8tUJm'),
 (2, 'San_Ros2', 'Sandra', 'Rose', 'female', '1989-02-22', 'sanrose@mail.com', '3f1d4d7d234e9f83cf3c1e50717daa9664a01d27112ac6dc3a2565cfc1724f44', '2025-03-10 19:03:44', 'active', '$2y$10$R0m9LdDrYFfcezZe9Os2ZeAX2j8E5s2DQDjfVMFbLC9f3VA1ADE9y'),
 (7, 'Wil_Sam7', 'Will', 'Samwells', 'female', '1972-03-12', 'wsamwells@mail.com', 'cd857d45b3003103316f607b8de20c0e3b657febe1811726895ebce7493fa09b', '2025-03-13 07:58:14', 'active', '$2y$10$DvU7iwJAIW2NCzDTcpIxdOr1TmRNdGSxkkOP9oldDLasCZNnfBvXW'),
-(8, 'Nat_Dre8', 'Natasha', 'Drews', 'female', '2005-02-18', 'san_drw@mail.com', '1afe55ff22d624dd72eb5d6665285a3f2f36291524a7df104d5b08056c9e639c', '2025-03-20 12:49:58', 'active', '$2y$10$YWyutWNHEIZ3lFXLXOJSw.w6z8e9nN0Z1r7EEgWkbf4e6KBmLeD5a');
+(8, 'Nat_Dre8', 'Natasha', 'Drews', 'female', '2005-02-18', 'san_drw@mail.com', '1afe55ff22d624dd72eb5d6665285a3f2f36291524a7df104d5b08056c9e639c', '2025-03-20 12:49:58', 'active', '$2y$10$YWyutWNHEIZ3lFXLXOJSw.w6z8e9nN0Z1r7EEgWkbf4e6KBmLeD5a'),
+(10, 'Fre_Lew10', 'Fred', 'Lewis', 'male', '1992-02-27', 'flewis@gmail.com', 'c33fbe0fb13f2b167324e92f0dabf99dd8721af77fd299a3c782364dbe904060', '2025-03-23 13:51:27', 'active', '$2y$10$qrHzUbrkFS9012UMBdPZYe4WnaK9OoMAlPFdiOA1IZOLmjIZpN24m');
 
 --
 -- Indexes for dumped tables
@@ -914,6 +1055,14 @@ ALTER TABLE `communicate`
   ADD PRIMARY KEY (`communicate_id`),
   ADD KEY `sender_userid` (`sender_userid`,`sender_username`),
   ADD KEY `recipient_userid` (`recipient_userid`,`recipient_username`);
+
+--
+-- Indexes for table `family_chat`
+--
+ALTER TABLE `family_chat`
+  ADD PRIMARY KEY (`chat_id`),
+  ADD KEY `sender_id` (`sender_id`,`sender_username`),
+  ADD KEY `patient_id` (`patient_id`,`patient_username`);
 
 --
 -- Indexes for table `family_member`
@@ -963,19 +1112,25 @@ ALTER TABLE `web_users`
 -- AUTO_INCREMENT for table `communicate`
 --
 ALTER TABLE `communicate`
-  MODIFY `communicate_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `communicate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+
+--
+-- AUTO_INCREMENT for table `family_chat`
+--
+ALTER TABLE `family_chat`
+  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `web_users`
 --
 ALTER TABLE `web_users`
-  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables
@@ -987,6 +1142,13 @@ ALTER TABLE `web_users`
 ALTER TABLE `communicate`
   ADD CONSTRAINT `communicate_ibfk_1` FOREIGN KEY (`sender_userid`,`sender_username`) REFERENCES `web_users` (`userID`, `username`),
   ADD CONSTRAINT `communicate_ibfk_2` FOREIGN KEY (`recipient_userid`,`recipient_username`) REFERENCES `web_users` (`userID`, `username`);
+
+--
+-- Constraints for table `family_chat`
+--
+ALTER TABLE `family_chat`
+  ADD CONSTRAINT `family_chat_ibfk_1` FOREIGN KEY (`sender_id`,`sender_username`) REFERENCES `web_users` (`userID`, `username`),
+  ADD CONSTRAINT `family_chat_ibfk_2` FOREIGN KEY (`patient_id`,`patient_username`) REFERENCES `patient` (`userid`, `username`);
 
 --
 -- Constraints for table `family_member`
