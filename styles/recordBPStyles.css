@@ -159,7 +159,7 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
     display: none;
     grid-template-columns: auto auto;
     column-gap: 10px;
-    width: 300px;
+    width: max-content;
     align-items: center;
     justify-content: center;
     background-color: white;
@@ -167,7 +167,8 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
     box-shadow: 0px 0px 5px 1px black;
-    
+    padding-right: 5px;
+    padding-left: 5px;
 }
 
 #Select_Patient_container select{

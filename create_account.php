@@ -113,7 +113,15 @@
                     <option value="Five years or more"  <?php echo isset($_SESSION["health_prov_exp"])&& $_SESSION["health_prov_exp"]=="Five years or more" ? htmlspecialchars("selected") :''?>>Five years or more</option>
                     <option value="Over a decade"       <?php echo isset($_SESSION["health_prov_exp"])&& $_SESSION["health_prov_exp"]=="Over a decade" ? htmlspecialchars("selected") :''?>>Over a Decade</option>
                 </select>
-                
+
+                <div class="label_and_alert_containert " id="phoneNumber_div" "> 
+                    <label for="">Phone Number</label>
+                    <span class="formError"><?php echo isset($_SESSION["phoneNum_Err"]) ? htmlspecialchars($_SESSION["phoneNum_Err"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
+                </div>
+
+                <!--Specify the pattern in telephon input as being 1876-123-4567 -->
+                <input type="tel" name="phoneNum" id="" value="<?php echo isset($_SESSION['phoneNum']) ? htmlspecialchars($_SESSION['phoneNum']) : ''; ?>">
+
                 <input id="submit-btn" class="button_style" type="submit" name="account_creation" value="Create Account">
 
             </form>

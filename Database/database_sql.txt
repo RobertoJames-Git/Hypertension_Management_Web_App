@@ -27,6 +27,7 @@ create table web_users(
     token_expiration datetime,
     account_status enum('pending','active'),
     password varchar(100),
+    phone_number varchar(15),
     PRIMARY KEY(userID, username) 
 );
 
@@ -128,7 +129,8 @@ CREATE PROCEDURE AddWebUser(
     IN p_password_hashed VARCHAR(100),
     IN p_userType ENUM('Hypertensive Individual', 'Family Member', 'Healthcare Professional'),
     IN p_education_level VARCHAR(50),  -- For Family Member
-    IN p_years_of_exp ENUM('Less than a year','One to two years','Three to Fours years','Five years or more','Over a decade'),             -- For Healthcare Professional
+    IN p_years_of_exp ENUM('Less than a year','One to two years','Three to Fours years','Five years or more','Over a decade'),     -- For Healthcare Professional
+    IN p_phone_number VARCHAR(15),
     OUT p_generated_username VARCHAR(50)
 )
 BEGIN
@@ -147,8 +149,8 @@ BEGIN
         -- Set token expiration (10 minutes from now)
         SET p_token_expiration = NOW() + INTERVAL 10 MINUTE;
         -- Insert into web_users table without username
-        INSERT INTO web_users (fname, lname, gender, dob, email, token, token_expiration,account_status, password)
-        VALUES (p_fname, p_lname, p_gender, p_dob, p_email, p_token,p_token_expiration,p_account_status, p_password_hashed);
+        INSERT INTO web_users (fname, lname, gender, dob, email, token, token_expiration,account_status, password,phone_number)
+        VALUES (p_fname, p_lname, p_gender, p_dob, p_email, p_token,p_token_expiration,p_account_status, p_password_hashed,p_phone_number);
 
         -- Get the new userID
         SET newUserID = LAST_INSERT_ID();

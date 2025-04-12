@@ -71,6 +71,8 @@
     const userType = "<?php echo htmlspecialchars($_SESSION["userType"]); ?>";
 
     if (userType === "Patient") {
+
+      // Show chat option for Patient
       chatLinks.forEach(link => {
         if (link.textContent.trim() === "Patient") {
           link.style.display = "none";
@@ -78,12 +80,20 @@
           link.style.display = "block";
         }
       });
-    } else if (userType === "Family Member" || userType === "Health Care Professional") {
+    } 
+    
+    //Show chat option for Family Member and Health Care Professional
+    else if (userType === "Family Member" || userType === "Health Care Professional") {
       chatLinks.forEach(link => {
         if (link.textContent.trim() !== "Patient") {
           link.style.display = "none";
         } else {
-          link.style.display = "block";
+
+          //change the html text in drop down from Patient to Family mmber if the user Type is Family Member
+          if(userType == "Family Member" && link.innerHTML =="Patient"){
+            link.innerHTML ="Family Member"
+          }
+          link.style.display = "block"; 
         }
       });
     }

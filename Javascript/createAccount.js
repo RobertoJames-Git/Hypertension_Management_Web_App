@@ -20,7 +20,7 @@ function showAttributes(accountType) {
             break;
         default:
             return; //exit function if the user selected someothing else
-            break;
+
     }
 
     //show the respective option
@@ -28,6 +28,7 @@ function showAttributes(accountType) {
     for (let i = 0; i < elements.length; i++) {
         elements[i].style.display = "grid";
     }
+
 }
 
 function displayDatabaseErr(){

@@ -7,17 +7,19 @@
     function addUserToDatabase() {
         try {
             $dbConn = getDatabaseConnection();
-            $sql = "CALL AddWebUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @generated_username)";
+            $sql = "CALL AddWebUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @generated_username)";
             $stmt = $dbConn->prepare($sql);
     
             $_SESSION["token"] = bin2hex(random_bytes(32));
             $_SESSION["password"] = generateRandomPassword();
             $password_hash = password_hash($_SESSION["password"], PASSWORD_DEFAULT);
-    
+            
+            //remove dashes from phone number
+            $_SESSION["phoneNum"] =  str_replace("-", "", $_SESSION["phoneNum"]);
             $account_status = "pending";
     
             // Bind parameters
-            $stmt->bind_param("sssssssssss",  
+            $stmt->bind_param("ssssssssssss",  
                 $_SESSION["fname"], 
                 $_SESSION["lname"], 
                 $_SESSION["gender"], 
@@ -28,7 +30,8 @@
                 $password_hash, 
                 $_SESSION["user_type"], 
                 $_SESSION["family_edu_level"],
-                $_SESSION["health_prov_exp"]
+                $_SESSION["health_prov_exp"],
+                $_SESSION["phoneNum"]
             );
     
             $stmt->execute();
@@ -865,7 +868,8 @@
         $query = "SELECT CONCAT(fname, ' ', lname) AS full_name,
                         gender,
                         email,
-                        dob
+                        dob,
+                        phone_number
                 FROM web_users
                 WHERE username = ?";
 

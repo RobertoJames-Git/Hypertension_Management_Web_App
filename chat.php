@@ -24,7 +24,8 @@
         }
         
         $acceptedUserType=["Health Care Professional","Family Member","Patient"];
-        
+
+        //Validate the chatWith parameter to ensure it is one of the accepted user types
         if(!isset($_GET["chatWith"]) || !in_array($_GET["chatWith"],$acceptedUserType) ){
             header("Location:support_network.php");
             exit();
@@ -49,9 +50,18 @@
         // Check if the logged-in user is chatting with a healthcare professional and is a patient
         if ($_GET['chatWith'] == "Health Care Professional" && $_SESSION["userType"] == "Patient") {
             $healthProfData = getAcceptedHealthProfessional($_SESSION["loggedIn_username"]);
-            $chatWithUserID = isset($healthProfData[0]["userID"]) ? $healthProfData[0]["userID"] : "";
-            $chatWithUserUsername = isset($healthProfData[0]["username"]) ? $healthProfData[0]["username"] : "";
-            $headingData="Health Professional Chat : ".$healthProfData[0]["fname"]. " ". $healthProfData[0]["lname"] ;
+
+            if(count($healthProfData)>0){
+
+                $chatWithUserID = isset($healthProfData[0]["userID"]) ? $healthProfData[0]["userID"] : "";
+                $chatWithUserUsername = isset($healthProfData[0]["username"]) ? $healthProfData[0]["username"] : "";
+                $headingData="Health Professional Chat : ".$healthProfData[0]["fname"]. " ". $healthProfData[0]["lname"] ;
+            }
+            else{
+
+                echo'<h3 class="No_Members">Add a Health Care Professional to your Support Network</h3>';
+                exit();
+            }
         }
 
         else if($_GET['chatWith'] == "Patient" ){
@@ -65,7 +75,7 @@
                     $chatWithUserUsername = $_GET["chat_with_patient"];
                 }
 
-                $headingData="Patient Chat";
+                $headingData= $_SESSION["userType"]=="Health Care Professional"?"Patient Chat":"Family Member Chat";
             }
 
         }
@@ -82,20 +92,47 @@
 
 
         }
+        
+    
 
+        //Invalid user interactions eg(Patient --> Patient or Family Member --> Family Member or Health Care Professional --> Health Care Professional or Family Member --> Health Care Professional)
+        else {
+            
+            echo "<br><h1 style='color:red;margin:auto;width:max-content;'>Invalid User Interaction</h1>";
+
+            exit();
+    
+        }
+ 
+         
         // Extract the numeric part from the logged-in username
         $extractedID = extractIDAndUSername($_SESSION["loggedIn_username"]);
         
 
     ?>
 
+
     <div id="chat_header_and_Select">
         <h3 id="chatHeader"><?php echo htmlspecialchars($headingData); ?></h3>
         
         <select name="chat_to_patient" id="chat_to_patientID">
-            <option value="">Select Patient</option>
+            
+            
+
             <?php
-            if (isset($patientData) && is_array($patientData)) {
+
+            $dropDownMessage="";
+            //personalize message in drop down depending on usertype
+            if ($_SESSION["userType"]=="Health Care Professional"){
+                $dropDownMessage="Patient";
+            }
+            else if ($_SESSION["userType"]=="Family Member"){
+                $dropDownMessage="Family Member";
+            }
+            
+            if (isset($patientData) && count($patientData) > 0) {
+
+                echo'<option value="">Select a '.$dropDownMessage.'</option>';
                 foreach ($patientData as $patient) {
                     
                     echo '<option value="' . htmlspecialchars($patient['patient_username']) . '" ' . 
@@ -105,7 +142,8 @@
                     
                 }
             } else {
-                echo '<option value="" disabled>No patients found</option>';
+
+                echo '<option value="" disabled>No '.$dropDownMessage.' found</option>';
             }
             ?>
         </select>

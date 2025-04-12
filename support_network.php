@@ -151,8 +151,15 @@
                 if($_SESSION["userType"]=="Patient"){
                     $headerTxt="Add to your Support Network";
                 }
+                else if ($_SESSION["userType"]=="Family Member"){
+                    $headerTxt="Find your Family Member";
+                }
+                else if($_SESSION["userType"]=="Health Care Professional"){
+                    $headerTxt="Find your Patient";
+                }
                 else{
-                    $headerTxt="Find a Patient";
+                    header("Location:logout.php");
+                    exit();
                 }
             ?>
             <h2> <?php echo htmlspecialchars($headerTxt) ?></h2>

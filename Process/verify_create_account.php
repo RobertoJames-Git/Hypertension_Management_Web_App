@@ -17,7 +17,8 @@
         
         unset(  $_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],
                 $_SESSION["user_typeErr"],$_SESSION["genderErr"],$_SESSION["emailErr"],
-                $_SESSION["family_edu_level_Err"],$_SESSION["health_prov_exp_Err"]);
+                $_SESSION["family_edu_level_Err"],$_SESSION["health_prov_exp_Err"],
+                $_SESSION["phoneNum_Err"]);
         
         #this variable will keep track of if there were any validation errors
         $valErr=false;
@@ -35,6 +36,7 @@
         $_SESSION["email"]=$_POST["email"];
         $_SESSION["family_edu_level"]=$_POST["family_edu_level"];
         $_SESSION["health_prov_exp"]=$_POST["health_prov_exp"];
+        $_SESSION["phoneNum"]=$_POST["phoneNum"];
 
         if($_POST["fname"]==""){
             $_SESSION["fnameErr"]="Field is empty";
@@ -159,6 +161,31 @@
         }
 
 
+        //check if the username is set and if it is empty
+        if(!isset($_POST["phoneNum"])){
+            $_SESSION["phoneNum_Err"] = "Missing in Request";
+            $valErr=true; 
+            header("location:../create_account.php");
+            exit();
+        }
+        else if ($_POST["phoneNum"]==""){
+            $_SESSION["phoneNum_Err"] = "Field is empty";
+            $valErr=true; 
+            header("location:../create_account.php");
+            exit();
+        }
+        else{
+
+            //check if the number starts with the area code 658 or 876 and it has 10 digits.
+            //also the number can have dashed
+            if (!preg_match("/^(658|876)-?[0-9]{3}-?[0-9]{4}$/", $_POST["phoneNum"])) {
+                $_SESSION["phoneNum_Err"] = "Format: 658-123-4567 or 876-123-4567 or 6581234567 or 8761234567";
+                $valErr = true;
+            }
+        }
+        
+
+
 
 
         if($valErr==true){//redirect user if there is an error in validation
@@ -171,7 +198,8 @@
         #if there were no validation error then all variables that store validation data is unset
         unset(  $_SESSION["fnameErr"],$_SESSION["lnameErr"],$_SESSION["dobErr"],
                 $_SESSION["user_typeErr"],$_SESSION["genderErr"],$_SESSION["emailErr"],
-                $_SESSION["family_edu_level_Err"],$_SESSION["health_prov_exp_Err"],$_SESSION["database_or_sendmail_Err"],$_SESSION["username"]);
+                $_SESSION["family_edu_level_Err"],$_SESSION["health_prov_exp_Err"],$_SESSION["database_or_sendmail_Err"],
+                $_SESSION["username"],$_SESSION["phoneNum_Err"]);
         
         //calls a function from the databse folder that adds the user to the database
         if(addUserToDatabase()==false){//if an error occurs while adding the user account then they are redirected back tot the form

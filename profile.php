@@ -40,7 +40,8 @@
             <div class="profile_details"><span>Username : </span>    <span><?php echo htmlspecialchars($_SESSION["loggedIn_username"]) ?></span> </div>
             <div class="profile_details"><span>Gender : </span>    <span><?php echo htmlspecialchars($userDetails['gender']) ?></span> </div>
             <div class="profile_details"><span>DOB : </span>      <span><?php echo htmlspecialchars($userDetails['dob']) ?></span></div>
-            <div class="profile_details"><span>User : </span>  <span> <?php echo htmlspecialchars($_SESSION["userType"]); ?> </span></div>
+            <div class="profile_details"><span>User Type : </span>  <span> <?php echo htmlspecialchars($_SESSION["userType"]); ?> </span></div>
+            <div class="profile_details"><span>Phone number : </span>  <span> <?php echo htmlspecialchars($userDetails["phone_number"]); ?> </span></div>
         </div>
 
 

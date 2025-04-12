@@ -161,3 +161,16 @@
     outline:1px solid white;
     display: none;
 }
+
+.No_Members{
+
+    background-color: white;
+    outline: 1px solid black;
+    border-radius: 5px;
+    margin: auto;
+    margin-top: 20px;
+    width: 530px;
+    padding: 5px;
+    text-align: center;
+    color:red;
+}

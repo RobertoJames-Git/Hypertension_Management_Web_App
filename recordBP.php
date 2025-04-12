@@ -384,13 +384,13 @@
 
 
         // only family member and health care professsionals can see the option to view hypertensive readings of different patients
-        if (userType === "Health Care Professional" || userType === "Family Member") {
+        if (userType === "Health Care Professional") {
             selectPatientText.textContent = "Select your Patient";
             document.getElementById("Select_Patient_container").style.display ="grid"
 
         } else if (userType === "Family Member") {
             selectPatientText.textContent = "Select your Hypertensive Family Member";
-            document.getElementById("Select_Patient_container").style.display ="gird"
+            document.getElementById("Select_Patient_container").style.display ="grid"
         }
 
 
