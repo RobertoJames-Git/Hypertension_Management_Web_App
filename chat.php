@@ -63,32 +63,48 @@
                 exit();
             }
         }
-
-        else if($_GET['chatWith'] == "Patient" ){
+        //if a Health care professional or Family Member is chatting with a Patient
+        else if($_GET['chatWith'] == "Patient" &&($_SESSION["userType"] == "Health Care Professional" ||$_SESSION["userType"] == "Family Member") ){
             
-            //if a Health care professional or Family Member selected Patient chat
-            if( $_SESSION["userType"] == "Health Care Professional" ||$_SESSION["userType"] == "Family Member"){
-                $patientData= getPatientsForSupportUser($_SESSION["loggedIn_username"]);
-                
-                if(isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!= ""){
-                    $chatWithUserID = extractIDAndUSername($_GET["chat_with_patient"]);
-                    $chatWithUserUsername = $_GET["chat_with_patient"];
-                }
-
-                $headingData= $_SESSION["userType"]=="Health Care Professional"?"Patient Chat":"Family Member Chat";
+            $patientData= getPatientsForSupportUser($_SESSION["loggedIn_username"]);
+            
+            if(isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!= ""){
+                $chatWithUserID = extractIDAndUSername($_GET["chat_with_patient"]);
+                $chatWithUserUsername = $_GET["chat_with_patient"];
             }
+
+            $headingData= $_SESSION["userType"]=="Health Care Professional"?"Patient Chat":"Family Member Chat";
+        
 
         }
-        else if($_GET['chatWith'] == "Family Member" ){
+
+        //if a patient want to chat with a family member
+
+        else if($_GET['chatWith'] == "Family Member" && $_SESSION["userType"] == "Patient" ){
             
             //if the patient is the one that is sending a message then extract their userID and username from session
-            if($_SESSION["userType"] == "Patient"){
-
-                $chatWithUserID = extractIDAndUSername($_SESSION["loggedIn_username"]);
-                $chatWithUserUsername = $_SESSION["loggedIn_username"];
-                $headingData="Family Chat";
-            }
+            $chatWithUserID = extractIDAndUSername($_SESSION["loggedIn_username"]);
+            $chatWithUserUsername = $_SESSION["loggedIn_username"];
+            $headingData="Family Chat";
+       
+            $supportNetwork = getSupportNetwork($_SESSION["loggedIn_username"]);
             
+            $foundFamMember=false;
+            foreach ($supportNetwork as $value){
+                if ($value['role'] === "Family Member"){
+                    $foundFamMember = true;
+                    break;
+                }
+                
+            }
+
+            if($foundFamMember ===false){
+
+                echo'<h3 class="No_Members">Add a Family Member to your Support Network</h3>';
+                exit();
+            }
+
+
 
 
         }
@@ -199,7 +215,7 @@
 
             <?php 
             
-            // Periodically update the chat (using setInterval for simplicity, consider WebSockets for production)
+            // Periodically update the chat (using setInterval for simplicity)
             // // Reload chat every 1 seconds
             if((isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!="" && ($_SESSION['userType']=="Family Member"||$_SESSION['userType']=="Health Care Professional"))||($_SESSION['userType']=="Patient")){
                     echo "loadChat();\n\t\t\tsetInterval(loadChat, 2000);";

@@ -49,7 +49,8 @@
 
                 $supportNetwork = getSupportNetwork($_SESSION["loggedIn_username"]);
                 $patientRecord = FALSE;
-
+                
+                
                 if (isset($supportNetwork['error'])) {
                     echo '<p class="error_message">Error: ' . htmlspecialchars($supportNetwork['error']) . '</p>';
                 } elseif (!empty($supportNetwork)) {
@@ -243,7 +244,13 @@
 
     
     </div>
+    
 
+    <?php
+
+        echo print_r($supportNetwork);
+
+    ?>
     <br>
 
 
