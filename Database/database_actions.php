@@ -9,11 +9,18 @@
             $dbConn = getDatabaseConnection();
             $sql = "CALL AddWebUser(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @generated_username)";
             $stmt = $dbConn->prepare($sql);
-    
-            $_SESSION["token"] = bin2hex(random_bytes(32));
+            
+            
+
+            do{
+                //token is a session because it is needed when sending a email
+                $_SESSION["token"] = bin2hex(random_bytes(32));
+            }while(tokenExistInDatabase($_SESSION["token"]) == true);
+
             $_SESSION["password"] = generateRandomPassword();
             $password_hash = password_hash($_SESSION["password"], PASSWORD_DEFAULT);
             
+
             //remove dashes from phone number
             $_SESSION["phoneNum"] =  str_replace("-", "", $_SESSION["phoneNum"]);
             $account_status = "pending";
@@ -67,7 +74,37 @@
             }
         }
     }
-    
+
+    function tokenExistInDatabase($token) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+        
+        // Prepare the SQL query
+        $query = "SELECT COUNT(*) FROM web_users WHERE token = ?";
+        
+        // Initialize a prepared statement
+        $stmt = $dbConn->prepare($query);
+        
+        // Bind the token parameter to the statement
+        $stmt->bind_param("s", $token);
+        
+        // Execute the query
+        $stmt->execute();
+        
+        // Get the result
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        
+        // Close the statement and connection
+        $stmt->close();
+        
+        // Return true if the token exists, false otherwise
+
+        if($count > 0){
+            return true;
+        }
+        return false;
+    }
 
     function activateAccount($token) {
         $dbConn = getDatabaseConnection(); 

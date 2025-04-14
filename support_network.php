@@ -246,14 +246,8 @@
     </div>
     
 
-    <?php
 
-        echo print_r($supportNetwork);
-
-    ?>
     <br>
-
-
     
     <script>
         // Retrieve user type from the session (injected by PHP)
