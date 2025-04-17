@@ -74,8 +74,6 @@ CREATE TABLE reading (
 
 
 
-
-
 CREATE TABLE communicate (
     communicate_id AUTO_INCREMENT PRIMARY KEY,
     sender_userid INT NOT NULL,

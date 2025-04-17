@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 14, 2025 at 02:04 AM
+-- Generation Time: Apr 18, 2025 at 12:46 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -297,120 +297,138 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetMatchingUsers` (IN `p_username_p
         SET MESSAGE_TEXT = 'Invalid account type. Must be "Family member", "Health Care Professional", or "Patient".';
     END IF;
 
-    -- Fetch users based on the account type and username prefix
+    -- Fetch users based on the account type and username prefix, excluding blocked users
     IF p_account_type = 'Family member' THEN
-        SELECT 
+        SELECT
             fm.username AS family_member_username,
-            CASE 
+            CASE
                 -- Return accepted if logged-in user is the sender or receiver of an accepted request
                 WHEN EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = fm.username
-                      AND request.request_status = 'accepted'
+                        AND request.recipient_username = fm.username
+                        AND request.request_status = 'accepted'
                 ) OR EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.recipient_username = p_logged_in_username
-                      AND request.sender_username = fm.username
-                      AND request.request_status = 'accepted'
+                        AND request.sender_username = fm.username
+                        AND request.request_status = 'accepted'
                 ) THEN 'accepted'
                 -- Return other statuses or no request
                 WHEN EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = fm.username
-                      AND request.request_status = 'pending'
+                        AND request.recipient_username = fm.username
+                        AND request.request_status = 'pending'
                 ) THEN 'pending'
-                WHEN EXISTS (
-                    SELECT 1 
-                    FROM request
-                    WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = fm.username
-                      AND request.request_status = 'rejected'
-                ) THEN 'rejected'
                 ELSE 'No Request Sent'
             END AS request_status
         FROM family_member fm
-        WHERE fm.username LIKE CONCAT(p_username_prefix, '%');
+        WHERE fm.username LIKE CONCAT(p_username_prefix, '%')
+          AND fm.username NOT IN (
+              -- Users blocked by the logged-in user
+              SELECT recipient_username
+              FROM request
+              WHERE sender_username = p_logged_in_username
+                AND request_status = 'rejected'
+              UNION
+              -- Users who have blocked the logged-in user
+              SELECT sender_username
+              FROM request
+              WHERE recipient_username = p_logged_in_username
+                AND request_status = 'rejected'
+          );
 
     ELSEIF p_account_type = 'Health Care Professional' THEN
-        SELECT 
+        SELECT
             hp.username AS healthcare_prof_username,
-            CASE 
+            CASE
                 -- Return accepted if logged-in user is the sender or receiver of an accepted request
                 WHEN EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = hp.username
-                      AND request.request_status = 'accepted'
+                        AND request.recipient_username = hp.username
+                        AND request.request_status = 'accepted'
                 ) OR EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.recipient_username = p_logged_in_username
-                      AND request.sender_username = hp.username
-                      AND request.request_status = 'accepted'
+                        AND request.sender_username = hp.username
+                        AND request.request_status = 'accepted'
                 ) THEN 'accepted'
                 -- Return other statuses or no request
                 WHEN EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = hp.username
-                      AND request.request_status = 'pending'
+                        AND request.recipient_username = hp.username
+                        AND request.request_status = 'pending'
                 ) THEN 'pending'
-                WHEN EXISTS (
-                    SELECT 1 
-                    FROM request
-                    WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = hp.username
-                      AND request.request_status = 'rejected'
-                ) THEN 'rejected'
                 ELSE 'No Request Sent'
             END AS request_status
         FROM health_care_prof hp
-        WHERE hp.username LIKE CONCAT(p_username_prefix, '%');
+        WHERE hp.username LIKE CONCAT(p_username_prefix, '%')
+           AND hp.username NOT IN (
+              -- Users blocked by the logged-in user
+              SELECT recipient_username
+              FROM request
+              WHERE sender_username = p_logged_in_username
+                AND request_status = 'rejected'
+              UNION
+              -- Users who have blocked the logged-in user
+              SELECT sender_username
+              FROM request
+              WHERE recipient_username = p_logged_in_username
+                AND request_status = 'rejected'
+          );
 
     ELSEIF p_account_type = 'Patient' THEN
-        SELECT 
+        SELECT
             pt.username AS patient_username,
-            CASE 
+            CASE
                 -- Return accepted if logged-in user is the sender or receiver of an accepted request
                 WHEN EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = pt.username
-                      AND request.request_status = 'accepted'
+                        AND request.recipient_username = pt.username
+                        AND request.request_status = 'accepted'
                 ) OR EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.recipient_username = p_logged_in_username
-                      AND request.sender_username = pt.username
-                      AND request.request_status = 'accepted'
+                        AND request.sender_username = pt.username
+                        AND request.request_status = 'accepted'
                 ) THEN 'accepted'
                 -- Return other statuses or no request
                 WHEN EXISTS (
-                    SELECT 1 
+                    SELECT 1
                     FROM request
                     WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = pt.username
-                      AND request.request_status = 'pending'
+                        AND request.recipient_username = pt.username
+                        AND request.request_status = 'pending'
                 ) THEN 'pending'
-                WHEN EXISTS (
-                    SELECT 1 
-                    FROM request
-                    WHERE request.sender_username = p_logged_in_username
-                      AND request.recipient_username = pt.username
-                      AND request.request_status = 'rejected'
-                ) THEN 'rejected'
                 ELSE 'No Request Sent'
             END AS request_status
         FROM patient pt
-        WHERE pt.username LIKE CONCAT(p_username_prefix, '%');
+        WHERE pt.username LIKE CONCAT(p_username_prefix, '%')
+           AND pt.username NOT IN (
+              -- Users blocked by the logged-in user
+              SELECT recipient_username
+              FROM request
+              WHERE sender_username = p_logged_in_username
+                AND request_status = 'rejected'
+              UNION
+              -- Users who have blocked the logged-in user
+              SELECT sender_username
+              FROM request
+              WHERE recipient_username = p_logged_in_username
+                AND request_status = 'rejected'
+          );
     END IF;
 END$$
 
@@ -496,7 +514,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getRejectedRequests` (IN `p_user_lo
     FROM 
         request
     WHERE 
-        (sender_username = p_user_loggedIn OR recipient_username = p_user_loggedIn)
+        recipient_username = p_user_loggedIn
         AND request_status = 'rejected'
     ORDER BY 
         request_date DESC; -- Show the most recent requests first
@@ -544,7 +562,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetUserCredentialsAndType` (IN `p_u
     -- Check if the username exists
     IF userPassword IS NULL THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Invalid username and/or Password';
+        SET MESSAGE_TEXT = 'Invalid username and/or password';
     ELSEIF accountStatus = 'pending' THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Account is not activated';
@@ -1029,7 +1047,7 @@ INSERT INTO `request` (`request_id`, `sender_userid`, `sender_username`, `recipi
 (32, 2, 'San_Ros2', 10, 'Fre_Lew10', 'accepted', '2025-03-23 18:12:03'),
 (33, 10, 'Fre_Lew10', 8, 'Nat_Dre8', 'accepted', '2025-03-30 15:02:09'),
 (34, 1, 'Dav_Rob1', 8, 'Nat_Dre8', 'accepted', '2025-03-30 18:37:22'),
-(35, 11, 'Ada_Ros11', 1, 'Dav_Rob1', 'accepted', '2025-04-13 10:08:31');
+(41, 11, 'Ada_Ros11', 15, 'Dia_Pot15', 'rejected', '2025-04-17 17:41:29');
 
 -- --------------------------------------------------------
 
@@ -1148,7 +1166,7 @@ ALTER TABLE `family_chat`
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `web_users`

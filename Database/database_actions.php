@@ -235,7 +235,7 @@
                     "user_type" => $user_type
                 ];
             } else {
-                return "Invalid username and/or password.";
+                return "Invalid username and/or password";
             }
         } catch (mysqli_sql_exception $e) {
             // Catch MySQL errors, including SIGNAL errors from the procedure

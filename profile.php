@@ -15,7 +15,7 @@
 
         //ensure the user is logged in
         if(!isset($_SESSION["loggedIn_username"],$_SESSION["userType"])|| $_SESSION["loggedIn_username"]==""||$_SESSION["userType"]==""){
-            header("Location:logout.php");
+            header("Location:login.php");
             exit();
         }
 

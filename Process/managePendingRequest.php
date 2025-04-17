@@ -14,11 +14,17 @@
     $sender = $_GET['sender'] ?? '';
     $decision = $_GET['decision'] ?? '';
     $loggedInUser= $_SESSION["loggedIn_username"];
-
+    $decisionOptions = ['accepted', 'rejected'];
+    
     if ($sender==""||$decision=="") {
         echo json_encode(['success' => false, 'message' => 'Recepient Username and decision is required.']);
         exit();
 
+    }
+
+    if(!in_array($decision,$decisionOptions)){
+        echo json_encode(['success' => false, 'message' => 'Invalid decision. Must be "accepted" or "rejected".']);
+        exit();
     }
 
     try {

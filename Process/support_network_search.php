@@ -23,6 +23,13 @@
         exit;
     }
 
+    $acceptedUserTypes = ['Family member', 'Health Care Professional', 'Patient'];
+
+    if(!in_array($type,$acceptedUserTypes)){
+        echo json_encode([['success' => false, 'message' => 'Invalid User Type. Must be "Family member" or "Health Care Professional" or "Patient"']]);
+        exit;   
+    }
+
     try {
 
 
