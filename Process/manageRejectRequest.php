@@ -16,7 +16,7 @@
         $requestId = intval($_GET['requestId']);
 
         try {
-            // Call the PHP function that interacts with the stored procedure
+            // Call the PHP function that interacts with the stored procedure to delete the rejected request
             $result = deleteRejectedRequest($requestId);
 
             // Send success response

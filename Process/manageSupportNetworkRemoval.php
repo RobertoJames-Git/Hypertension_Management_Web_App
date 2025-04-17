@@ -13,7 +13,8 @@
     $loggedInUsername = $_SESSION["loggedIn_username"];
 
     if($supportUsername==""){
-        echo json_encode(['error' => "The username of the person that is apart fo your support network is needed."]);
+        echo json_encode(['error' => "The username of the person that is apart of your support network is needed."]);
+        exit();
     }
 
     try {
