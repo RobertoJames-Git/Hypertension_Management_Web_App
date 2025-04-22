@@ -229,7 +229,7 @@
                 <?php foreach ($rejectedData as $request): ?>
                     <div class="support_net_details">
                         <span class="username"><?php echo htmlspecialchars($request['Sender']); ?></span>
-                        <button class="reject-Btn" class="remove_button" data-request-id="<?php echo htmlspecialchars($request['request_id']); ?>">Remove</button>
+                        <button class="remove_button" data-request-id="<?php echo htmlspecialchars($request['request_id']); ?>">Remove</button>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
