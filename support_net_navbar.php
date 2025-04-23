@@ -51,15 +51,6 @@
         div.id = "support_selected";
       }
 
-      // Add click functionality for "Manage Support Network"
-      if (text.includes("Manage Support Network")) {
-        div.addEventListener("click", function () {
-          // Redirect only if not already on the page
-          if (currentPage !== "support_network.php") {
-            window.location.href = "support_network.php";
-          }
-        });
-      }
     });
 
     // Get the 'Chat with' dropdown content
