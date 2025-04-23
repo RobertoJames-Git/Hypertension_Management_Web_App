@@ -838,33 +838,83 @@ CREATE PROCEDURE managePendingRequest(
     IN p_decision ENUM('accepted', 'rejected') -- Decision made by the user
 )
 BEGIN
-    DECLARE requestExists INT DEFAULT 0;
-    DECLARE p_request_id INT;
+    DECLARE v_loggedInUserId INT;
+    DECLARE v_isPatient INT DEFAULT 0;
+    DECLARE v_isSenderHCP INT DEFAULT 0;
+    DECLARE v_existingHcpConnection INT DEFAULT 0;
+    DECLARE v_request_id INT;
 
-    -- Check if a pending request exists between the sender and the logged-in user
-    SELECT request_id INTO p_request_id
+    -- 1. Check if the logged-in user exists and is a patient
+    SELECT wu.userID INTO v_loggedInUserId
+    FROM web_users wu
+    WHERE wu.username = p_user_loggedIn;
+
+    IF v_loggedInUserId IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Logged-in user does not exist.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_isPatient
+    FROM patient p
+    WHERE p.userid = v_loggedInUserId;
+
+    IF v_isPatient = 0 THEN
+        -- If the user is not a patient, they might be accepting a request *from* a patient.
+        -- We'll allow the procedure to continue for now, but the HCP check below won't apply.
+        -- If you *only* want patients to manage requests via this procedure,
+        -- you could uncomment the following line:
+        -- SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Only patients can manage requests this way.';
+        SET v_isPatient = 0; -- Explicitly set for clarity in later logic
+    ELSE
+        SET v_isPatient = 1; -- Explicitly set for clarity
+    END IF;
+
+    -- 2. Check if the sender is a Health Care Professional
+    SELECT COUNT(*) INTO v_isSenderHCP
+    FROM health_care_prof hcp
+    JOIN web_users wu ON hcp.userid = wu.userID
+    WHERE wu.username = p_sender_username;
+
+    -- 3. If logged-in user is a patient, sender is HCP, and decision is 'accepted',
+    --    check if the patient already has an accepted HCP connection.
+    IF v_isPatient = 1 AND v_isSenderHCP = 1 AND p_decision = 'accepted' THEN
+        SELECT COUNT(*) INTO v_existingHcpConnection
+        FROM request r
+        JOIN health_care_prof hcp ON (r.sender_username = hcp.username OR r.recipient_username = hcp.username) -- The other party is an HCP
+        WHERE r.request_status = 'accepted'
+          AND (r.sender_username = p_user_loggedIn OR r.recipient_username = p_user_loggedIn) -- Involves the logged-in patient
+          AND hcp.username != p_sender_username; -- Exclude the current request being accepted
+
+        IF v_existingHcpConnection > 0 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'A patient can only have one health care professional in their support network.';
+        END IF;
+    END IF;
+
+    -- Original Logic: Check if the specific pending request exists
+    SELECT request_id INTO v_request_id
     FROM request
     WHERE sender_username = p_sender_username
       AND recipient_username = p_user_loggedIn
       AND request_status = 'pending';
 
-    -- Check if a valid request_id was found
-    SET requestExists = (p_request_id IS NOT NULL);
 
     -- Case 1: Request does not exist
-    IF requestExists = 0 THEN
+    IF v_request_id IS NULL THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'No matching pending request found.';
     END IF;
 
     -- Case 2: Update the request status based on the decision
     UPDATE request
-    SET request_status = p_decision
-    WHERE request_id = p_request_id;
+    SET request_status = p_decision,
+        request_date = NOW() -- Optionally update the date when accepted/rejected
+    WHERE request_id = v_request_id;
 
 END $$
 
 DELIMITER ;
+
 
 
 

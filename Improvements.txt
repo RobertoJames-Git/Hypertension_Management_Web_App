@@ -1,7 +1,11 @@
-1) Someone cannot add more than one health care Professional
+1) Someone cannot add more than one health care Professional --- NOW FIXED
 2) chat system should show date a message was sent
 3) Remove button in rejected request not working (Fix it) --- NOW IT WORKS
 4) Ensure users can tick a remember me check box when logging in
 5) When someone is interacting with a request whether accept or request or remove make sure your procedure checks if the request exist first and return an appropriate message to the user 
 _____________________
 When hosting set up a cron job that delete inactive 
+
+
+
+MINOR modification:

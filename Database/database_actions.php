@@ -498,7 +498,7 @@
             return ['success' => true, 'message' => $message];
         } catch (mysqli_sql_exception $e) {
             // Catch MySQL errors, including SIGNAL errors from the procedure
-            return ['error' => $e->getMessage()];
+            return ['success'=> false, 'error' => $e->getMessage()];
         } finally {
             // Close resources
             if (isset($stmt) && $stmt instanceof mysqli_stmt) {

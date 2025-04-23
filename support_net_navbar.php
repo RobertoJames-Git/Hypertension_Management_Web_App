@@ -1,8 +1,13 @@
 
 
+<?php
+    // Get the filename of the current page to apply styling to specific nav bar to indicate what option was selected
+    $currentPage = basename($_SERVER['PHP_SELF']);
+?>
 
 <div id="Support_Navbar">
-    <div class="dropdown" >
+    <!-- Apply styling if the current page is 'support_network.php' -->
+    <div class="dropdown" <?php echo ($currentPage === 'support_network.php') ? 'id="support_selected"' : ''; ?>>
         Manage Support Network
         <div class="dropdown_content">
             <a onclick="supportNetworkOption('support_network_ID')" >View Support Network</a>
@@ -21,7 +26,8 @@
             <a onclick="supportNetworkOption('rejected_container')">Rejected Requests</a>
         </div>
     </div>
-    <div class="dropdown">
+    <!-- Apply styling if the current page is 'chat.php' -->
+    <div class="dropdown" <?php echo ($currentPage === 'chat.php') ? 'id="support_selected"' : ''; ?>>
         Chat with
         <div class="dropdown_content" id="chat-with-dropdown">
             <a onclick="startChat('Family Member')">Family Member</a>
@@ -40,18 +46,6 @@
 
     // Get all dropdown divs
     let dropdowns = document.querySelectorAll("#Support_Navbar .dropdown");
-
-    dropdowns.forEach(div => {
-      let text = div.textContent.trim();
-
-      // Apply id to a div depending on what page I am in for styling
-      if (currentPage === "support_network.php" && text.includes("Manage Support Network")) {
-        div.id = "support_selected";
-      } else if (currentPage === "chat.php" && text.includes("Chat with")) {
-        div.id = "support_selected";
-      }
-
-    });
 
     // Get the 'Chat with' dropdown content
     const chatDropdown = document.getElementById("chat-with-dropdown");

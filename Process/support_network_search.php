@@ -16,7 +16,6 @@
     $type = $_GET['type'] ?? '';
     $username = $_GET['username'] ?? '';
 
-
     //check if either is empty
     if (empty($type) || empty($username)) {
         echo json_encode([['success' => false, 'message' => 'Username and Type is required']]);

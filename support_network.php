@@ -429,13 +429,14 @@
                             if (parentRecord) {
                                 parentRecord.remove();
                             }
-                            alert(`Request from ${senderUsername} has been ${decision}.`);
+                            console.log(`Request from ${senderUsername} has been ${decision}.`);
                         } else {
-                            alert(`Failed to process the request: ${result.message}`);
+                            alert(`Warning: ${result.message}`);
+                            console.log(`Warning: ${result.message}`)
                         }
                     } catch (error) {
-                        console.error("Error processing request:", error);
-                        alert("An error occurred while processing the request.");
+                        console.error("Error:", error);
+                        alert("Error: ");
                     }
                 }
             });
@@ -517,6 +518,13 @@
                 // Check if the clicked element is a "Remove" button
                 if (target.classList.contains("remove_button")) {
                     const supportUsername = target.closest(".support_net_details").getAttribute("user-on-support-network");
+                    
+                    // Ask for user confirmation
+                    const isConfirmed = confirm(`Are you sure you want to remove ${supportUsername} from your support network?`);
+                    if (!isConfirmed) {
+                        // If user cancels, exit the function
+                        return;
+                    }
 
                     try {
                         // Send a GET request to Process/manageSupportNetworkRemoval.php

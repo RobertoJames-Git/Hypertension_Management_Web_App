@@ -15,13 +15,6 @@
         // List of all container IDs
         const allContainer = ['support_network_ID', 'add_supp_net_container', 'pending_container', 'rejected_container'];
 
-        
-        // Check if containerID is in allContainer
-        if (!allContainer.includes(containerID)) {
-            alert(`The container ID "${containerID}" is not in the list of valid containers.`);
-            return;
-        }
-
         // Iterate through each container in the list
         allContainer.forEach(id => {
             const element = document.getElementById(id);
