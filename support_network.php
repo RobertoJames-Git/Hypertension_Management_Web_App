@@ -336,6 +336,12 @@
                         // Add a click event to the button
                         sendRequestButton.addEventListener('click', () => {
 
+                            //If request Accepted button is clicked it does nothing
+                            if (sendRequestButton.textContent === "Request Accepted") {
+                                alert("The user has already accepted your request.");
+                                return
+                            }
+
                             if (sendRequestButton.textContent === "Request Pending") {
                                 
                                 // Show a confirmation alert for canceling the request
@@ -359,12 +365,16 @@
                                         } else if (sendRequestButton.textContent === "Request Pending") {
                                             // Change back to Send Request after canceling
                                             sendRequestButton.textContent = "Send Request";
-
                                             sendRequestButton.style.backgroundColor = ""; // Reset to default
+                                             console.log(result)
                                         }
                                     } else {
+
                                         alert(`Failed to process request: ${result.message}`);
+                                        console.log(`Failed to process request: ${result.message}`)
                                     }
+
+                                   
                                 })
                                 .catch(error => {
                                     console.error("Error processing request:", error);
@@ -378,9 +388,7 @@
                             sendRequestButton.style.backgroundColor = "#153bb0";
                         } else if (user.request_status === "accepted") {
                             sendRequestButton.textContent = "Request Accepted";
-                            sendRequestButton.addEventListener('click', () => {
-                                window.location.href = `Process/manage_request.php?username=${encodeURIComponent(username)}`;
-                            });
+
                         }
 
                         console.log(user);
@@ -459,6 +467,13 @@
                 if (target.classList.contains("remove_button")) {
                     const requestId = target.getAttribute("data-request-id");
 
+                    // Ask for user confirmation
+                    const isConfirmed = confirm(`Are you sure you want to remove ${supportUsername} from rejected request?`);
+                    if (!isConfirmed) {
+                        // If user cancels, exit the function
+                        return;
+                    }
+
                     try {
                         // Send a GET request to Process/manageRejectRequest.php
                         const response = await fetch(`Process/manageRejectRequest.php?requestId=${encodeURIComponent(requestId)}`, { method: 'GET' });
@@ -471,7 +486,7 @@
                             if (parentRecord) {
                                 parentRecord.remove();
                             }
-                            alert("Rejected request removed successfully.");
+                            console.log("Rejected request removed successfully.");
                         } else {
                             alert(`Failed to remove the request: ${result.message}`);
                         }
@@ -537,9 +552,11 @@
                             if (parentRecord) {
                                 parentRecord.remove();
                             }
-                            alert(`The connection with ${supportUsername} has been removed.`);
+                            console.log(`The connection with ${supportUsername} has been removed.`);
+
                         } else {
                             alert(`Failed to remove the connection: ${result.error}`);
+                            console.error(`Failed to remove the connection: ${result.error}`)
                         }
                     } catch (error) {
                         console.error("Error removing connection:", error);
