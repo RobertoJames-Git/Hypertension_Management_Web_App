@@ -5,9 +5,10 @@
     <div class="dropdown" >
         Manage Support Network
         <div class="dropdown_content">
-            <a onclick="onlyShow('support_network_ID')" >View Support Network</a>
+            <a onclick="supportNetworkOption('support_network_ID')" >View Support Network</a>
 
             <?php
+                #Customize message based on the type of user that has logged in
                 if ($_SESSION["userType"]==="Patient"){
                     $dropdown_Search_msg="Add to Support Network";
                 }
@@ -15,9 +16,9 @@
                     $dropdown_Search_msg="Search for Patient";
                 }
             ?>
-            <a onclick="onlyShow('add_supp_net_container')"><?php echo htmlspecialchars($dropdown_Search_msg)?></a>
-            <a onclick="onlyShow('pending_container')">Pending Requests</a>
-            <a onclick="onlyShow('rejected_container')">Rejected Request</a>
+            <a onclick="supportNetworkOption('add_supp_net_container')"><?php echo htmlspecialchars($dropdown_Search_msg)?></a>
+            <a onclick="supportNetworkOption('pending_container')">Pending Requests</a>
+            <a onclick="supportNetworkOption('rejected_container')">Rejected Requests</a>
         </div>
     </div>
     <div class="dropdown">

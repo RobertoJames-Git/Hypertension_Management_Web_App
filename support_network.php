@@ -249,7 +249,10 @@
 
     <br>
     
+
+    
     <script>
+        
         // Retrieve user type from the session (injected by PHP)
         const userType = <?php echo json_encode($_SESSION["userType"]); ?>;
 
@@ -537,6 +540,24 @@
                 }
             });
         });
+
+
+
+
+        <?php
+            // List of valid container IDs
+            $allowedContainers = ['support_network_ID', 'add_supp_net_container', 'pending_container', 'rejected_container'];
+
+            // Check if the 'container' parameter is set in $_GET and is valid
+            if (isset($_GET['container']) && in_array($_GET['container'], $allowedContainers)) {
+                // If valid, execute your logic
+                $container = htmlspecialchars($_GET['container'], ENT_QUOTES, 'UTF-8');
+                echo "onlyShow('" . $container . "');";
+            } else {
+                // If not set or invalid display the first container
+                echo "onlyShow('support_network_ID');";
+            }
+        ?>
 
     </script>
 

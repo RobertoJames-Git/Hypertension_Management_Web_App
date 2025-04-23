@@ -207,3 +207,11 @@ button{
 #chat-with-dropdown{
     margin-left: 50px;
 }
+
+
+select{
+    outline:2px solid #1946da;
+    border-style: none;
+    border-radius: 2px;
+}
+
