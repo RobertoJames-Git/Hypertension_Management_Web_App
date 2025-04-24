@@ -43,9 +43,8 @@
         $formattedTime=date('g:i A', strtotime($message['message_date']));
 
         
-
+        //This ensures the date is shown once for all messages that has been sent for that day
         if($dateofPrevRecord != $date_of_current_record){
-
             $output.='<div class="msg_date">'.$date_of_current_record.'</div>';
             $dateofPrevRecord=$date_of_current_record;
         }
