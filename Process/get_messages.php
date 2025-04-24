@@ -27,16 +27,50 @@
 
     // Format and return the messages
     $output = '';
+
+    //if there are no messages
+    if(empty($messages)){
+        echo '';
+        exit();
+    }
+
+    $dateofPrevRecord='';
     foreach ($messages as $message) {
+        
+        // --- Date Formatting ---
+        // Convert the original date string to the desired format
+        $date_of_current_record = date('M j, Y', strtotime($message['message_date']));
+        $formattedTime=date('g:i A', strtotime($message['message_date']));
+
+        
+
+        if($dateofPrevRecord != $date_of_current_record){
+
+            $output.='<div class="msg_date">'.$date_of_current_record.'</div>';
+            $dateofPrevRecord=$date_of_current_record;
+        }
+
+            
+
+        // --- End Date Formatting ---
 
         if($message['sender_username'] != $_SESSION["loggedIn_username"]){
+            
             $output .= '<div class="reciever"> 
-                            <span class="reciever_username">' . $message['sender_username'] . '</span> 
-                            <span class="content">' . $message['message_content'] . '</span> 
-                        </div>';
+            <span class="reciever_username">' . $message['sender_username'] . '</span> 
+            <span class="content">' . $message['message_content'] . '</span> 
+            <span class="msg_time">' . $formattedTime. '</span>
+            </div>';
+
         }
         else if($message['sender_username'] == $_SESSION["loggedIn_username"]){
-            $output .= '<div class="sender">' . $message['message_content'] . ' </div>';
+            
+            $output .= '
+            <div class="sender"> 
+            <span class="content">' . $message['message_content'] . '</span> 
+            <span class="msg_time">' . $formattedTime. '</span>
+            </div>';
+
         }
 
 

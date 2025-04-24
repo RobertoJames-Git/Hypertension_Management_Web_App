@@ -12,19 +12,20 @@
 
 /* Style for the chat container */
 #chat_container {
-
     width: 500px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
     background-color: #f9f9f9;
     padding: 15px;
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 10px;
     height: 440px;
     overflow-y: scroll; /* Enables scrolling */
 
+    /* Ensure elements take up space based on their content */
+    grid-auto-rows: min-content; /* Rows will adjust to content height */
+    align-items: start; /* Align elements at the top of each grid cell */
 }
 
 
@@ -56,18 +57,22 @@
 
 
 /* Styling for received messages */
-.reciever {
-    align-self: flex-start;
-    background-color: #d1e7ff;
-    color: #000;
+
+.reciever,.sender{
     padding: 10px 15px;
     border-radius: 20px;
-    max-width: 80%;
+    width: max-content;
+    max-width: 350px;
     word-wrap: break-word;
     font-size: 14px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
     display: grid;
-    
+}
+
+.reciever {
+
+    background-color: #d1e7ff;
+    color: #000;
 }
 
 .reciever_username{
@@ -79,16 +84,33 @@
 
 /* Styling for sent messages */
 .sender {
-    align-self: flex-end;
     background-color: #1946da;
     color: #fff;
-    padding: 10px 15px;
-    border-radius: 20px;
-    max-width: 80%;
-    word-wrap: break-word;
-    font-size: 14px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    justify-self: end;
 }
+
+.content{
+    margin-bottom: 4px;
+}
+
+.reciever .msg_time{
+    text-align: left;
+} 
+.sender .msg_time{
+    text-align: right;
+}
+.msg_time{
+    font-size: 10px;
+  
+}
+
+.msg_date{
+    margin: auto;
+    font-size: 13px;
+    color: grey;
+    margin-bottom: 10px;
+}
+
 
 /* Fixed styling for input container */
 #chat_input_container {
