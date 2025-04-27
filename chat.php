@@ -66,6 +66,8 @@
         //if a Health care professional or Family Member is chatting with a Patient
         else if($_GET['chatWith'] == "Patient" &&($_SESSION["userType"] == "Health Care Professional" ||$_SESSION["userType"] == "Family Member") ){
             
+            /* Add a check here th */
+
             $patientData= getPatientsForSupportUser($_SESSION["loggedIn_username"]);
             
             if(isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!= ""){
@@ -216,9 +218,9 @@
             <?php 
             
             // Periodically update the chat (using setInterval for simplicity)
-            // // Reload chat every 1 seconds
+
             if((isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!="" && ($_SESSION['userType']=="Family Member"||$_SESSION['userType']=="Health Care Professional"))||($_SESSION['userType']=="Patient")){
-                    echo "loadChat();\n\t\t\tsetInterval(loadChat, 2000);";
+                    echo "loadChat();\n\t\t\tsetInterval(loadChat, 3000);";
                 
             }
 

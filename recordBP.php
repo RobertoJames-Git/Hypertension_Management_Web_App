@@ -138,6 +138,60 @@
         }//end of if
     ?>
 
+    
+
+    <div id="blood_Pressure_Range_container">
+        <h2>Modify Patient Range</h2>
+
+        <div id="bp_range_error">
+            <?php
+                if(isset($_SESSION["Err_message"])&& strlen($_SESSION["Err_message"])>4){
+                    echo $_SESSION["Err_message"];
+                    unset($_SESSION["Err_message"]);
+                }
+            ?>
+        </div>
+
+        <form action="Process/setPatientRange.php" method="post">
+            <h4>Set Maxmimum Reading</h4>
+            <div>
+                <label for="">Systolic (mmHg)</label>
+                <input type="number" name="max_systolic" id="" value="<?php echo isset($_SESSION["max_systolic"]) ? htmlspecialchars($_SESSION["max_systolic"]) : htmlspecialchars("") ?>">
+            </div>
+
+            <div>
+                <label for="">Diastolic (mmHg)</label>
+                <input type="number" name="max_diastolic" id="" value="<?php echo isset($_SESSION["max_diastolic"]) ? htmlspecialchars($_SESSION["max_diastolic"]) : htmlspecialchars("")?>">      
+            </div>
+
+            <div>
+                <label for="">Heart Rate (Bpm)</label>
+                <input type="number" name="max_heart_rate" id="" value="<?php echo isset($_SESSION["max_heart_rate"]) ? htmlspecialchars($_SESSION["max_heart_rate"]) : htmlspecialchars("")?>">
+            </div>
+
+            <h4>Set Minimum Reading</h4>
+            <div>
+                <label for="">Systolic (mmHg)</label>
+                <input type="number" name="min_systolic" id="" value="<?php echo isset($_SESSION["min_systolic"]) ? htmlspecialchars($_SESSION["min_systolic"]) : htmlspecialchars("")?>">
+            </div>
+
+            <div>
+                <label for="">Diastolic (mmHg)</label>
+                <input type="number" name="min_diastolic" id="" value="<?php echo isset($_SESSION["min_diastolic"]) ? htmlspecialchars($_SESSION["min_diastolic"]) : htmlspecialchars("")?>">      
+            </div>
+
+            <div>
+                <label for="">Heart Rate (BPM)</label>
+                <input type="number" name="min_heart_rate" id="" value="<?php echo isset($_SESSION["min_heart_rate"]) ? htmlspecialchars($_SESSION["min_heart_rate"]) : htmlspecialchars("")?>">
+            </div>
+
+
+            <button type="submit" id="confirm_Range_Btn" value="submit">Confirm Range</button>
+        </form>
+    </div>
+
+
+
 
     <?php
 
@@ -387,6 +441,7 @@
         if (userType === "Health Care Professional") {
             selectPatientText.textContent = "Select your Patient";
             document.getElementById("Select_Patient_container").style.display ="grid"
+            document.getElementById("blood_Pressure_Range_container").style.display ="block"
 
         } else if (userType === "Family Member") {
             selectPatientText.textContent = "Select your Hypertensive Family Member";

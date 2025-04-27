@@ -35,8 +35,8 @@
         $_SESSION["systolicErr"] = "Numbers Only";
         $valErr = true;
     }
-    elseif(intval($_POST["systolic"])<50 ||intval($_POST["systolic"])>300){
-        $_SESSION["systolicErr"] = "Accepted Range 50 - 300";
+    elseif(intval($_POST["systolic"])<50 ||intval($_POST["systolic"])>400){
+        $_SESSION["systolicErr"] = "Accepted Range 50 - 400";
         $valErr = true;
     }
 

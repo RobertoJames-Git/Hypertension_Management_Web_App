@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 24, 2025 at 02:14 AM
+-- Generation Time: Apr 27, 2025 at 08:02 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -860,6 +860,87 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sendRequest` (IN `p_sender_username
     END procedure_end;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` VARCHAR(50), IN `patientUsername` VARCHAR(50), IN `minSystolic` INT, IN `maxSystolic` INT, IN `minDiastolic` INT, IN `maxDiastolic` INT, IN `minHeartRate` INT, IN `maxHeartRate` INT)   BEGIN
+    DECLARE hcpUserID INT;
+    DECLARE patientUserID INT;
+    DECLARE acceptedRequestExists INT;
+    DECLARE recordExists INT;
+
+    -- Retrieve HCP's userID from health_care_prof table
+    SELECT userid INTO hcpUserID
+    FROM health_care_prof
+    WHERE username = hcpUsername;
+
+    -- Retrieve Patient's userID from patient table
+    SELECT userid INTO patientUserID
+    FROM patient
+    WHERE username = patientUsername;
+
+    -- Check if an accepted request exists between the HCP and the patient
+    SELECT COUNT(*) INTO acceptedRequestExists
+    FROM request
+    WHERE (sender_userid = hcpUserID AND sender_username = hcpUsername AND recipient_userid = patientUserID AND recipient_username = patientUsername)
+       OR (sender_userid = patientUserID AND sender_username = patientUsername AND recipient_userid = hcpUserID AND recipient_username = hcpUsername)
+       AND request_status = 'accepted';
+
+    -- If no accepted request exists, signal an error
+    IF acceptedRequestExists = 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'No accepted request exists between this HCP and the patient.';
+    ELSE
+        -- Check if a record already exists in patient_range table
+        SELECT COUNT(*) INTO recordExists
+        FROM patient_range
+        WHERE hcp_userid = hcpUserID
+          AND hcp_username = hcpUsername
+          AND patient_userid = patientUserID
+          AND patient_username = patientUsername;
+
+        -- If record exists, update it; otherwise, insert a new one
+        IF recordExists > 0 THEN
+            UPDATE patient_range
+            SET min_systolic = minSystolic,
+                max_systolic = maxSystolic,
+                min_diastolic = minDiastolic,
+                max_diastolic = maxDiastolic,
+                min_heart_rate = minHeartRate,
+                max_heart_rate = maxHeartRate,
+                date_set = CURRENT_TIMESTAMP
+            WHERE hcp_userid = hcpUserID
+              AND hcp_username = hcpUsername
+              AND patient_userid = patientUserID
+              AND patient_username = patientUsername;
+        ELSE
+            INSERT INTO patient_range (
+                patient_userid,
+                patient_username,
+                min_systolic,
+                max_systolic,
+                min_diastolic,
+                max_diastolic,
+                min_heart_rate,
+                max_heart_rate,
+                date_set,
+                hcp_userid,
+                hcp_username
+            )
+            VALUES (
+                patientUserID,
+                patientUsername,
+                minSystolic,
+                maxSystolic,
+                minDiastolic,
+                maxDiastolic,
+                minHeartRate,
+                maxHeartRate,
+                CURRENT_TIMESTAMP,
+                hcpUserID,
+                hcpUsername
+            );
+        END IF;
+    END IF;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateUserTokenAndPassword` (IN `p_current_token` VARCHAR(150), IN `p_new_token` VARCHAR(150), IN `p_new_password_hashed` VARCHAR(100))   BEGIN
     DECLARE userExists INT;
 
@@ -959,7 +1040,26 @@ INSERT INTO `family_chat` (`chat_id`, `sender_username`, `sender_id`, `message_d
 (17, 'Dav_Rob1', 1, '2025-03-30 18:40:11', 'yes', 'Dav_Rob1', 1),
 (20, 'Dav_Rob1', 1, '2025-04-18 20:40:02', 'My readings were great this week', 'Dav_Rob1', 1),
 (21, 'Nat_Dre8', 8, '2025-04-18 20:40:50', 'Wonderful', 'Dav_Rob1', 1),
-(22, 'Dav_Rob1', 1, '2025-04-23 16:58:50', 'hmmm..', 'Dav_Rob1', 1);
+(22, 'Dav_Rob1', 1, '2025-04-23 16:58:50', 'hmmm..', 'Dav_Rob1', 1),
+(23, 'Nat_Dre8', 8, '2025-04-24 21:20:50', 'hello, how was your day', 'Dav_Rob1', 1),
+(24, 'Dav_Rob1', 1, '2025-04-24 21:21:07', 'i am doing fine', 'Dav_Rob1', 1),
+(25, 'Nat_Dre8', 8, '2025-04-24 21:24:52', 'My readings are great', 'Dav_Rob1', 1),
+(26, 'Dav_Rob1', 1, '2025-04-24 21:25:09', 'yeap', 'Dav_Rob1', 1),
+(27, 'Nat_Dre8', 8, '2025-04-24 21:26:50', 'How are you\'re readings', 'Dav_Rob1', 1),
+(28, 'Dav_Rob1', 1, '2025-04-24 21:27:31', 'you can check it ', 'Dav_Rob1', 1),
+(29, 'Dav_Rob1', 1, '2025-04-24 21:31:10', 'okay', 'Dav_Rob1', 1),
+(30, 'Nat_Dre8', 8, '2025-04-24 21:31:19', 'yea', 'Dav_Rob1', 1),
+(31, 'Dav_Rob1', 1, '2025-04-24 21:33:07', 'tes', 'Dav_Rob1', 1),
+(32, 'Nat_Dre8', 8, '2025-04-24 21:33:18', 'yeap', 'Dav_Rob1', 1),
+(33, 'Dav_Rob1', 1, '2025-04-24 21:41:40', 'hwllo', 'Dav_Rob1', 1),
+(34, 'Nat_Dre8', 8, '2025-04-24 21:41:53', '...', 'Dav_Rob1', 1),
+(35, 'Dav_Rob1', 1, '2025-04-24 21:42:06', 'test time', 'Dav_Rob1', 1),
+(36, 'Dav_Rob1', 1, '2025-04-24 21:42:54', 'hey', 'Dav_Rob1', 1),
+(37, 'Nat_Dre8', 8, '2025-04-24 21:43:03', '...', 'Dav_Rob1', 1),
+(38, 'Nat_Dre8', 8, '2025-04-24 21:46:41', 'testing remove', 'Dav_Rob1', 1),
+(39, 'Nat_Dre8', 8, '2025-04-24 22:00:12', 'whats up', 'Fre_Lew10', 10),
+(40, 'Fre_Lew10', 10, '2025-04-25 10:14:36', 'hello', 'Fre_Lew10', 10),
+(41, 'Nat_Dre8', 8, '2025-04-25 10:22:48', '....', 'Fre_Lew10', 10);
 
 -- --------------------------------------------------------
 
@@ -1024,7 +1124,35 @@ INSERT INTO `patient` (`userid`, `username`, `hyp_status`) VALUES
 (10, 'Fre_Lew10', NULL),
 (12, 'Gar_Fer12', NULL),
 (13, 'Rog_bla13', NULL),
-(15, 'Dia_Pot15', NULL);
+(15, 'Dia_Pot15', NULL),
+(17, 'Kem_Chr17', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `patient_range`
+--
+
+CREATE TABLE `patient_range` (
+  `patient_userid` int(11) NOT NULL,
+  `patient_username` varchar(50) NOT NULL,
+  `min_systolic` int(11) NOT NULL,
+  `max_systolic` int(11) NOT NULL,
+  `min_diastolic` int(11) NOT NULL,
+  `max_diastolic` int(11) NOT NULL,
+  `min_heart_rate` int(11) NOT NULL,
+  `max_heart_rate` int(11) NOT NULL,
+  `date_set` datetime NOT NULL,
+  `hcp_userid` int(11) NOT NULL,
+  `hcp_username` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `patient_range`
+--
+
+INSERT INTO `patient_range` (`patient_userid`, `patient_username`, `min_systolic`, `max_systolic`, `min_diastolic`, `max_diastolic`, `min_heart_rate`, `max_heart_rate`, `date_set`, `hcp_userid`, `hcp_username`) VALUES
+(10, 'Fre_Lew10', 100, 180, 60, 110, 50, 130, '2025-04-27 00:58:36', 7, 'Wil_Sam7');
 
 -- --------------------------------------------------------
 
@@ -1142,8 +1270,7 @@ INSERT INTO `request` (`request_id`, `sender_userid`, `sender_username`, `recipi
 (50, 1, 'Dav_Rob1', 14, 'Fre_Smi14', 'accepted', '2025-04-18 20:38:36'),
 (54, 14, 'Fre_Smi14', 15, 'Dia_Pot15', 'accepted', '2025-04-21 19:28:05'),
 (55, 7, 'Wil_Sam7', 15, 'Dia_Pot15', 'pending', '2025-04-22 13:11:47'),
-(58, 16, 'Kay_Jac16', 1, 'Dav_Rob1', 'accepted', '2025-04-23 11:26:30'),
-(70, 1, 'Dav_Rob1', 8, 'Nat_Dre8', 'accepted', '2025-04-23 13:18:14');
+(58, 16, 'Kay_Jac16', 1, 'Dav_Rob1', 'accepted', '2025-04-23 11:26:30');
 
 -- --------------------------------------------------------
 
@@ -1181,7 +1308,8 @@ INSERT INTO `web_users` (`userID`, `username`, `fname`, `lname`, `gender`, `dob`
 (13, 'Rog_bla13', 'Roger', 'blake', 'male', '1987-09-21', 'rogbalke@mail.com', '3509f95ab502fbf1571ab794e200be5f2d10588ab51ce1a18e2078616508eab2', '2025-04-12 12:48:24', 'active', '$2y$10$pNtMAiZMh12uUELkdBAe3.xvp6U0RIW1k2Qtp5RotpqfaL65.zMHm', '8761234567'),
 (14, 'Fre_Smi14', 'Fredick', 'Smith', 'male', '1982-12-22', 'fsmith@mail.com', 'bb9546457e8c079f954d94fa54bc86ee81a209359a74b0799f254555d00bc8fd', '2025-04-13 18:20:45', 'active', '$2y$10$BRn0CX2ItGinkoaIAAU7L.i5MqppoWw64mHZNaEo8NLLkNnspvzma', '8761155432'),
 (15, 'Dia_Pot15', 'Diana', 'Potter', 'female', '1960-08-03', 'dpotter@mail.com', 'e816f5467081cf9e65e07fd79aa7b55c0d7a3daa3a65f0c7ba2f8c81d6139ef2', '2025-04-13 19:07:03', 'active', '$2y$10$E63apY9OJ521hIf2768wYeV.ch3SDtAm6iQHPbibUV/UDDiPCrcba', '6585678942'),
-(16, 'Kay_Jac16', 'Kayla', 'Jackson', 'female', '1983-02-22', 'kayjack@mail.com', 'd4b7dfdcabb209de6ffe9b516077dce7f20c4b4fdc2aaa90159bdf6ae0b3ddb7', '2025-04-18 18:36:02', 'active', '$2y$10$u2NWm1/1ZYFXdki6vXo.JOsU60D4uVgSW5Cljkg.eWOSmFjWW2ILq', '876-xxx-xxxx');
+(16, 'Kay_Jac16', 'Kayla', 'Jackson', 'female', '1983-02-22', 'kayjack@mail.com', 'd4b7dfdcabb209de6ffe9b516077dce7f20c4b4fdc2aaa90159bdf6ae0b3ddb7', '2025-04-18 18:36:02', 'active', '$2y$10$u2NWm1/1ZYFXdki6vXo.JOsU60D4uVgSW5Cljkg.eWOSmFjWW2ILq', '876-xxx-xxxx'),
+(17, 'Kem_Chr17', 'Kemar', 'Christie', 'male', '1990-10-22', '1872@mail.com', '7731489034bd3db288d5a20ed72ee0a0592d2c4fe9628bc96014e1c9faf18d5f', '2025-04-26 23:17:11', 'pending', '$2y$10$BITRGdHjxYVOeGTqw2hg8.7mft03BlLC5pOiYF22vOsFYmkdz/oy2', '8761234567');
 
 --
 -- Indexes for dumped tables
@@ -1222,6 +1350,13 @@ ALTER TABLE `patient`
   ADD PRIMARY KEY (`userid`,`username`);
 
 --
+-- Indexes for table `patient_range`
+--
+ALTER TABLE `patient_range`
+  ADD PRIMARY KEY (`patient_userid`,`patient_username`,`hcp_userid`,`hcp_username`),
+  ADD KEY `hcp_userid` (`hcp_userid`,`hcp_username`);
+
+--
 -- Indexes for table `reading`
 --
 ALTER TABLE `reading`
@@ -1257,19 +1392,19 @@ ALTER TABLE `communicate`
 -- AUTO_INCREMENT for table `family_chat`
 --
 ALTER TABLE `family_chat`
-  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT for table `web_users`
 --
 ALTER TABLE `web_users`
-  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `userID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Constraints for dumped tables
@@ -1306,6 +1441,13 @@ ALTER TABLE `health_care_prof`
 --
 ALTER TABLE `patient`
   ADD CONSTRAINT `patient_ibfk_1` FOREIGN KEY (`userid`,`username`) REFERENCES `web_users` (`userID`, `username`);
+
+--
+-- Constraints for table `patient_range`
+--
+ALTER TABLE `patient_range`
+  ADD CONSTRAINT `patient_range_ibfk_1` FOREIGN KEY (`hcp_userid`,`hcp_username`) REFERENCES `health_care_prof` (`userid`, `username`),
+  ADD CONSTRAINT `patient_range_ibfk_2` FOREIGN KEY (`patient_userid`,`patient_username`) REFERENCES `patient` (`userid`, `username`);
 
 --
 -- Constraints for table `reading`

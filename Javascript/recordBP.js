@@ -1,3 +1,37 @@
+
+function displayErrorForPatientRange() {
+    // Get the element where the message is displayed
+    const errorElement = document.getElementById("bp_range_error");
+
+
+        // Get the text content of the element and remove leading/trailing whitespace
+        const message = errorElement.textContent.trim();
+
+        // Check if there is any message content
+        if (message.length > 0) {
+            // Make the element visible since it has content
+            errorElement.style.display = "block";
+
+            // Check if the message includes "successful" (case-insensitive)
+            if (message.toLowerCase().includes("success")) {
+                // If it's a success message, set the text color to green
+                errorElement.style.color = "white";
+                errorElement.style.backgroundColor = "green"; // Light green background
+                errorElement.style.borderRadius="5px";
+                errorElement.style.padding="3px";
+            } else {
+                // If it's an error message (doesn't contain "successful"), set the text color to red
+                errorElement.style.color = "red";
+
+            }
+        }
+    
+}
+
+
+
+
+
 function displayDatabaseErr() {
     const errorContent = document.getElementById("errorContent").innerHTML; // Get the content
     const databaseErrorElement = document.getElementById("database_Error"); // Reference the parent element
@@ -75,6 +109,7 @@ function fetchReadings(page,numOfRecordsToDisplay) {
 // Add the event listener for when the window loads
 window.addEventListener("load", function () {
     
+    displayErrorForPatientRange();
     styleDisabledButtons();
     displayDatabaseErr();
     displayRecordsAlert()

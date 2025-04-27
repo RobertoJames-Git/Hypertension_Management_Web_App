@@ -114,6 +114,24 @@ CREATE TABLE family_chat (
 
 
 
+CREATE TABLE patient_range (
+    patient_userid INT NOT NULL,
+    patient_username VARCHAR(50) NOT NULL,
+    min_systolic INT NOT NULL,
+    max_systolic INT NOT NULL,
+    min_diastolic INT NOT NULL,
+    max_diastolic INT NOT NULL,
+    min_heart_rate INT NOT NULL,
+    max_heart_rate INT NOT NULL,
+    date_set DATETIME NOT NULL,
+    hcp_userid INT NOT NULL,
+    hcp_username VARCHAR(50) NOT NULL,
+    PRIMARY KEY (patient_userid, patient_username, hcp_userid, hcp_username),
+    FOREIGN KEY (hcp_userid, hcp_username) REFERENCES health_care_prof(userid, username),
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
+);
+
+
 DELIMITER $$
 
 CREATE PROCEDURE AddWebUser(
@@ -1161,5 +1179,101 @@ BEGIN
     ORDER BY fc.message_date;
 
 END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE SetPatientRange(
+    IN hcpUsername VARCHAR(50),
+    IN patientUsername VARCHAR(50),
+    IN minSystolic INT,
+    IN maxSystolic INT,
+    IN minDiastolic INT,
+    IN maxDiastolic INT,
+    IN minHeartRate INT,
+    IN maxHeartRate INT
+)
+BEGIN
+    DECLARE hcpUserID INT;
+    DECLARE patientUserID INT;
+    DECLARE acceptedRequestExists INT;
+    DECLARE recordExists INT;
+
+    -- Retrieve HCP's userID from health_care_prof table
+    SELECT userid INTO hcpUserID
+    FROM health_care_prof
+    WHERE username = hcpUsername;
+
+    -- Retrieve Patient's userID from patient table
+    SELECT userid INTO patientUserID
+    FROM patient
+    WHERE username = patientUsername;
+
+    -- Check if an accepted request exists between the HCP and the patient
+    SELECT COUNT(*) INTO acceptedRequestExists
+    FROM request
+    WHERE (sender_userid = hcpUserID AND sender_username = hcpUsername AND recipient_userid = patientUserID AND recipient_username = patientUsername)
+       OR (sender_userid = patientUserID AND sender_username = patientUsername AND recipient_userid = hcpUserID AND recipient_username = hcpUsername)
+       AND request_status = 'accepted';
+
+    -- If no accepted request exists, signal an error
+    IF acceptedRequestExists = 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'No accepted request exists between this HCP and the patient.';
+    ELSE
+        -- Check if a record already exists in patient_range table
+        SELECT COUNT(*) INTO recordExists
+        FROM patient_range
+        WHERE hcp_userid = hcpUserID
+          AND hcp_username = hcpUsername
+          AND patient_userid = patientUserID
+          AND patient_username = patientUsername;
+
+        -- If record exists, update it; otherwise, insert a new one
+        IF recordExists > 0 THEN
+            UPDATE patient_range
+            SET min_systolic = minSystolic,
+                max_systolic = maxSystolic,
+                min_diastolic = minDiastolic,
+                max_diastolic = maxDiastolic,
+                min_heart_rate = minHeartRate,
+                max_heart_rate = maxHeartRate,
+                date_set = CURRENT_TIMESTAMP
+            WHERE hcp_userid = hcpUserID
+              AND hcp_username = hcpUsername
+              AND patient_userid = patientUserID
+              AND patient_username = patientUsername;
+        ELSE
+            INSERT INTO patient_range (
+                patient_userid,
+                patient_username,
+                min_systolic,
+                max_systolic,
+                min_diastolic,
+                max_diastolic,
+                min_heart_rate,
+                max_heart_rate,
+                date_set,
+                hcp_userid,
+                hcp_username
+            )
+            VALUES (
+                patientUserID,
+                patientUsername,
+                minSystolic,
+                maxSystolic,
+                minDiastolic,
+                maxDiastolic,
+                minHeartRate,
+                maxHeartRate,
+                CURRENT_TIMESTAMP,
+                hcpUserID,
+                hcpUsername
+            );
+        END IF;
+    END IF;
+END$$
 
 DELIMITER ;

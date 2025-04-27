@@ -954,3 +954,42 @@
     }
 
 
+
+    function setPatientRange($hcpUsername, $patientUsername, $minSystolic, $maxSystolic, $minDiastolic, $maxDiastolic, $minHeartRate, $maxHeartRate) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL SetPatientRange(?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param(
+                "ssiiiiii", 
+                $hcpUsername, 
+                $patientUsername, 
+                $minSystolic, 
+                $maxSystolic, 
+                $minDiastolic, 
+                $maxDiastolic, 
+                $minHeartRate, 
+                $maxHeartRate
+            );
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Success message (Procedure doesn't return a result set)
+            return ['success' => 'Patient range set successfully.'];
+    
+        } catch (mysqli_sql_exception $e) {
+            // Error handling
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Close resources
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
