@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 27, 2025 at 08:02 AM
+-- Generation Time: Apr 28, 2025 at 04:55 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -146,6 +146,68 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddWebUser` (IN `p_fname` VARCHAR(5
     ELSE
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Email already exists.';
+    END IF;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckPatientReading` (IN `patientUsername` VARCHAR(50), IN `systolic` INT, IN `diastolic` INT)   BEGIN
+    DECLARE patientUserID INT;
+    DECLARE patientName VARCHAR(100);
+    DECLARE minSystolic INT;
+    DECLARE maxSystolic INT;
+    DECLARE minDiastolic INT;
+    DECLARE maxDiastolic INT;
+    DECLARE recordExists INT;
+
+    -- Default hypertension thresholds
+    DECLARE defaultHypertensionMinSystolic INT DEFAULT 130;
+    DECLARE defaultHypertensionMaxSystolic INT DEFAULT 139;
+    DECLARE defaultHypertensionMinDiastolic INT DEFAULT 80;
+    DECLARE defaultHypertensionMaxDiastolic INT DEFAULT 89;
+
+    -- Retrieve the patient's userID and full name
+    SELECT userid, CONCAT(fname, ' ', lname) INTO patientUserID, patientName
+    FROM web_users
+    WHERE username = patientUsername;
+
+    -- Check if a record exists in the patient_range table for the patient
+    SELECT COUNT(*) INTO recordExists
+    FROM patient_range
+    WHERE patient_userid = patientUserID AND patient_username = patientUsername;
+
+    -- If no record exists in the patient_range table, check against default hypertension readings
+    IF recordExists = 0 THEN
+        IF (systolic >= defaultHypertensionMinSystolic AND systolic <= defaultHypertensionMaxSystolic) OR
+           (diastolic >= defaultHypertensionMinDiastolic AND diastolic <= defaultHypertensionMaxDiastolic) THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Patient readings indicate potential hypertension based on default thresholds.';
+        ELSE
+            SELECT 'No record found for patient in patient_range, but readings are within safe levels based on default thresholds.' AS message;
+        END IF;
+    ELSE
+        -- Retrieve the patient's recommended readings from the patient_range table
+        SELECT min_systolic, max_systolic, min_diastolic, max_diastolic
+        INTO minSystolic, maxSystolic, minDiastolic, maxDiastolic
+        FROM patient_range
+        WHERE patient_userid = patientUserID AND patient_username = patientUsername;
+
+        -- Check if the readings are out of range
+        IF (systolic < minSystolic OR systolic > maxSystolic OR
+            diastolic < minDiastolic OR diastolic > maxDiastolic) THEN
+            -- Return the email and phone number of the patient's support network, along with the patient's name and recommended readings
+            SELECT wu.email, wu.phone_number, patientName AS Patient_Name,
+                   minSystolic AS Recommended_Min_Systolic,
+                   maxSystolic AS Recommended_Max_Systolic,
+                   minDiastolic AS Recommended_Min_Diastolic,
+                   maxDiastolic AS Recommended_Max_Diastolic
+            FROM web_users wu
+            JOIN request r
+              ON (r.sender_userid = patientUserID AND r.sender_username = patientUsername AND r.recipient_userid = wu.userID AND r.recipient_username = wu.username
+                  OR r.recipient_userid = patientUserID AND r.recipient_username = patientUsername AND r.sender_userid = wu.userID AND r.sender_username = wu.username)
+            WHERE r.request_status = 'accepted';
+        ELSE
+            -- If readings are in range, return a success message with patient's name and recommended readings
+            SELECT 'Readings are within range.' AS message;
+        END IF;
     END IF;
 END$$
 
@@ -860,7 +922,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sendRequest` (IN `p_sender_username
     END procedure_end;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` VARCHAR(50), IN `patientUsername` VARCHAR(50), IN `minSystolic` INT, IN `maxSystolic` INT, IN `minDiastolic` INT, IN `maxDiastolic` INT, IN `minHeartRate` INT, IN `maxHeartRate` INT)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` VARCHAR(50), IN `patientUsername` VARCHAR(50), IN `minSystolic` INT, IN `maxSystolic` INT, IN `minDiastolic` INT, IN `maxDiastolic` INT)   BEGIN
     DECLARE hcpUserID INT;
     DECLARE patientUserID INT;
     DECLARE acceptedRequestExists INT;
@@ -903,8 +965,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` 
                 max_systolic = maxSystolic,
                 min_diastolic = minDiastolic,
                 max_diastolic = maxDiastolic,
-                min_heart_rate = minHeartRate,
-                max_heart_rate = maxHeartRate,
                 date_set = CURRENT_TIMESTAMP
             WHERE hcp_userid = hcpUserID
               AND hcp_username = hcpUsername
@@ -918,8 +978,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` 
                 max_systolic,
                 min_diastolic,
                 max_diastolic,
-                min_heart_rate,
-                max_heart_rate,
                 date_set,
                 hcp_userid,
                 hcp_username
@@ -931,8 +989,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` 
                 maxSystolic,
                 minDiastolic,
                 maxDiastolic,
-                minHeartRate,
-                maxHeartRate,
                 CURRENT_TIMESTAMP,
                 hcpUserID,
                 hcpUsername
@@ -999,7 +1055,9 @@ INSERT INTO `communicate` (`communicate_id`, `sender_userid`, `sender_username`,
 (51, 16, 'Kay_Jac16', 1, 'Dav_Rob1', '2025-04-23 19:08:42', 'I am doing fine'),
 (52, 1, 'Dav_Rob1', 16, 'Kay_Jac16', '2025-04-23 19:09:05', 'I am doing fine too'),
 (53, 16, 'Kay_Jac16', 1, 'Dav_Rob1', '2025-04-23 19:09:17', 'how are your readings?'),
-(54, 1, 'Dav_Rob1', 16, 'Kay_Jac16', '2025-04-23 19:10:15', 'they have been good you can check them in the support page. But my meds are running low tho');
+(54, 1, 'Dav_Rob1', 16, 'Kay_Jac16', '2025-04-23 19:10:15', 'they have been good you can check them in the support page. But my meds are running low tho'),
+(55, 15, 'Dia_Pot15', 16, 'Kay_Jac16', '2025-04-27 18:36:56', 'hello doctor'),
+(56, 16, 'Kay_Jac16', 15, 'Dia_Pot15', '2025-04-27 18:37:08', 'how are you doing');
 
 -- --------------------------------------------------------
 
@@ -1140,8 +1198,6 @@ CREATE TABLE `patient_range` (
   `max_systolic` int(11) NOT NULL,
   `min_diastolic` int(11) NOT NULL,
   `max_diastolic` int(11) NOT NULL,
-  `min_heart_rate` int(11) NOT NULL,
-  `max_heart_rate` int(11) NOT NULL,
   `date_set` datetime NOT NULL,
   `hcp_userid` int(11) NOT NULL,
   `hcp_username` varchar(50) NOT NULL
@@ -1151,8 +1207,9 @@ CREATE TABLE `patient_range` (
 -- Dumping data for table `patient_range`
 --
 
-INSERT INTO `patient_range` (`patient_userid`, `patient_username`, `min_systolic`, `max_systolic`, `min_diastolic`, `max_diastolic`, `min_heart_rate`, `max_heart_rate`, `date_set`, `hcp_userid`, `hcp_username`) VALUES
-(10, 'Fre_Lew10', 100, 180, 60, 110, 50, 130, '2025-04-27 00:58:36', 7, 'Wil_Sam7');
+INSERT INTO `patient_range` (`patient_userid`, `patient_username`, `min_systolic`, `max_systolic`, `min_diastolic`, `max_diastolic`, `date_set`, `hcp_userid`, `hcp_username`) VALUES
+(1, 'Dav_Rob1', 50, 120, 88, 90, '2025-04-27 18:29:53', 16, 'Kay_Jac16'),
+(10, 'Fre_Lew10', 50, 120, 88, 90, '2025-04-27 12:09:57', 7, 'Wil_Sam7');
 
 -- --------------------------------------------------------
 
@@ -1191,7 +1248,21 @@ INSERT INTO `reading` (`userid`, `username`, `readingdate`, `readingtime`, `syst
 (1, 'Dav_Rob1', '2025-03-12', '06:25:00', 180, 131, 105),
 (1, 'Dav_Rob1', '2025-03-13', '09:00:00', 110, 80, 90),
 (1, 'Dav_Rob1', '2025-03-14', '09:00:00', 108, 79, 90),
-(1, 'Dav_Rob1', '2025-04-15', '10:35:00', 120, 95, 90),
+(1, 'Dav_Rob1', '2025-03-16', '14:05:00', 50, 100, 80),
+(1, 'Dav_Rob1', '2025-03-17', '16:12:00', 300, 200, 80),
+(1, 'Dav_Rob1', '2025-03-18', '04:00:00', 120, 70, 50),
+(1, 'Dav_Rob1', '2025-03-19', '16:19:00', 100, 80, 60),
+(1, 'Dav_Rob1', '2025-03-20', '16:19:00', 100, 80, 60),
+(1, 'Dav_Rob1', '2025-03-21', '16:27:00', 80, 50, 50),
+(1, 'Dav_Rob1', '2025-03-22', '16:27:00', 80, 50, 50),
+(1, 'Dav_Rob1', '2025-03-23', '04:24:00', 80, 50, 50),
+(1, 'Dav_Rob1', '2025-03-24', '04:24:00', 80, 50, 50),
+(1, 'Dav_Rob1', '2025-03-25', '04:24:00', 80, 50, 50),
+(1, 'Dav_Rob1', '2025-04-15', '14:09:00', 100, 80, 70),
+(1, 'Dav_Rob1', '2025-04-16', '13:53:00', 300, 200, 120),
+(1, 'Dav_Rob1', '2025-04-17', '18:12:00', 80, 50, 50),
+(1, 'Dav_Rob1', '2025-04-18', '06:10:00', 287, 123, 60),
+(1, 'Dav_Rob1', '2025-04-26', '04:27:00', 80, 50, 88),
 (10, 'Fre_Lew10', '2025-03-18', '08:00:00', 130, 101, 90),
 (10, 'Fre_Lew10', '2025-03-19', '09:00:00', 120, 100, 77),
 (10, 'Fre_Lew10', '2025-03-20', '09:00:00', 118, 98, 75),
@@ -1236,11 +1307,7 @@ INSERT INTO `reading` (`userid`, `username`, `readingdate`, `readingtime`, `syst
 (15, 'Dia_Pot15', '2025-04-08', '09:05:00', 132, 88, 76),
 (15, 'Dia_Pot15', '2025-04-09', '08:40:00', 120, 80, 71),
 (15, 'Dia_Pot15', '2025-04-10', '10:55:00', 138, 92, 79),
-(15, 'Dia_Pot15', '2025-04-11', '06:30:00', 126, 84, 73),
-(15, 'Dia_Pot15', '2025-04-12', '12:00:00', 145, 98, 82),
-(15, 'Dia_Pot15', '2025-04-13', '07:10:00', 122, 79, 70),
-(15, 'Dia_Pot15', '2025-04-14', '08:20:00', 135, 89, 77),
-(15, 'Dia_Pot15', '2025-04-15', '09:30:00', 129, 83, 75);
+(15, 'Dia_Pot15', '2025-04-11', '06:30:00', 126, 84, 73);
 
 -- --------------------------------------------------------
 
@@ -1263,14 +1330,15 @@ CREATE TABLE `request` (
 --
 
 INSERT INTO `request` (`request_id`, `sender_userid`, `sender_username`, `recipient_userid`, `recipient_username`, `request_status`, `request_date`) VALUES
-(31, 10, 'Fre_Lew10', 7, 'Wil_Sam7', 'accepted', '2025-03-23 14:37:47'),
 (32, 2, 'San_Ros2', 10, 'Fre_Lew10', 'accepted', '2025-03-23 18:12:03'),
 (41, 11, 'Ada_Ros11', 15, 'Dia_Pot15', 'pending', '2025-04-17 17:41:29'),
 (49, 2, 'San_Ros2', 1, 'Dav_Rob1', 'pending', '2025-04-18 19:41:19'),
 (50, 1, 'Dav_Rob1', 14, 'Fre_Smi14', 'accepted', '2025-04-18 20:38:36'),
 (54, 14, 'Fre_Smi14', 15, 'Dia_Pot15', 'accepted', '2025-04-21 19:28:05'),
 (55, 7, 'Wil_Sam7', 15, 'Dia_Pot15', 'pending', '2025-04-22 13:11:47'),
-(58, 16, 'Kay_Jac16', 1, 'Dav_Rob1', 'accepted', '2025-04-23 11:26:30');
+(75, 16, 'Kay_Jac16', 1, 'Dav_Rob1', 'accepted', '2025-04-27 17:05:41'),
+(77, 10, 'Fre_Lew10', 16, 'Kay_Jac16', 'accepted', '2025-04-27 18:33:10'),
+(78, 15, 'Dia_Pot15', 16, 'Kay_Jac16', 'accepted', '2025-04-27 18:34:32');
 
 -- --------------------------------------------------------
 
@@ -1386,7 +1454,7 @@ ALTER TABLE `web_users`
 -- AUTO_INCREMENT for table `communicate`
 --
 ALTER TABLE `communicate`
-  MODIFY `communicate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `communicate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT for table `family_chat`
@@ -1398,7 +1466,7 @@ ALTER TABLE `family_chat`
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `web_users`

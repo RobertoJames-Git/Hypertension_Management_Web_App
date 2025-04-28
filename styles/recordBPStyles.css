@@ -190,7 +190,7 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
 
 #blood_Pressure_Range_container{
     background-color: white;
-    width: 424px;
+    width: 320px;
     margin: auto;
     padding: 10px;
     margin-top: 20px;
@@ -201,9 +201,16 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
 
 #blood_Pressure_Range_container form{
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto auto;
     column-gap: 10px;
     row-gap: 0px;
+    width: 300px;
+    margin: auto;
+}
+
+#blood_Pressure_Range_container form div{
+    margin: auto;
+    width: max-content;
 }
 
 #blood_Pressure_Range_container form input{
@@ -257,3 +264,43 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
     margin-top: 10px;
     display: none;
 }
+
+
+#patient_range_msg{
+    background-color: red;
+    color: white;
+    padding: 5px;
+    border-radius: 8px;
+    display: none;
+
+}
+
+#bp_range_error{
+    width: 290px;
+    padding-left: 10px;
+    word-wrap: break-word;;
+
+}
+
+#target_range_btn{
+    grid-column: 1 / -1;
+    margin-bottom: 10px;
+    display: none;
+    cursor: pointer;
+    background-color: white;
+    border-style: none;
+    color: #1946da;
+    font-size: 13px;
+    border: 2px solid #1946da;
+    padding: 5px;
+    transition: 0.2s background-color ease-in,0.2s color ease-in;
+}
+
+
+
+#target_range_btn:hover{
+    background-color: #1946da;
+    color: white;
+
+}
+

@@ -9,7 +9,7 @@
     require 'PHPMailer-master/PHPMailer-master/src/SMTP.php';
 
 
-    function sendMail($to, $subject, $body) {
+    function sendMail($recipients, $subject, $body) {
         $mail = new PHPMailer(true);
         
         try {
@@ -19,13 +19,17 @@
             $mail->SMTPAuth = true;
             $mail->Username = 'dbsocial0@gmail.com'; // SMTP username
             $mail->Password = 'ckvzlzuuppaowqin'; // SMTP password
-            $mail->SMTPSecure = 'ssl'; 
+            $mail->SMTPSecure = 'ssl';
             $mail->Port = 465; // SMTP port
             
             // Email Headers
             $mail->setFrom('dbsocial0@gmail.com', 'HypMonitor'); // Sender
-            $mail->addAddress($to); // Recipient
             $mail->addReplyTo('dbsocial@gmail.com', 'HypMonitor');
+            
+            // Add multiple recipients
+            foreach ($recipients as $recipient) {
+                $mail->addAddress($recipient); // Add each recipient
+            }
             
             // Email Content
             $mail->isHTML(true);
@@ -35,13 +39,14 @@
             // Send Email
             $mail->send();
             return true;
-
+    
         } catch (Exception $e) {
-        return false;
+            return false;
             // return "Email could not be sent. Error: " . $mail->ErrorInfo;
         }
     }
 
+    
     function sendActivationEmail($to){
         
         if(!isset($_SESSION['fname'],$_SESSION['lname'],$_SESSION["username"],$_SESSION['password'],$_SESSION["token"])){
@@ -73,10 +78,41 @@
 
         $subject="Welcome To HypMonitor! Activate your Account";
         
-        $emailResult=sendMail($to,$subject,$body);
+        $emailResult=sendMail(array($to),$subject,$body);
 
         unset($_SESSION['fname'],$_SESSION['lname'],$_SESSION["username"],$_SESSION['password'],$_SESSION["token"]);
         
         return $emailResult;
 
     }
+
+
+
+    function sendAlertEmailToSupportNetword($recipients, $patient_name,$recommended_min_Systolic,$recommended_min_Diastolic,$recommended_max_Systolic,$recommended_max_Diastolic,$patient_systolic,$patient_diastolic,$patient_heartRate){
+
+        $body="
+        Greetings,<br>
+        This is an automated message regarding $patient_name. Their recent health readings have fallen outside the recommended range:<br>
+        <br>
+        <b>Patient Readings</b><br>
+        - Systolic: $patient_systolic mmHg<br>
+        - Diastolic: $patient_diastolic mmHg<br>
+        - Heart Rate: $patient_heartRate BPM<br>
+        <br>
+        <b>Recommended Readings</b><br>
+        - Systolic: $recommended_min_Systolic mmHg - $recommended_max_Systolic mmHg<br>
+        - Diastolic: $recommended_min_Diastolic mmHg - $recommended_max_Diastolic mmHg<br>
+        <br>
+        As members of $patient_name's support network, your attention is important to ensure their health and safety. If you are a family member, please check in with $patient_name's or offer support as needed. If you are $patient_name healthcare professional, we advise reviewing these readings promptly to provide guidance or intervention as required.<br>
+        Thank you for your dedication to $patient_name's well-being. Together, we can ensure they receive the care and support they need.<br><br>
+        Best regards,<br>
+        HypMonitor Team";
+
+        $subject ="Urgent: Patient Health Update Requires Attention";
+
+        $sendMailResult=sendMail($recipients,$subject,$body);
+        
+        return $sendMailResult;
+    }
+
+

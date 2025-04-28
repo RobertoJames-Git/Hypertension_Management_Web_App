@@ -955,23 +955,21 @@
 
 
 
-    function setPatientRange($hcpUsername, $patientUsername, $minSystolic, $maxSystolic, $minDiastolic, $maxDiastolic, $minHeartRate, $maxHeartRate) {
+    function setPatientRange($hcpUsername, $patientUsername, $minSystolic, $maxSystolic, $minDiastolic, $maxDiastolic) {
         // Get the database connection
         $dbConn = getDatabaseConnection();
     
         try {
             // Prepare the stored procedure call
-            $stmt = $dbConn->prepare("CALL SetPatientRange(?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $dbConn->prepare("CALL SetPatientRange(?, ?, ?, ?, ?, ? )");
             $stmt->bind_param(
-                "ssiiiiii", 
+                "ssiiii", 
                 $hcpUsername, 
                 $patientUsername, 
                 $minSystolic, 
                 $maxSystolic, 
                 $minDiastolic, 
                 $maxDiastolic, 
-                $minHeartRate, 
-                $maxHeartRate
             );
     
             // Execute the procedure
@@ -993,3 +991,50 @@
             }
         }
     }
+
+
+
+    function checkPatientReading($patientUsername, $systolic, $diastolic) {
+        // Get the database connection
+        $dbConn = getDatabaseConnection();
+    
+        try {
+            // Prepare the stored procedure call
+            $stmt = $dbConn->prepare("CALL CheckPatientReading(?, ?, ?)");
+            $stmt->bind_param("sii", $patientUsername, $systolic, $diastolic);
+    
+            // Execute the procedure
+            $stmt->execute();
+    
+            // Fetch the results
+            $result = $stmt->get_result();
+            $output = [];
+    
+            // Check if there are rows returned
+            if ($result) {
+                while ($row = $result->fetch_assoc()) {
+                    $output[] = $row;
+                }
+            }
+    
+            // Return the output
+            return $output;
+    
+        } catch (mysqli_sql_exception $e) {
+            // Return an error message in case of an issue
+            return ['error' => $e->getMessage()];
+        } finally {
+            // Close the statement and database connection
+            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if (isset($dbConn) && $dbConn instanceof mysqli) {
+                $dbConn->close();
+            }
+        }
+    }
+
+
+
+
+

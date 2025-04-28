@@ -28,8 +28,14 @@
         <span id="errorContent"><?php  echo isset($_SESSION["dbMessage"]) ? htmlspecialchars($_SESSION["dbMessage"]) :'';  unset($_SESSION["dbMessage"]) //ensure result is only shown once?></span>
     </div>
 
+    <div id="support_Network_Alert">
+
+    </div>
+
     <div id="recordBP_container">
         <h1>Track your blood pressure</h1>
+
+        <p id="patient_range_msg"><?php echo isset($_SESSION["patientRange_Err"])? $_SESSION["patientRange_Err"] : ''; unset($_SESSION["patientRange_Err"]);?>   </p>
 
         <p>Please enter today's readings</p>
         <form action="Process/validate_recordBP.php" method="post" >
@@ -94,6 +100,8 @@
         <?php
             }#end of if statement
         ?>
+
+        <button id="target_range_btn" onclick="showBPRangeContainer()"> Modify Patient Target Range</button>
     </div>
 
     <?php
@@ -140,55 +148,6 @@
 
     
 
-    <div id="blood_Pressure_Range_container">
-        <h2>Modify Patient Range</h2>
-
-        <div id="bp_range_error">
-            <?php
-                if(isset($_SESSION["Err_message"])&& strlen($_SESSION["Err_message"])>4){
-                    echo $_SESSION["Err_message"];
-                    unset($_SESSION["Err_message"]);
-                }
-            ?>
-        </div>
-
-        <form action="Process/setPatientRange.php" method="post">
-            <h4>Set Maxmimum Reading</h4>
-            <div>
-                <label for="">Systolic (mmHg)</label>
-                <input type="number" name="max_systolic" id="" value="<?php echo isset($_SESSION["max_systolic"]) ? htmlspecialchars($_SESSION["max_systolic"]) : htmlspecialchars("") ?>">
-            </div>
-
-            <div>
-                <label for="">Diastolic (mmHg)</label>
-                <input type="number" name="max_diastolic" id="" value="<?php echo isset($_SESSION["max_diastolic"]) ? htmlspecialchars($_SESSION["max_diastolic"]) : htmlspecialchars("")?>">      
-            </div>
-
-            <div>
-                <label for="">Heart Rate (Bpm)</label>
-                <input type="number" name="max_heart_rate" id="" value="<?php echo isset($_SESSION["max_heart_rate"]) ? htmlspecialchars($_SESSION["max_heart_rate"]) : htmlspecialchars("")?>">
-            </div>
-
-            <h4>Set Minimum Reading</h4>
-            <div>
-                <label for="">Systolic (mmHg)</label>
-                <input type="number" name="min_systolic" id="" value="<?php echo isset($_SESSION["min_systolic"]) ? htmlspecialchars($_SESSION["min_systolic"]) : htmlspecialchars("")?>">
-            </div>
-
-            <div>
-                <label for="">Diastolic (mmHg)</label>
-                <input type="number" name="min_diastolic" id="" value="<?php echo isset($_SESSION["min_diastolic"]) ? htmlspecialchars($_SESSION["min_diastolic"]) : htmlspecialchars("")?>">      
-            </div>
-
-            <div>
-                <label for="">Heart Rate (BPM)</label>
-                <input type="number" name="min_heart_rate" id="" value="<?php echo isset($_SESSION["min_heart_rate"]) ? htmlspecialchars($_SESSION["min_heart_rate"]) : htmlspecialchars("")?>">
-            </div>
-
-
-            <button type="submit" id="confirm_Range_Btn" value="submit">Confirm Range</button>
-        </form>
-    </div>
 
 
 
@@ -268,6 +227,50 @@
             $recordMsg="No records Found";
         }
     ?>
+
+
+    <div id="blood_Pressure_Range_container">
+        <h2>Modify Patient Range</h2>
+
+        <div id="bp_range_error">
+            <?php
+                if(isset($_SESSION["Err_message"])&& strlen($_SESSION["Err_message"])>4){
+                    echo $_SESSION["Err_message"];
+                    unset($_SESSION["Err_message"]);
+                }
+            ?>
+        </div>
+
+        <form action="Process/setPatientRange.php" method="post">
+            <h4>Set Maxmimum Reading</h4>
+            <div>
+                <label for="">Systolic (mmHg)</label>
+                <input type="number" name="max_systolic" id="" value="<?php echo isset($_SESSION["max_systolic"]) ? htmlspecialchars($_SESSION["max_systolic"]) : htmlspecialchars("") ?>">
+            </div>
+
+            <div>
+                <label for="">Diastolic (mmHg)</label>
+                <input type="number" name="max_diastolic" id="" value="<?php echo isset($_SESSION["max_diastolic"]) ? htmlspecialchars($_SESSION["max_diastolic"]) : htmlspecialchars("")?>">      
+            </div>
+
+
+            <h4>Set Minimum Reading</h4>
+            <div>
+                <label for="">Systolic (mmHg)</label>
+                <input type="number" name="min_systolic" id="" value="<?php echo isset($_SESSION["min_systolic"]) ? htmlspecialchars($_SESSION["min_systolic"]) : htmlspecialchars("")?>">
+            </div>
+
+            <div>
+                <label for="">Diastolic (mmHg)</label>
+                <input type="number" name="min_diastolic" id="" value="<?php echo isset($_SESSION["min_diastolic"]) ? htmlspecialchars($_SESSION["min_diastolic"]) : htmlspecialchars("")?>">      
+            </div>
+
+
+            <button type="submit" id="confirm_Range_Btn" value="submit">Confirm Range</button>
+        </form>
+    </div>
+
+
 
     <p id="no_support_message"><?php echo isset($no_patient_message) ? htmlspecialchars($no_patient_message) : ""?></p>
 
@@ -435,13 +438,15 @@
 
         // Get the paragraph element inside the Select_Patient_container div
         const selectPatientText = document.getElementById("select_patient_text");
-
+        const acceptedPatients = <?php echo isset($accepted_Patients) ? json_encode($accepted_Patients) : "[]";?>
+        
 
         // only family member and health care professsionals can see the option to view hypertensive readings of different patients
         if (userType === "Health Care Professional") {
             selectPatientText.textContent = "Select your Patient";
-            document.getElementById("Select_Patient_container").style.display ="grid"
-            document.getElementById("blood_Pressure_Range_container").style.display ="block"
+            document.getElementById("Select_Patient_container").style.display ="grid";
+            document.getElementById("target_range_btn").style.display ="block";
+            
 
         } else if (userType === "Family Member") {
             selectPatientText.textContent = "Select your Hypertensive Family Member";
@@ -459,7 +464,66 @@
             }
         });
 
+
+
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const userRole = "<?php echo $_SESSION['userType']; ?>"; // Fetch user role from PHP session
+            const bpRangeContainer = document.getElementById("blood_Pressure_Range_container");
+
+            // Check role and hide the container for non-HCP users
+            if (userRole !== "Health Care Professional") {
+                bpRangeContainer.style.display = "none"; // Ensure it's hidden for non-HCP users
+                return; // Stop further execution
+            }
+
+            // Check localStorage to restore the last state
+            const isOpen = localStorage.getItem("bpRangeContainerOpen");
+
+            if (isOpen === "true") {
+                // If the container was previously open
+                bpRangeContainer.style.display = "block";
+                bpRangeContainer.style.opacity = "1";
+                bpRangeContainer.style.height = "auto";
+            } else {
+                // If the container was previously closed
+                bpRangeContainer.style.display = "none";
+                bpRangeContainer.style.opacity = "0";
+                bpRangeContainer.style.height = "0px";
+            }
+        });
+
+
+
+        function showBPRangeContainer() {
+            const bpRangeContainer = document.getElementById("blood_Pressure_Range_container");
+
+            if (bpRangeContainer.style.display === "none" || bpRangeContainer.style.opacity === "0") {
+                // Reveal the container and store the state
+                bpRangeContainer.style.display = "block";
+                bpRangeContainer.style.opacity = "1";
+                bpRangeContainer.style.height = "auto";
+                bpRangeContainer.style.transition = "opacity 0.5s ease";
+                localStorage.setItem("bpRangeContainerOpen", "true"); // Save state as "open"
+            } else {
+                // Hide the container and store the state
+                bpRangeContainer.style.opacity = "0";
+                bpRangeContainer.style.transition = "opacity 0.5s ease";
+
+                setTimeout(() => {
+                    bpRangeContainer.style.display = "none"; // Fully hide after transition
+                    localStorage.setItem("bpRangeContainerOpen", "false"); // Save state as "closed"
+                }, 500); // Match transition duration
+            }
+        }
+
+
     </script>
+
+
+
 
     <br>
 </body>

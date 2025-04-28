@@ -1,0 +1,116 @@
+
+
+create table web_users(
+	userID INT AUTO_INCREMENT,
+    username varchar(10),
+    fname varchar(50),
+    lname varchar(50),
+    gender enum('male','female','other','rather not say'),
+    dob date,
+    email varchar(200) Unique,
+    token varchar(100) Unique,
+    token_expiration datetime,
+    account_status enum('pending','active'),
+    password varchar(100),
+    phone_number varchar(15),
+    PRIMARY KEY(userID, username) 
+);
+
+
+-- Create Family Member Table
+CREATE TABLE family_member (
+    userid INT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    education_level ENUM('No Formal Education','Elementary','Secondary','Some Tertiary','Vocational Training','Degree'),
+    PRIMARY KEY (userid, username),
+    FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
+);
+
+-- Create Health Care Professional Table
+CREATE TABLE health_care_prof (
+    userid INT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    years_of_exp ENUM('Less than a year','One to two years','Three to Fours years','Five years or more','Over a decade'),
+    PRIMARY KEY (userid, username),
+    FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
+);
+
+-- Create Patient Table
+CREATE TABLE patient (
+    userid INT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    hyp_status enum('normal','high','low','critical'),
+    PRIMARY KEY (userid, username),
+    FOREIGN KEY (userid, username) REFERENCES web_users(userid, username)
+);
+
+-- Create Reading Table
+CREATE TABLE reading (
+    userid INT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    readingdate DATE NOT NULL,
+    readingtime TIME NOT NULL,
+    systolic INT NOT NULL,
+    diastolic INT NOT NULL,
+    heart_rate INT NOT NULL,
+    PRIMARY KEY (userid, username, readingdate),-- ensure persons can only send in readings once
+    FOREIGN KEY (userid, username) REFERENCES patient(userid, username)
+);
+
+
+
+CREATE TABLE communicate (
+    communicate_id AUTO_INCREMENT PRIMARY KEY,
+    sender_userid INT NOT NULL,
+    sender_username VARCHAR(50) NOT NULL,
+    recipient_userid INT NOT NULL,
+    recipient_username VARCHAR(50) NOT NULL,
+    message_date DATETIME NOT NULL, 
+    message_content TEXT NOT NULL,
+    FOREIGN KEY (sender_userid, sender_username) REFERENCES web_users(userid, username),
+    FOREIGN KEY (recipient_userid, recipient_username) REFERENCES web_users(userid, username)
+);
+
+
+CREATE TABLE request (
+    request_id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_userid INT NOT NULL,
+    sender_username VARCHAR(50) NOT NULL,
+    recipient_userid INT NOT NULL,
+    recipient_username VARCHAR(50) NOT NULL,
+    request_status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+    request_date DATETIME,
+    FOREIGN KEY (sender_userid, sender_username) REFERENCES web_users(userID, username),
+    FOREIGN KEY (recipient_userid, recipient_username) REFERENCES web_users(userID, username)
+);
+
+
+CREATE TABLE family_chat (
+    chat_id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_username VARCHAR(50) NOT NULL,
+    sender_id INT NOT NULL,
+    message_date DATETIME NOT NULL,
+    content TEXT NOT NULL,
+    patient_username VARCHAR(50) NOT NULL,
+    patient_id INT NOT NULL,
+    FOREIGN KEY (sender_id, sender_username) REFERENCES web_users(userID, username),
+    FOREIGN KEY (patient_id, patient_username) REFERENCES patient(userid, username)
+);
+
+
+
+CREATE TABLE patient_range (
+    patient_userid INT NOT NULL,
+    patient_username VARCHAR(50) NOT NULL,
+    min_systolic INT NOT NULL,
+    max_systolic INT NOT NULL,
+    min_diastolic INT NOT NULL,
+    max_diastolic INT NOT NULL,
+    date_set DATETIME NOT NULL,
+    hcp_userid INT NOT NULL,
+    hcp_username VARCHAR(50) NOT NULL,
+    PRIMARY KEY (patient_userid, patient_username, hcp_userid, hcp_username),
+    FOREIGN KEY (hcp_userid, hcp_username) REFERENCES health_care_prof(userid, username),
+    FOREIGN KEY (patient_userid, patient_username) REFERENCES patient(userid, username)
+);
+

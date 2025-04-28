@@ -19,7 +19,7 @@
     require_once("../Database/database_actions.php"); // Include the file where addBloodPressureReading() is defined
 
     // Initialize error session variables
-    $_SESSION["dbMessage"]=$_SESSION["systolicErr"] = $_SESSION["diastolicErr"] = $_SESSION["heart_rateErr"]  = $_SESSION["dateErr"]=$_SESSION["timeErr"] = "";
+    $_SESSION["patientRange_Err"]=$_SESSION["dbMessage"]=$_SESSION["systolicErr"] = $_SESSION["diastolicErr"] = $_SESSION["heart_rateErr"]  = $_SESSION["dateErr"]=$_SESSION["timeErr"] = "";
 
     // Flag to track validation errors
     $valErr = false;
@@ -117,7 +117,7 @@
         // Call the function to add blood pressure reading
         $result = addBloodPressureReading($username, $readingDate, $readingTime, $systolic, $diastolic, $heartRate);
 
-        
+
         // Handle result
         if ($result===true) {
             
@@ -129,6 +129,10 @@
             $_SESSION["userType"] = $userType; // Restore user Type
 
             $_SESSION["dbMessage"] = "Record Added Successfully";
+
+            //Calls a function that checks if patient's readings are in ranges and notifies their support network if readings are out of range
+            check_if_patient_readings_are_in_Range($systolic,$diastolic,$heartRate);
+
             header("location:../recordBP.php");
             exit();
         } else {
@@ -144,6 +148,56 @@
     }
 
 
+    function check_if_patient_readings_are_in_Range($systolic,$diastolic,$heartRate){
+        //Check if readings are out of range and and send alert via phone number and email to support network
+        $result=checkPatientReading($_SESSION["loggedIn_username"],$systolic,$diastolic);
 
+        if (isset($result['error'])) {//If an error occur store it in a session that will display it to the user
+            $_SESSION["patientRange_Err"]=$result['error'];
+            
+        } 
+        /*If there procedure return a email or phone number it means the patients readings are out of range 
+        and that means their support network need to be contacted*/
+        else if (findelement($result,"email")&& findelement($result,"phone_number")) {
+
+            // Initialize an array to store all support network email addresses
+            $supportNetworkEmail = array();
+
+            // Iterate through `$result` (assuming `$result` is an array of associative arrays)
+            foreach ($result as $entry) {
+                if (isset($entry['email'])) { // Ensure 'email' exists in the current entry
+                    $supportNetworkEmail[] = $entry['email']; // Add email to the array
+                }
+            }
+
+
+            // Send email alerting your support netwoek about your irregular reading
+            require_once('sendmail.php');
+            $emailResult = sendAlertEmailToSupportNetword($supportNetworkEmail,$result[0]['Patient_Name'], $result[0]['Recommended_Min_Systolic'],$result[0]['Recommended_Min_Diastolic'], $result[0]['Recommended_Max_Systolic'], $result[0]['Recommended_Max_Diastolic'], $systolic,$diastolic,$heartRate);
+
+            if($emailResult){
+                $_SESSION["patientRange_Err"]= "Your support Network was notified of your irregular reading.";
+            }
+            else {
+                $_SESSION["patientRange_Err"]="An error Occurred while emailing your support network";
+            }
+
+        }
+        else if (findelement($result,"message")){
+            print_r($result);
+            $_SESSION["patientRange_Err"]=$result[0]["message"];
+        }
+
+    }
     
-    
+    //function used to find if there is an array with a certain element or record in it eg email or phone number
+    function findelement($data, $search) {
+        if (is_array($data)) {
+            foreach ($data as $entry) {
+                if (isset($entry[$search])) {
+                    return true; // Key found
+                }
+            }
+        }
+        return false; // Explicitly return false if key is not found
+    }

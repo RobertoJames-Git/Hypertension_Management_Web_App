@@ -102,6 +102,24 @@ function fetchReadings(page,numOfRecordsToDisplay) {
     window.location.href = "recordBP.php?page=" + page+ "&no_of_records_to_display="+ numOfRecordsToDisplay; // Reload with new page number
 }
 
+function displayPatientRangeMsg() {
+    const alertMsg = document.getElementById("patient_range_msg");
+    const message = alertMsg.textContent.trim();
+    // Trim any whitespace in case textContent has spaces
+    if (message.length > 0) {
+        alertMsg.style.display = "block"; // Make it visible if content exists
+    }
+
+
+    // Check if the message is not empty and includes "within range" (case-insensitive)
+    if (message.length > 0 && message.toLowerCase().includes("within range")) {
+
+        alertMsg.style.backgroundColor = "green";
+        alertMsg.style.color = "white";
+    }
+
+    
+}
 
 
 
@@ -114,6 +132,7 @@ window.addEventListener("load", function () {
     displayDatabaseErr();
     displayRecordsAlert()
     checkRecords();
+    displayPatientRangeMsg();
 });
 
 
