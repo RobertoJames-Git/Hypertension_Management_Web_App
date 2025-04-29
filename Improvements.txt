@@ -2,10 +2,13 @@
 2) chat system should show date a message was sent --- NOW FIXED
 3) Remove button in rejected request not working (Fix it) --- NOW IT WORKS
 4) Ensure users can tick a remember me check box when logging in
-5) When someone is interacting with a request whether accept or request or remove make sure your procedure checks if the request exist first and return an appropriate message to the user 
+5) When someone is interacting with a request whether accept or rejected or remove make sure your procedure checks if the request exist first and return an appropriate message to the user 
+6) In the Record page. for HCP ensure that the page shows the recommended reading for the selected patient
+7) Doctor and Family view if they dont have any Patient and click chat feature
 _____________________
-When hosting set up a cron job that delete inactive 
-
+When hosting, set up a cron job that delete inactive accounts after 24 hours, be sure to add a column in the database that shows the time a account was created
 
 
 MINOR modification:
+If someone modifies the url and add a backslash it causes an error in the javascript:
+example:http://localhost/Major_Project_DHI/chat.php?chatWith=Patient&chat_with_patient=ggg\

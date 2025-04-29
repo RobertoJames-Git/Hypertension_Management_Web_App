@@ -8,7 +8,6 @@
         exit();
     }
 
-
     // Get data from the request
     $senderId = $_POST['senderId'] ?? '';
     $recipientId = $_POST['recipientId'] ?? '';
@@ -32,15 +31,14 @@
     }
 
 
-    if ($result) {
+    if (isset($result["success"])) {
+        http_response_code(200); // Success
         echo json_encode(["status" => "success", "message" => "Message sent successfully"]);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Error sending message"]);
+    } else if (isset($result["error"])) {
+        http_response_code(400); // Client-side error
+        echo json_encode(["status" => "error", "message" => "Error sending message please refresh"]);
     }
-
     exit();
-
-
-
+    
 
 ?>

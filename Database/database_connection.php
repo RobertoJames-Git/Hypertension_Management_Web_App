@@ -20,7 +20,7 @@
             $dbConn=mysqli_connect($hostname,$database_user,$password,$database_name);
         }
         catch(mysqli_sql_exception $e){
-            echo("Connection Failed");
+            echo("Failed to connect to database.");
         }
 
         return $dbConn;

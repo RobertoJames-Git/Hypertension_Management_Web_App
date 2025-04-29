@@ -736,44 +736,33 @@
         return $messages;
     }
 
+
     function storeChatMessage($senderId, $recipientId, $message) {
-        // Get the database connection
         $dbConn = getDatabaseConnection();
     
         try {
-
-            // Set the timezone to Jamaica
-            $jamaicanTime = new DateTime("now", new DateTimeZone("America/Jamaica"));
-            $currentTime = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
-    
-            $query = "INSERT INTO communicate (sender_userid, sender_username, recipient_userid, recipient_username, message_date, message_content)
-                      VALUES (?, (SELECT username FROM web_users WHERE userID = ?), ?, (SELECT username FROM web_users WHERE userID = ?), ?, ?)";
-            $stmt = $dbConn->prepare($query);
-    
+            $stmt = $dbConn->prepare("CALL StoreChatMessage(?, ?, ?)");
             if (!$stmt) {
                 throw new mysqli_sql_exception("Error preparing statement: " . $dbConn->error);
             }
     
-            $stmt->bind_param("iiiiss", $senderId, $senderId, $recipientId, $recipientId, $currentTime,$message);
-    
+            $stmt->bind_param("iis", $senderId, $recipientId, $message);
             $stmt->execute();
     
-            // Check for errors after execution
             if ($stmt->errno) {
                 throw new mysqli_sql_exception("Error executing statement: " . $stmt->error);
             }
     
             return ['success' => true];
         } catch (mysqli_sql_exception $e) {
+            // Handle the custom SQL error for no accepted request
+            if (strpos($e->getMessage(), 'No accepted request exists') !== false) {
+                return ['error' => 'Cannot send message: No accepted request exists between these users.'];
+            }
             return ['error' => $e->getMessage()];
         } finally {
-            // Cleanup resources
-            if (isset($stmt) && $stmt instanceof mysqli_stmt) {
-                $stmt->close();
-            }
-            if (isset($dbConn) && $dbConn instanceof mysqli) {
-                $dbConn->close();
-            }
+            if (isset($stmt)) $stmt->close();
+            if (isset($dbConn)) $dbConn->close();
         }
     }
 
@@ -847,57 +836,33 @@
     }
 
 
-
-    function addFamilyChatMessage( string $senderUsername, int $senderId, string $content, string $patientUsername, int $patientId) {
-
+    function addFamilyChatMessage(string $senderUsername, int $senderId, string $content, string $patientUsername, int $patientId) {
         $conn = getDatabaseConnection();
         
-        if (!$conn) {
-            return ["error" => "Failed to connect to the database"];
-        }
-
         try {
+            // Prepare the stored procedure call
+            $stmt = $conn->prepare("CALL AddFamilyChatMessage(?, ?, ?, ?, ?)");
             
-            // Set the timezone to Jamaica
-            $jamaicanTime = new DateTime("now", new DateTimeZone("America/Jamaica"));
-            $currentTime = $jamaicanTime->format("Y-m-d H:i:s"); // Format to 'YYYY-MM-DD HH:MM:SS'
-
-            // Construct the SQL query
-            $query = "INSERT INTO family_chat (sender_username, sender_id, message_date, content, patient_username, patient_id)
-                    VALUES (?, ?, ?, ?, ?, ?)";
-
-            // Prepare the query
-            $stmt = $conn->prepare($query);
-
-            // Bind the parameters
-            $stmt->bind_param(
-                "sisssi",
-                $senderUsername,
-                $senderId,
-                $currentTime,
-                $content,
-                $patientUsername,
-                $patientId
-            );
-
-            // Execute the query
-            if ($stmt->execute()) {
-                $stmt->close();
-                $conn->close();
-                return ["success" => "Message added successfully"];
-            } else {
-                $stmt->close();
-                $conn->close();
-                return ["error" => "Failed to add message: " . $stmt->error];
+            if (!$stmt) {
+                throw new mysqli_sql_exception("Error preparing statement: " . $conn->error);
             }
-        } catch (Exception $e) {
-            // Handle errors (e.g., log them)
-            error_log("Error: " . $e->getMessage());
-            return ["error" => "Database error: " . $e->getMessage()];
+    
+            // Bind the parameters
+            $stmt->bind_param("sissi", $senderUsername, $senderId, $content, $patientUsername, $patientId);
+    
+            // Execute the stored procedure
+            if (!$stmt->execute()) {
+                throw new mysqli_sql_exception("Error executing statement: " . $stmt->error);
+            }
+    
+            return ["success" => "Message added successfully"];
+        } catch (mysqli_sql_exception $e) {
+            return ["error" => $e->getMessage()];
+        } finally {
+            if (isset($stmt)) $stmt->close();
+            if (isset($conn)) $conn->close();
         }
     }
-
-    
 
     function getUserDetailsByUsername() {
         $conn = getDatabaseConnection(); // Assuming getDatabaseConnection() is defined elsewhere
@@ -1035,6 +1000,7 @@
     }
 
 
+    
 
 
 

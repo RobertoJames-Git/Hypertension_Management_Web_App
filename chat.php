@@ -69,6 +69,13 @@
             /* Add a check here th */
 
             $patientData= getPatientsForSupportUser($_SESSION["loggedIn_username"]);
+
+            //checks if the health care professional or family member does not have anyone in their support network to chat with
+            if(!isset($patientData)|| count($patientData)==0){
+
+                echo'<h3 class="No_Members">Add a Patient to your Support Network</h3>';
+                exit();
+            }
             
             if(isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!= ""){
                 $chatWithUserID = extractIDAndUSername($_GET["chat_with_patient"]);
@@ -126,7 +133,6 @@
         // Extract the numeric part from the logged-in username
         $extractedID = extractIDAndUSername($_SESSION["loggedIn_username"]);
         
-
     ?>
 
 
@@ -139,46 +145,104 @@
 
             <?php
 
-            $dropDownMessage="";
-            //personalize message in drop down depending on usertype
-            if ($_SESSION["userType"]=="Health Care Professional"){
-                $dropDownMessage="Patient";
-            }
-            else if ($_SESSION["userType"]=="Family Member"){
-                $dropDownMessage="Family Member";
+                $dropDownMessage="";
+                //personalize message in drop down depending on usertype
+                if ($_SESSION["userType"]=="Health Care Professional"){
+                    $dropDownMessage="Patient";
+                }
+                else if ($_SESSION["userType"]=="Family Member"){
+                    $dropDownMessage="Family Member";
+                }
+                
+                if (isset($patientData) && count($patientData) > 0) {
+
+                    echo'<option value="">Select a '.$dropDownMessage.'</option>';
+
+                    foreach ($patientData as $patient) {
+                        
+                        echo '<option value="' . htmlspecialchars($patient['patient_username']) . '" ' . 
+                            ((isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"] == $patient['patient_username']) ? "selected" : "") . '>' . 
+                            htmlspecialchars($patient['patient_username']) . 
+                            '</option>';
+                        
+                    }
+                } else {
+
+                    echo '<option value="" disabled>No '.$dropDownMessage.' found</option>';
             }
             
-            if (isset($patientData) && count($patientData) > 0) {
-
-                echo'<option value="">Select a '.$dropDownMessage.'</option>';
-                foreach ($patientData as $patient) {
-                    
-                    echo '<option value="' . htmlspecialchars($patient['patient_username']) . '" ' . 
-                        ((isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"] == $patient['patient_username']) ? "selected" : "") . '>' . 
-                        htmlspecialchars($patient['patient_username']) . 
-                        '</option>';
-                    
-                }
-            } else {
-
-                echo '<option value="" disabled>No '.$dropDownMessage.' found</option>';
-            }
             ?>
         </select>
 
     </div>
 
-    <div id="chat_and_input_container">
-        <div id="chat_container">
-            <!-- Messages will be dynamically appended here -->
+    <?php
+
+        #check if logged in user is a HCP or Family member and if they have selected a patient to chat with
+        if(($_SESSION["userType"] == "Health Care Professional" || $_SESSION["userType"] == "Family Member") && isset($_GET["chat_with_patient"], $patientData) ){
+
+            $patientFromUrl = $_GET["chat_with_patient"];
+            $isValidPatientSelected = false; // Flag to track if the selected patient is valid
+
+            // Check if $patientData is not empty and is an array
+            if (!empty($patientData) && is_array($patientData)) {
+                // Iterate through the patient data array
+                foreach ($patientData as $patient) {
+                    // Check if the 'patient_username' key exists and matches the selected patient
+                    if (isset($patient['patient_username']) && $patient['patient_username'] === $patientFromUrl) {
+                        $isValidPatientSelected = true; // Found a match
+                        break; // Exit the loop once a match is found
+                    }
+                }
+            }
+
+
+            if (!$isValidPatientSelected) {
+
+                if(isset($_GET["chat_with_patient"]) && !empty($_GET["chat_with_patient"])){
+                
+                    echo"<h3 class='No_Members'>You are not apart of $patientFromUrl's support network<br>Please select someone from the drop down.</h3>";
+                }
+                else{
+                    echo"<h3 class='No_Members'>Please select someone form the dropdown.</h3>";
+                }
+            }
+
+        }
+
+    ?>
+
+        
+    
+    <?php 
+
+        //checks if the patient username that was retrieved from the url is in the support network of the HCP and Family Member
+        //Patient does not rely on $_GET request since they do not select someone form the drop down
+        if( ( ($_SESSION["userType"] == "Health Care Professional" || $_SESSION["userType"] == "Family Member") && (isset($isValidPatientSelected) && $isValidPatientSelected)) || $_SESSION["userType"] == "Patient"  ){
+
+    ?>
+        <div id="chat_and_input_container">
+            <div id="chat_container">
+                <!-- Messages will be dynamically appended here -->
+            </div>
+
+            <div id="chat_input_container">
+                <textarea id="chat_textarea" placeholder="Type your message..." rows="2"></textarea>
+                <button id="send_button">Send</button>
+            </div>
         </div>
 
-        <div id="chat_input_container">
-            <textarea id="chat_textarea" placeholder="Type your message..." rows="2"></textarea>
-            <button id="send_button">Send</button>
-        </div>
-    </div>
+    <?php  }//endif
+            else if  (($_SESSION["userType"] == "Health Care Professional" || $_SESSION["userType"] == "Family Member")&& (!isset($_GET["chat_with_patient"]))){
+                echo'<h3 class="No_Members">Please select someone from the drop down.</h3>';
+            }
+    ?>
+
     
+    <?php 
+    
+    //if the patient username in the url is not in your support network then dont request any info from the backend
+    if((isset($isValidPatientSelected) && $isValidPatientSelected)||!isset($isValidPatientSelected)) {?>
 
     <script>
 
@@ -226,34 +290,42 @@
 
             ?>
             
+            $('#send_button').click(function () {
+    var message = $('#chat_textarea').val();
+    if (message.trim() !== '') {
+        $.ajax({
+            url: 'Process/send_message.php',
+            type: 'POST',
+            data: {
+                senderId: <?php echo $extractedID; ?>,
+                <?php echo (isset($chatWithUserID) && $chatWithUserID != "") ? "recipientId: '" . htmlentities($chatWithUserID) . "'," : ""; ?>
+                <?php echo (isset($chatWithUserUsername) && $chatWithUserUsername != "") ? "patientUsername: '" . htmlentities($chatWithUserUsername) . "'," : ""; ?>
+                message: message,
+                chatWith: userOption
+            },
+            success: function (response) {
+                // Clear the chat message input field on success
+                $('#chat_textarea').val('');
+            },
+            error: function (xhr, status, error) {
+                console.error("Error sending message:", status, error);
 
-            // Send message on button click
-            $('#send_button').click(function() {
-                var message = $('#chat_textarea').val();
-                if (message.trim() != '') {
-                    $.ajax({
-                        url: 'Process/send_message.php',
-                        type: 'POST',
-                        data: {
-                            senderId: <?php echo $extractedID; ?>,
-                            <?php echo (isset($chatWithUserID) && $chatWithUserID != "") ? "recipientId: '" . htmlentities($chatWithUserID) . "'," : ""; ?>
-                            <?php echo (isset($chatWithUserUsername) && $chatWithUserUsername != "") ? "patientUsername: '" . htmlentities($chatWithUserUsername) . "'," : ""; ?>
-                            message: message,
-                            chatWith: userOption
-                        },
-                        success: function() {
-                            $('#chat_textarea').val('');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error sending message:", status, error);
-                            console.error("Response Text:", xhr.responseText);
-                            $('#chat_container').append("<div class='error-message'>Failed to send message. Please try again.</div>");
-                        }
-                    });
+                // Parse JSON response to display the error message
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.status === "error") {
+                        alert(response.message); // Display the error message in an alert
+                    } else {
+                        alert("An unexpected error occurred.");
+                    }
+                } catch (e) {
+                    console.error("Failed to parse JSON response:", e);
+                    alert("An unexpected error occurred while sending the message.");
                 }
-            });
-            
-        
+            }
+        });
+    }
+});  
 
         });
         
@@ -279,7 +351,9 @@
 
 
     </script>
-            
+
+    <?php }?>
+
 
 </body>
 

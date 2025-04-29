@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 28, 2025 at 04:55 AM
+-- Generation Time: Apr 29, 2025 at 05:43 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -97,6 +97,49 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `AddBloodPressureReading` (IN `p_use
     INSERT INTO reading (userid, username, readingdate, readingtime, systolic, diastolic, heart_rate)
     VALUES (user_id, p_username, p_reading_date, p_reading_time, p_systolic, p_diastolic, p_heart_rate);
 
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddFamilyChatMessage` (IN `senderUsername` VARCHAR(50), IN `senderId` INT, IN `messageContent` TEXT, IN `patientUsername` VARCHAR(50), IN `patientId` INT)   BEGIN
+    -- Declare a variable to check if an accepted request exists
+    DECLARE requestExists BOOLEAN;
+
+    -- If sender and recipient are the same, bypass the check
+    IF senderUsername = patientUsername AND senderId = patientId THEN
+        SET requestExists = TRUE;
+    ELSE
+        -- Check if there is an accepted request between sender and recipient
+        SELECT EXISTS (
+            SELECT 1 
+            FROM request 
+            WHERE 
+                ((sender_userid = senderId AND recipient_userid = patientId) OR
+                 (sender_userid = patientId AND recipient_userid = senderId))
+                AND request_status = 'accepted'
+        ) INTO requestExists;
+    END IF;
+
+    -- If no request exists, raise an error
+    IF NOT requestExists THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No accepted request exists between the specified users.';
+    END IF;
+
+    -- Insert the message into the family_chat table
+    INSERT INTO family_chat (
+        sender_username, 
+        sender_id, 
+        message_date, 
+        content, 
+        patient_username, 
+        patient_id
+    ) VALUES (
+        senderUsername, 
+        senderId, 
+        NOW(), 
+        messageContent, 
+        patientUsername, 
+        patientId
+    );
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `AddWebUser` (IN `p_fname` VARCHAR(50), IN `p_lname` VARCHAR(50), IN `p_gender` ENUM('male','female','other','rather not say'), IN `p_dob` DATE, IN `p_email` VARCHAR(200), IN `p_token` VARCHAR(150), IN `p_account_status` ENUM('pending','active'), IN `p_password_hashed` VARCHAR(100), IN `p_userType` ENUM('Hypertensive Individual','Family Member','Healthcare Professional'), IN `p_education_level` VARCHAR(50), IN `p_years_of_exp` ENUM('Less than a year','One to two years','Three to Fours years','Five years or more','Over a decade'), IN `p_phone_number` VARCHAR(15), OUT `p_generated_username` VARCHAR(50))   BEGIN
@@ -773,7 +816,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `managePendingRequest` (IN `p_sender
     -- Case 1: Request does not exist
     IF v_request_id IS NULL THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'No matching pending request found.';
+        SET MESSAGE_TEXT = 'Pending request does not exist.';
     END IF;
 
     -- Case 2: Update the request status based on the decision
@@ -997,6 +1040,39 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` 
     END IF;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `StoreChatMessage` (IN `senderId` INT, IN `recipientId` INT, IN `messageContent` TEXT)   BEGIN
+    -- Variable to track if an 'accepted' request exists
+    DECLARE recordExists BOOLEAN;
+
+    -- Check if there's an 'accepted' request between the sender and recipient
+    SELECT EXISTS(
+        SELECT 1 
+        FROM request 
+        WHERE 
+            ((sender_userid = senderId AND recipient_userid = recipientId) OR
+             (sender_userid = recipientId AND recipient_userid = senderId)) 
+            AND request_status = 'accepted'
+    ) INTO recordExists;
+
+    -- If no record exists, throw an error
+    IF NOT recordExists THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No accepted request exists between users.';
+    END IF;
+
+    -- If a record exists, insert the message into the 'communicate' table
+    INSERT INTO communicate (
+        sender_userid, sender_username, recipient_userid, recipient_username, message_date, message_content
+    ) VALUES (
+        senderId, 
+        (SELECT username FROM web_users WHERE userID = senderId),
+        recipientId, 
+        (SELECT username FROM web_users WHERE userID = recipientId), 
+        NOW(), 
+        messageContent
+    );
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateUserTokenAndPassword` (IN `p_current_token` VARCHAR(150), IN `p_new_token` VARCHAR(150), IN `p_new_password_hashed` VARCHAR(100))   BEGIN
     DECLARE userExists INT;
 
@@ -1057,7 +1133,20 @@ INSERT INTO `communicate` (`communicate_id`, `sender_userid`, `sender_username`,
 (53, 16, 'Kay_Jac16', 1, 'Dav_Rob1', '2025-04-23 19:09:17', 'how are your readings?'),
 (54, 1, 'Dav_Rob1', 16, 'Kay_Jac16', '2025-04-23 19:10:15', 'they have been good you can check them in the support page. But my meds are running low tho'),
 (55, 15, 'Dia_Pot15', 16, 'Kay_Jac16', '2025-04-27 18:36:56', 'hello doctor'),
-(56, 16, 'Kay_Jac16', 15, 'Dia_Pot15', '2025-04-27 18:37:08', 'how are you doing');
+(56, 16, 'Kay_Jac16', 15, 'Dia_Pot15', '2025-04-27 18:37:08', 'how are you doing'),
+(57, 7, 'Wil_Sam7', 10, 'Fre_Lew10', '2025-04-28 19:30:07', 'Hello'),
+(58, 7, 'Wil_Sam7', 10, 'Fre_Lew10', '2025-04-28 19:31:38', 'hello'),
+(59, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 20:39:27', 'I\'m williams'),
+(60, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 20:50:15', '..'),
+(61, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-04-28 20:50:21', 'jjj'),
+(62, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 20:55:18', '...4'),
+(63, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-04-28 20:55:26', '98j'),
+(64, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 21:07:45', 'kkk'),
+(65, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-04-28 21:07:51', 'yyy'),
+(66, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-04-28 21:22:25', 'xbxbxb'),
+(67, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 21:22:28', 'bxbx'),
+(68, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-04-28 21:27:42', 'p'),
+(69, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 21:27:47', 'f');
 
 -- --------------------------------------------------------
 
@@ -1117,7 +1206,19 @@ INSERT INTO `family_chat` (`chat_id`, `sender_username`, `sender_id`, `message_d
 (38, 'Nat_Dre8', 8, '2025-04-24 21:46:41', 'testing remove', 'Dav_Rob1', 1),
 (39, 'Nat_Dre8', 8, '2025-04-24 22:00:12', 'whats up', 'Fre_Lew10', 10),
 (40, 'Fre_Lew10', 10, '2025-04-25 10:14:36', 'hello', 'Fre_Lew10', 10),
-(41, 'Nat_Dre8', 8, '2025-04-25 10:22:48', '....', 'Fre_Lew10', 10);
+(41, 'Nat_Dre8', 8, '2025-04-25 10:22:48', '....', 'Fre_Lew10', 10),
+(42, 'Dav_Rob1', 1, '2025-04-28 20:32:34', 'hello', 'Dav_Rob1', 1),
+(43, 'San_Ros2', 2, '2025-04-28 20:32:45', 'whats up', 'Dav_Rob1', 1),
+(44, 'San_Ros2', 2, '2025-04-28 20:33:05', 'hey', 'Dav_Rob1', 1),
+(45, 'San_Ros2', 2, '2025-04-28 20:33:12', '...', 'Dav_Rob1', 1),
+(46, 'San_Ros2', 2, '2025-04-28 20:51:02', 'jkwdjkw', 'Dav_Rob1', 1),
+(47, 'San_Ros2', 2, '2025-04-28 22:30:25', 'jjj', 'Dav_Rob1', 1),
+(48, 'Dav_Rob1', 1, '2025-04-28 22:36:52', 'jjj', 'Dav_Rob1', 1),
+(49, 'San_Ros2', 2, '2025-04-28 22:37:18', 'jh', 'Dav_Rob1', 1),
+(50, 'Dav_Rob1', 1, '2025-04-28 22:37:49', 'jjn', 'Dav_Rob1', 1),
+(51, 'Dav_Rob1', 1, '2025-04-28 22:37:56', 'nnkn', 'Dav_Rob1', 1),
+(52, 'Dav_Rob1', 1, '2025-04-28 22:38:07', 'oopp', 'Dav_Rob1', 1),
+(53, 'San_Ros2', 2, '2025-04-28 22:39:28', 'lll', 'Dav_Rob1', 1);
 
 -- --------------------------------------------------------
 
@@ -1208,7 +1309,7 @@ CREATE TABLE `patient_range` (
 --
 
 INSERT INTO `patient_range` (`patient_userid`, `patient_username`, `min_systolic`, `max_systolic`, `min_diastolic`, `max_diastolic`, `date_set`, `hcp_userid`, `hcp_username`) VALUES
-(1, 'Dav_Rob1', 50, 120, 88, 90, '2025-04-27 18:29:53', 16, 'Kay_Jac16'),
+(1, 'Dav_Rob1', 100, 140, 60, 80, '2025-04-27 22:04:27', 16, 'Kay_Jac16'),
 (10, 'Fre_Lew10', 50, 120, 88, 90, '2025-04-27 12:09:57', 7, 'Wil_Sam7');
 
 -- --------------------------------------------------------
@@ -1262,6 +1363,7 @@ INSERT INTO `reading` (`userid`, `username`, `readingdate`, `readingtime`, `syst
 (1, 'Dav_Rob1', '2025-04-16', '13:53:00', 300, 200, 120),
 (1, 'Dav_Rob1', '2025-04-17', '18:12:00', 80, 50, 50),
 (1, 'Dav_Rob1', '2025-04-18', '06:10:00', 287, 123, 60),
+(1, 'Dav_Rob1', '2025-04-19', '10:04:00', 300, 200, 100),
 (1, 'Dav_Rob1', '2025-04-26', '04:27:00', 80, 50, 88),
 (10, 'Fre_Lew10', '2025-03-18', '08:00:00', 130, 101, 90),
 (10, 'Fre_Lew10', '2025-03-19', '09:00:00', 120, 100, 77),
@@ -1330,15 +1432,11 @@ CREATE TABLE `request` (
 --
 
 INSERT INTO `request` (`request_id`, `sender_userid`, `sender_username`, `recipient_userid`, `recipient_username`, `request_status`, `request_date`) VALUES
-(32, 2, 'San_Ros2', 10, 'Fre_Lew10', 'accepted', '2025-03-23 18:12:03'),
 (41, 11, 'Ada_Ros11', 15, 'Dia_Pot15', 'pending', '2025-04-17 17:41:29'),
-(49, 2, 'San_Ros2', 1, 'Dav_Rob1', 'pending', '2025-04-18 19:41:19'),
-(50, 1, 'Dav_Rob1', 14, 'Fre_Smi14', 'accepted', '2025-04-18 20:38:36'),
 (54, 14, 'Fre_Smi14', 15, 'Dia_Pot15', 'accepted', '2025-04-21 19:28:05'),
 (55, 7, 'Wil_Sam7', 15, 'Dia_Pot15', 'pending', '2025-04-22 13:11:47'),
-(75, 16, 'Kay_Jac16', 1, 'Dav_Rob1', 'accepted', '2025-04-27 17:05:41'),
-(77, 10, 'Fre_Lew10', 16, 'Kay_Jac16', 'accepted', '2025-04-27 18:33:10'),
-(78, 15, 'Dia_Pot15', 16, 'Kay_Jac16', 'accepted', '2025-04-27 18:34:32');
+(78, 15, 'Dia_Pot15', 16, 'Kay_Jac16', 'accepted', '2025-04-27 18:34:32'),
+(121, 7, 'Wil_Sam7', 1, 'Dav_Rob1', 'accepted', '2025-04-28 21:48:53');
 
 -- --------------------------------------------------------
 
@@ -1454,19 +1552,19 @@ ALTER TABLE `web_users`
 -- AUTO_INCREMENT for table `communicate`
 --
 ALTER TABLE `communicate`
-  MODIFY `communicate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `communicate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
 
 --
 -- AUTO_INCREMENT for table `family_chat`
 --
 ALTER TABLE `family_chat`
-  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=125;
 
 --
 -- AUTO_INCREMENT for table `web_users`

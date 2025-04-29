@@ -425,6 +425,7 @@
                     const senderUsername = target.getAttribute("data-username");
                     const decision = target.classList.contains("accept_button") ? "accepted" : "rejected";
 
+            
                     try {
                         // Send GET request to Process/managePendingRequest.php
                         const response = await fetch(`Process/managePendingRequest.php?sender=${encodeURIComponent(senderUsername)}&decision=${encodeURIComponent(decision)}`, { method: 'GET' });
@@ -439,12 +440,12 @@
                             }
                             console.log(`Request from ${senderUsername} has been ${decision}.`);
                         } else {
-                            alert(`Warning: ${result.message}`);
+                            alert(result.message);
                             console.log(`Warning: ${result.message}`)
                         }
                     } catch (error) {
                         console.error("Error:", error);
-                        alert("Error: ");
+                        alert("Error: ",error);
                     }
                 }
             });

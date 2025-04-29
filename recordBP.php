@@ -101,7 +101,10 @@
             }#end of if statement
         ?>
 
-        <button id="target_range_btn" onclick="showBPRangeContainer()"> Modify Patient Target Range</button>
+        <?php if ($_SESSION["userType"]==="Health Care Professional" ){ ?>
+            <button id="target_range_btn" onclick="showBPRangeContainer()"> Modify Patient Target Range</button>
+        <?php } ?>
+
     </div>
 
     <?php
@@ -228,47 +231,56 @@
         }
     ?>
 
+    <?php 
+    //only display div if user is a health care professional
+    if ($_SESSION["userType"]=="Health Care Professional"){ ?>
 
-    <div id="blood_Pressure_Range_container">
-        <h2>Modify Patient Range</h2>
+        <div id="blood_Pressure_Range_container">
+            <h2>Modify Patient Range</h2>
 
-        <div id="bp_range_error">
-            <?php
-                if(isset($_SESSION["Err_message"])&& strlen($_SESSION["Err_message"])>4){
-                    echo $_SESSION["Err_message"];
-                    unset($_SESSION["Err_message"]);
-                }
-            ?>
+            <div id="bp_range_error">
+                <?php
+                    if(isset($_SESSION["Err_message"])&& strlen($_SESSION["Err_message"])>4){
+                        echo $_SESSION["Err_message"];
+                        unset($_SESSION["Err_message"]);
+                    }
+                ?>
+            </div>
+
+            <form action="Process/setPatientRange.php" method="post">
+                <h4>Set Maxmimum Reading</h4>
+                <div>
+                    <label for="">Systolic (mmHg)</label>
+                    <input type="number" name="max_systolic" id="" value="<?php echo isset($_SESSION["max_systolic"]) ? htmlspecialchars($_SESSION["max_systolic"]) : htmlspecialchars("") ?>">
+                </div>
+
+                <div>
+                    <label for="">Diastolic (mmHg)</label>
+                    <input type="number" name="max_diastolic" id="" value="<?php echo isset($_SESSION["max_diastolic"]) ? htmlspecialchars($_SESSION["max_diastolic"]) : htmlspecialchars("")?>">      
+                </div>
+
+
+                <h4>Set Minimum Reading</h4>
+                <div>
+                    <label for="">Systolic (mmHg)</label>
+                    <input type="number" name="min_systolic" id="" value="<?php echo isset($_SESSION["min_systolic"]) ? htmlspecialchars($_SESSION["min_systolic"]) : htmlspecialchars("")?>">
+                </div>
+
+                <div>
+                    <label for="">Diastolic (mmHg)</label>
+                    <input type="number" name="min_diastolic" id="" value="<?php echo isset($_SESSION["min_diastolic"]) ? htmlspecialchars($_SESSION["min_diastolic"]) : htmlspecialchars("")?>">      
+                </div>
+
+
+                <button type="submit" id="confirm_Range_Btn" value="submit">Confirm Range</button>
+            </form>
         </div>
 
-        <form action="Process/setPatientRange.php" method="post">
-            <h4>Set Maxmimum Reading</h4>
-            <div>
-                <label for="">Systolic (mmHg)</label>
-                <input type="number" name="max_systolic" id="" value="<?php echo isset($_SESSION["max_systolic"]) ? htmlspecialchars($_SESSION["max_systolic"]) : htmlspecialchars("") ?>">
-            </div>
+        <?php //unset session variable in form that is used for persistency 
+            unset($_SESSION["max_systolic"],$_SESSION["max_diastolic"],$_SESSION["min_systolic"],$_SESSION["min_diastolic"]);
+        ?>
 
-            <div>
-                <label for="">Diastolic (mmHg)</label>
-                <input type="number" name="max_diastolic" id="" value="<?php echo isset($_SESSION["max_diastolic"]) ? htmlspecialchars($_SESSION["max_diastolic"]) : htmlspecialchars("")?>">      
-            </div>
-
-
-            <h4>Set Minimum Reading</h4>
-            <div>
-                <label for="">Systolic (mmHg)</label>
-                <input type="number" name="min_systolic" id="" value="<?php echo isset($_SESSION["min_systolic"]) ? htmlspecialchars($_SESSION["min_systolic"]) : htmlspecialchars("")?>">
-            </div>
-
-            <div>
-                <label for="">Diastolic (mmHg)</label>
-                <input type="number" name="min_diastolic" id="" value="<?php echo isset($_SESSION["min_diastolic"]) ? htmlspecialchars($_SESSION["min_diastolic"]) : htmlspecialchars("")?>">      
-            </div>
-
-
-            <button type="submit" id="confirm_Range_Btn" value="submit">Confirm Range</button>
-        </form>
-    </div>
+    <?php } //endif?>
 
 
 
@@ -439,16 +451,146 @@
         // Get the paragraph element inside the Select_Patient_container div
         const selectPatientText = document.getElementById("select_patient_text");
         const acceptedPatients = <?php echo isset($accepted_Patients) ? json_encode($accepted_Patients) : "[]";?>
-        
+        // Get the dropdown element
+        const patientDropdown = document.getElementById("selected_patient_id");
 
-        // only family member and health care professsionals can see the option to view hypertensive readings of different patients
         if (userType === "Health Care Professional") {
             selectPatientText.textContent = "Select your Patient";
-            document.getElementById("Select_Patient_container").style.display ="grid";
-            document.getElementById("target_range_btn").style.display ="block";
             
+            document.getElementById("Select_Patient_container").style.display = "grid";
 
-        } else if (userType === "Family Member") {
+
+            // Get the target range button element
+            const targetRangeButton = document.getElementById("target_range_btn");
+
+            // Check if the dropdown has more than 0 options (i.e., it's not empty)
+            // Also handles the case where the only option might be the "No patients available" disabled one.
+            // We check if there's at least one option that is NOT disabled.
+            let hasPatientValidOptions = false;
+            for (let i = 0; i < patientDropdown.options.length; i++) {
+                if (!patientDropdown.options[i].disabled) {
+                    hasPatientValidOptions = true;
+                    break;
+                }
+            }
+
+            // Check if both the dropdown and the button exist in the DOM
+            if (patientDropdown && targetRangeButton) {
+
+                if (hasPatientValidOptions) {
+                    // If there are valid patient options, show the button
+                    targetRangeButton.style.display = "block";
+                } else {
+                    // If the dropdown is empty or only has the disabled placeholder, hide the button
+                    targetRangeButton.style.display = "none";
+                }
+
+
+            } else if (targetRangeButton) {
+                // If the dropdown doesn't exist for some reason, but the button does, hide the button.
+                targetRangeButton.style.display = "none";
+            }
+
+
+            <?php if ($_SESSION["userType"]=="Health Care Professional"){ ?>
+                document.addEventListener("DOMContentLoaded", () => {
+
+                    const userRole = "<?php echo $_SESSION['userType']; ?>"; // Fetch user role from PHP session
+                    const bpRangeContainer = document.getElementById("blood_Pressure_Range_container");
+
+
+                    // Check localStorage to restore the last state
+                    const isOpen = localStorage.getItem("bpRangeContainerOpen");
+
+                    //If HCP does not have anyone in their support network then they will not see the form to adjust patient range
+                    if(!hasPatientValidOptions){
+                        return
+                    }
+
+                    if (isOpen === "true") {
+                        // If the container was previously open
+                        bpRangeContainer.style.display = "block";
+                        bpRangeContainer.style.opacity = "1";
+                        bpRangeContainer.style.height = "auto";
+                    } else {
+                        // If the container was previously closed
+                        bpRangeContainer.style.display = "none";
+                        bpRangeContainer.style.opacity = "0";
+                        bpRangeContainer.style.height = "0px";
+                    }
+                });
+
+
+
+                function showBPRangeContainer() {
+                    const bpRangeContainer = document.getElementById("blood_Pressure_Range_container");
+
+                    if (bpRangeContainer.style.display === "none" || bpRangeContainer.style.opacity === "0") {
+                        // Reveal the container and store the state
+                        bpRangeContainer.style.display = "block"; // Display immediately for smooth visibility
+                        bpRangeContainer.style.height = "auto";
+                        setTimeout(() => {
+                            bpRangeContainer.style.opacity = "1"; // Start opacity transition
+                        }, 10); // Small delay ensures the transition is noticeable
+                        bpRangeContainer.style.transition = "opacity 0.5s ease"; // Smooth appearance
+                        localStorage.setItem("bpRangeContainerOpen", "true"); // Save state as "open"
+                    } else {
+                        // Hide the container with a smooth transition
+                        bpRangeContainer.style.opacity = "0"; // Trigger fade-out
+                        bpRangeContainer.style.transition = "opacity 0.5s ease"; // Smooth disappearance
+                        setTimeout(() => {
+                            bpRangeContainer.style.display = "none"; // Fully hide after transition completes
+                            localStorage.setItem("bpRangeContainerOpen", "false"); // Save state as "closed"
+                        }, 500); // Match transition duration
+                    }
+                }
+                                
+                function displayErrorForPatientRange() {
+                    // Get the element where the message is displayed
+                    const errorElement = document.getElementById("bp_range_error");
+
+
+                        // Get the text content of the element and remove leading/trailing whitespace
+                        const message = errorElement.textContent.trim();
+
+                        // Check if there is any message content
+                        if (message.length > 0) {
+                            // Make the element visible since it has content
+                            errorElement.style.display = "block";
+
+                            // Check if the message includes "successful" (case-insensitive)
+                            if (message.toLowerCase().includes("success")) {
+                                // If it's a success message, set the text color to green
+                                errorElement.style.color = "white";
+                                errorElement.style.backgroundColor = "green"; // Light green background
+                                errorElement.style.borderRadius="5px";
+                                errorElement.style.padding="3px";
+                            } else {
+                                // If it's an error message (doesn't contain "successful"), set the text color to red
+                                errorElement.style.color = "red";
+
+                            }
+                        }
+                    
+                }
+
+                // Add the event listener for when the window loads
+                window.addEventListener("load", function () {
+                    
+                    displayErrorForPatientRange();
+
+                });
+
+
+
+            <?php }?>
+
+
+
+        }
+ 
+        
+        else if (userType === "Family Member") {
             selectPatientText.textContent = "Select your Hypertensive Family Member";
             document.getElementById("Select_Patient_container").style.display ="grid"
         }
@@ -467,57 +609,6 @@
 
 
 
-
-        document.addEventListener("DOMContentLoaded", () => {
-
-            const userRole = "<?php echo $_SESSION['userType']; ?>"; // Fetch user role from PHP session
-            const bpRangeContainer = document.getElementById("blood_Pressure_Range_container");
-
-            // Check role and hide the container for non-HCP users
-            if (userRole !== "Health Care Professional") {
-                bpRangeContainer.style.display = "none"; // Ensure it's hidden for non-HCP users
-                return; // Stop further execution
-            }
-
-            // Check localStorage to restore the last state
-            const isOpen = localStorage.getItem("bpRangeContainerOpen");
-
-            if (isOpen === "true") {
-                // If the container was previously open
-                bpRangeContainer.style.display = "block";
-                bpRangeContainer.style.opacity = "1";
-                bpRangeContainer.style.height = "auto";
-            } else {
-                // If the container was previously closed
-                bpRangeContainer.style.display = "none";
-                bpRangeContainer.style.opacity = "0";
-                bpRangeContainer.style.height = "0px";
-            }
-        });
-
-
-
-        function showBPRangeContainer() {
-            const bpRangeContainer = document.getElementById("blood_Pressure_Range_container");
-
-            if (bpRangeContainer.style.display === "none" || bpRangeContainer.style.opacity === "0") {
-                // Reveal the container and store the state
-                bpRangeContainer.style.display = "block";
-                bpRangeContainer.style.opacity = "1";
-                bpRangeContainer.style.height = "auto";
-                bpRangeContainer.style.transition = "opacity 0.5s ease";
-                localStorage.setItem("bpRangeContainerOpen", "true"); // Save state as "open"
-            } else {
-                // Hide the container and store the state
-                bpRangeContainer.style.opacity = "0";
-                bpRangeContainer.style.transition = "opacity 0.5s ease";
-
-                setTimeout(() => {
-                    bpRangeContainer.style.display = "none"; // Fully hide after transition
-                    localStorage.setItem("bpRangeContainerOpen", "false"); // Save state as "closed"
-                }, 500); // Match transition duration
-            }
-        }
 
 
     </script>
