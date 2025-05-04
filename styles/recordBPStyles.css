@@ -282,7 +282,7 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
 
 }
 
-#target_range_btn{
+.HCP_button{
     grid-column: 1 / -1;
     margin-bottom: 10px;
     display: none;
@@ -298,9 +298,59 @@ input[type=submit]:hover,input[type=reset]:hover,#edit_prev_readings:hover{
 
 
 
-#target_range_btn:hover{
+.HCP_button:hover{
     background-color: #1946da;
     color: white;
 
 }
 
+
+
+#showPatientRange_container {
+    position: fixed; /* Ensures it's above all other content */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centers it perfectly */
+    
+    z-index: 4; /* Ensures it appears above all other elements */
+    
+    background: white; /* Optional: Add a background */
+    padding: 10px; /* Optional: Add padding for spacing */
+    border-radius: 10px; /* Optional: Add rounded corners */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Optional: Add shadow */
+    text-align: center; /* Centers text inside the div */
+    display: none;
+}
+
+/* Background overlay */
+#backgroundOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black; /* Background color */
+    opacity: 0.5;
+    z-index: 3; /* Below the container but above other content */
+    display: none; /* Hidden by default */
+}
+
+
+#close_icon_container{
+/*align item to the right*/
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+
+
+}
+#close_icon_container img{
+    background-color: #1946da;
+    padding: 2px;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+#showPatientRange_container h2{
+    margin: 0px;
+} 

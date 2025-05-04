@@ -92,6 +92,23 @@ function displayPatientRangeMsg() {
 }
 
 
+function closeContainer(){
+
+    const containerElement = document.getElementById("showPatientRange_container");
+    const overlayElement = document.getElementById("backgroundOverlay"); 
+
+    // Check the current display style of the container
+    // Using computedStyle is more robust if the initial display is set via CSS
+    const currentDisplay = window.getComputedStyle(containerElement).display;
+
+    if (currentDisplay === "none" || currentDisplay === "") { // If it's currently none or empty, show it
+        containerElement.style.display = "block"; // Show the container
+        overlayElement.style.display = "block"; // Show the overlay
+    } else { // If it's currently block or anything else, hide it
+        containerElement.style.display = "none"; // Hide the container
+        overlayElement.style.display = "none"; // Hide the overlay
+    }
+}
 
 
 // Add the event listener for when the window loads
@@ -103,7 +120,3 @@ window.addEventListener("load", function () {
     checkRecords();
     displayPatientRangeMsg();
 });
-
-
-
-

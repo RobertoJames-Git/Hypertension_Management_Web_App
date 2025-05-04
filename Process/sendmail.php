@@ -88,7 +88,7 @@
 
 
 
-    function sendAlertEmailToSupportNetword($recipients, $patient_name,$recommended_min_Systolic,$recommended_min_Diastolic,$recommended_max_Systolic,$recommended_max_Diastolic,$patient_systolic,$patient_diastolic,$patient_heartRate){
+    function sendAlertEmailToSupportNetwork($recipients, $patient_name,$recommended_min_Systolic,$recommended_min_Diastolic,$recommended_max_Systolic,$recommended_max_Diastolic,$patient_systolic,$patient_diastolic,$patient_heartRate){
 
         $body="
         Greetings,<br>
@@ -114,5 +114,34 @@
         
         return $sendMailResult;
     }
+
+
+    function sendDefaultAlertEmailToSupportNetwork($recipients, $patient_name,$patient_systolic,$patient_diastolic,$patient_heartRate){
+
+        $body="
+        Greetings,<br>
+        This is an automated message regarding $patient_name. Their recent health readings have fallen outside the default range that is set if a patient has not had their normal range adjusted by a Health Care Professional:<br>
+        <br>
+        <b>Patient Readings</b><br>
+        - Systolic: $patient_systolic mmHg<br>
+        - Diastolic: $patient_diastolic mmHg<br>
+        - Heart Rate: $patient_heartRate BPM<br>
+        <br>
+        <b>Default Readings</b><br>
+        - Systolic: 90 mmHg - 135 mmHg<br>
+        - Diastolic: 60 mmHg - 90 mmHg<br>
+        <br>
+        As members of $patient_name's support network, your attention is important to ensure their health and safety. If you are a family member, please check in with $patient_name's or offer support as needed. If you are $patient_name healthcare professional, we advise reviewing these readings promptly to provide guidance or intervention as required.<br>
+        Thank you for your dedication to $patient_name's well-being. Together, we can ensure they receive the care and support they need.<br><br>
+        Best regards,<br>
+        HypMonitor Team";
+
+        $subject ="Urgent: Patient Health Update Requires Attention";
+
+        $sendMailResult=sendMail($recipients,$subject,$body);
+        
+        return $sendMailResult;
+    }
+
 
 

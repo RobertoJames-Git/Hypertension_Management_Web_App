@@ -102,8 +102,9 @@
         ?>
 
         <?php if ($_SESSION["userType"]==="Health Care Professional" ){ ?>
-            <button id="target_range_btn" onclick="showBPRangeContainer()"> Modify Patient Target Range</button>
-        <?php } ?>
+            <button id="target_range_btn" class="HCP_button" onclick="showBPRangeContainer()"> Modify Patient Target Range</button>
+            <button id="view_patient_range" class="HCP_button" onclick="closeContainer()">Display Patient Range</button>
+        <?php }//end if  ?>
 
     </div>
 
@@ -148,10 +149,6 @@
     <?php
         }//end of if
     ?>
-
-    
-
-
 
 
 
@@ -285,6 +282,24 @@
 
 
     <p id="no_support_message"><?php echo isset($no_patient_message) ? htmlspecialchars($no_patient_message) : ""?></p>
+
+
+
+    <?php if($_SESSION["userType"]==="Health Care Professional") {?>
+    <div id="backgroundOverlay"></div>
+
+    <div id="showPatientRange_container">
+        <div id="close_icon_container" onclick="closeContainer()"><img src="images/recordBPImage/closeButton.svg" alt="" width="25px"></div>
+
+        <h2>Patient Range : <?php echo $patient ?></h2>
+        <div id="patient_range_details">
+            <p>Systolic: x mmHg - x mmHg</p>
+            <p>Diastolic: x mmHg - x mmHg</p>
+        </div>
+    </div>
+
+    <?php }?>
+
 
     
     <div id="graph_container">
@@ -462,7 +477,7 @@
 
             // Get the target range button element
             const targetRangeButton = document.getElementById("target_range_btn");
-
+            const display_Patient_Btn = document.getElementById("view_patient_range");
             // Check if the dropdown has more than 0 options (i.e., it's not empty)
             // Also handles the case where the only option might be the "No patients available" disabled one.
             // We check if there's at least one option that is NOT disabled.
@@ -480,6 +495,7 @@
                 if (hasPatientValidOptions) {
                     // If there are valid patient options, show the button
                     targetRangeButton.style.display = "block";
+                    display_Patient_Btn.style.display = "block";
                 } else {
                     // If the dropdown is empty or only has the disabled placeholder, hide the button
                     targetRangeButton.style.display = "none";

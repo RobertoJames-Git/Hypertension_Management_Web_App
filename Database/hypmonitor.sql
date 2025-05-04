@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 29, 2025 at 05:43 AM
+-- Generation Time: May 03, 2025 at 04:48 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -224,7 +224,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckPatientReading` (IN `patientUs
             SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Patient readings indicate potential hypertension based on default thresholds.';
         ELSE
-            SELECT 'No record found for patient in patient_range, but readings are within safe levels based on default thresholds.' AS message;
+            SELECT 'Readings are within safe levels based on default thresholds.' AS message;
         END IF;
     ELSE
         -- Retrieve the patient's recommended readings from the patient_range table
@@ -1309,6 +1309,7 @@ CREATE TABLE `patient_range` (
 --
 
 INSERT INTO `patient_range` (`patient_userid`, `patient_username`, `min_systolic`, `max_systolic`, `min_diastolic`, `max_diastolic`, `date_set`, `hcp_userid`, `hcp_username`) VALUES
+(1, 'Dav_Rob1', 100, 140, 70, 80, '2025-05-02 21:45:12', 7, 'Wil_Sam7'),
 (1, 'Dav_Rob1', 100, 140, 60, 80, '2025-04-27 22:04:27', 16, 'Kay_Jac16'),
 (10, 'Fre_Lew10', 50, 120, 88, 90, '2025-04-27 12:09:57', 7, 'Wil_Sam7');
 
@@ -1364,6 +1365,7 @@ INSERT INTO `reading` (`userid`, `username`, `readingdate`, `readingtime`, `syst
 (1, 'Dav_Rob1', '2025-04-17', '18:12:00', 80, 50, 50),
 (1, 'Dav_Rob1', '2025-04-18', '06:10:00', 287, 123, 60),
 (1, 'Dav_Rob1', '2025-04-19', '10:04:00', 300, 200, 100),
+(1, 'Dav_Rob1', '2025-04-20', '07:00:00', 150, 100, 80),
 (1, 'Dav_Rob1', '2025-04-26', '04:27:00', 80, 50, 88),
 (10, 'Fre_Lew10', '2025-03-18', '08:00:00', 130, 101, 90),
 (10, 'Fre_Lew10', '2025-03-19', '09:00:00', 120, 100, 77),

@@ -1000,7 +1000,59 @@
     }
 
 
+
+    function getSupportNetworkEmails($patientUsername) {
+        $conn = getDatabaseConnection(); // Assume this function gets the database connection
+        $emails = [];
+        $patientName = null;
     
+        try {
+            // Prepare SQL query
+            $query = "SELECT DISTINCT wu2.email, CONCAT(wu.fname, ' ', wu.lname) AS patient_name
+                      FROM patient p
+                      JOIN web_users wu ON p.userid = wu.userID AND p.username = wu.username
+                      JOIN request r ON (
+                          (p.userid = r.sender_userid AND r.request_status = 'accepted')
+                          OR 
+                          (p.userid = r.recipient_userid AND r.request_status = 'accepted')
+                      )
+                      JOIN web_users wu2 ON (
+                          (r.sender_userid = wu2.userID AND r.sender_username = wu2.username AND r.recipient_userid = p.userid)
+                          OR 
+                          (r.recipient_userid = wu2.userID AND r.recipient_username = wu2.username AND r.sender_userid = p.userid)
+                      )
+                      WHERE p.username = ?";
+    
+            $stmt = $conn->prepare($query);
+            if (!$stmt) {
+                throw new mysqli_sql_exception("Error preparing statement: " . $conn->error);
+            }
+    
+            // Bind parameter and execute
+            $stmt->bind_param("s", $patientUsername);
+            $stmt->execute();
+            $result = $stmt->get_result();
+    
+            // Fetch results into an array
+            while ($row = $result->fetch_assoc()) {
+                $patientName = $row['patient_name']; // Get patient name
+                $emails[] = $row['email']; // Collect emails
+            }
+    
+            // If no patient name is found, return error
+            if ($patientName === null) {
+                return ['error' => "The specified user is not a registered patient."];
+            }
+    
+            return ['patient_name' => $patientName, 'emails' => $emails];
+    
+        } catch (mysqli_sql_exception $e) {
+            return ['error' => $e->getMessage()];
+        } finally {
+            if (isset($stmt)) $stmt->close();
+            if (isset($conn)) $conn->close();
+        }
+    }
 
 
 

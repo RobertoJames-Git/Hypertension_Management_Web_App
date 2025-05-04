@@ -50,8 +50,8 @@
         $_SESSION["Err_message"] .="<li>Min systolic must have only numbers</li>";
         $valErr=true;
     }
-    elseif(intval($_POST["min_systolic"])<50 ||intval($_POST["min_systolic"])>400){
-        $_SESSION["Err_message"] .="<li>Min systolic Accepted Range 50 - 400</li>";
+    elseif(intval($_POST["min_systolic"])<20 ||intval($_POST["min_systolic"])>400){
+        $_SESSION["Err_message"] .="<li>Min systolic Accepted Range 20 - 400</li>";
         $valErr=true;
     }
 
@@ -66,8 +66,8 @@
         $_SESSION["Err_message"] .="<li>Max diastolic must have only Numbers</li>";
         $valErr=true;
     }
-    elseif(intval($_POST["max_diastolic"])<30 ||intval($_POST["max_diastolic"])>200){
-        $_SESSION["Err_message"] .="<li>Max diastolic accepted Range 30 - 200</li>";
+    elseif(intval($_POST["max_diastolic"])<20 ||intval($_POST["max_diastolic"])>200){
+        $_SESSION["Err_message"] .="<li>Max diastolic accepted Range 20 - 200</li>";
         $valErr=true;
     }
 
@@ -80,8 +80,8 @@
         $_SESSION["Err_message"] .="<li>Min diastolic must have only Numbers</li>";
         $valErr=true;
     }
-    elseif(intval($_POST["min_diastolic"])<30 ||intval($_POST["min_diastolic"])>200){
-        $_SESSION["Err_message"] .="<li>Min diastolic Accepted Range 30 - 200</li>";
+    elseif(intval($_POST["min_diastolic"])<20 ||intval($_POST["min_diastolic"])>200){
+        $_SESSION["Err_message"] .="<li>Min diastolic Accepted Range 20 - 200</li>";
         $valErr=true;
     }
 

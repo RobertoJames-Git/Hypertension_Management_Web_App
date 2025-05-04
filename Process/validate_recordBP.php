@@ -35,8 +35,8 @@
         $_SESSION["systolicErr"] = "Numbers Only";
         $valErr = true;
     }
-    elseif(intval($_POST["systolic"])<50 ||intval($_POST["systolic"])>400){
-        $_SESSION["systolicErr"] = "Accepted Range 50 - 400";
+    elseif(intval($_POST["systolic"])<20 ||intval($_POST["systolic"])>400){
+        $_SESSION["systolicErr"] = "Accepted Range 20 - 400";
         $valErr = true;
     }
 
@@ -48,8 +48,8 @@
         $_SESSION["diastolicErr"] = "Numbers Only";
         $valErr = true;
     }
-    elseif(intval($_POST["diastolic"])<30 ||intval($_POST["diastolic"])>200){
-        $_SESSION["diastolicErr"] = "Accepted Range 30 - 200";
+    elseif(intval($_POST["diastolic"])<20 ||intval($_POST["diastolic"])>200){
+        $_SESSION["diastolicErr"] = "Accepted Range 20 - 200";
         $valErr = true;
     }
 
@@ -61,8 +61,8 @@
         $_SESSION["heart_rateErr"] = "Numbers Only";
         $valErr = true;
     }
-    elseif(intval($_POST["heart_rate"])<50 ||intval($_POST["heart_rate"])>300){
-        $_SESSION["heart_rateErr"] = "Accepted Range 50 - 300";
+    elseif(intval($_POST["heart_rate"])<20 ||intval($_POST["heart_rate"])>300){
+        $_SESSION["heart_rateErr"] = "Accepted Range 20 - 300";
         $valErr = true;
     }
 
@@ -149,13 +149,44 @@
 
 
     function check_if_patient_readings_are_in_Range($systolic,$diastolic,$heartRate){
+        // Send email alerting your support netwoek about your irregular reading
+        require_once('sendmail.php');
+
         //Check if readings are out of range and and send alert via phone number and email to support network
         $result=checkPatientReading($_SESSION["loggedIn_username"],$systolic,$diastolic);
 
         if (isset($result['error'])) {//If an error occur store it in a session that will display it to the user
-            $_SESSION["patientRange_Err"]=$result['error'];
+            //check if the error contains "default thresholds."
+            if (strpos($result['error'], 'default thresholds') !== false) {
+                
+                $_SESSION["patientRange_Err"]=$result['error'];
+                $details = getSupportNetworkEmails($_SESSION["loggedIn_username"]);
+
+                // Ensure the function returned valid data
+                if (isset($details['error'])) {
+                    $_SESSION["patientRange_Err"] = $details['error'];
+                    return; // Exit function
+                }
+                
+                // Get patient name & email list
+                $recipientEmails = $details['emails'];
+                $patientName = $details['patient_name'];
+                
+                if (empty($recipientEmails)) {
+                    $_SESSION["patientRange_Err"] = "There is no one in your support network to inform of your irregular readings.";
+                    return; // Exit function
+                }
+                
+                // Send the alert email to the support network
+                sendDefaultAlertEmailToSupportNetwork($recipientEmails, $patientName, $systolic, $diastolic, $heartRate);
+                $_SESSION["patientRange_Err"] = "Your support network was notified of your irregular reading.";
+                
+            } else {
+                $_SESSION["patientRange_Err"] = $result['error'];
+            }
             
         } 
+
         /*If there procedure return a email or phone number it means the patients readings are out of range 
         and that means their support network need to be contacted*/
         else if (findelement($result,"email")&& findelement($result,"phone_number")) {
@@ -171,15 +202,14 @@
             }
 
 
-            // Send email alerting your support netwoek about your irregular reading
-            require_once('sendmail.php');
-            $emailResult = sendAlertEmailToSupportNetword($supportNetworkEmail,$result[0]['Patient_Name'], $result[0]['Recommended_Min_Systolic'],$result[0]['Recommended_Min_Diastolic'], $result[0]['Recommended_Max_Systolic'], $result[0]['Recommended_Max_Diastolic'], $systolic,$diastolic,$heartRate);
+            $emailResult = sendAlertEmailToSupportNetwork($supportNetworkEmail,$result[0]['Patient_Name'], $result[0]['Recommended_Min_Systolic'],$result[0]['Recommended_Min_Diastolic'], $result[0]['Recommended_Max_Systolic'], $result[0]['Recommended_Max_Diastolic'], $systolic,$diastolic,$heartRate);
 
             if($emailResult){
                 $_SESSION["patientRange_Err"]= "Your support Network was notified of your irregular reading.";
             }
             else {
-                $_SESSION["patientRange_Err"]="An error Occurred while emailing your support network";
+                $_SESSION["patientRange_Err"]="An error occurred while notifying your support network.";
+                return;//exit the function
             }
 
         }
