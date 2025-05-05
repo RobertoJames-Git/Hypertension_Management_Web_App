@@ -101,7 +101,7 @@
             }#end of if statement
         ?>
 
-        <?php if ($_SESSION["userType"]==="Health Care Professional" ){ ?>
+        <?php if ($_SESSION["userType"]==="Health Care Professional" || $_SESSION["userType"]==="Family Member"){ ?>
             <button id="target_range_btn" class="HCP_button" onclick="showBPRangeContainer()"> Modify Patient Target Range</button>
             <button id="view_patient_range" class="HCP_button" onclick="closeContainer()">Display Patient Range</button>
         <?php }//end if  ?>
@@ -285,17 +285,44 @@
 
 
 
-    <?php if($_SESSION["userType"]==="Health Care Professional") {?>
+    <?php 
+    
+    
+    if(($_SESSION["userType"]==="Health Care Professional"|| $_SESSION["userType"]==="Family Member") && !empty($patient)) {
+
+        $patientRange=getPatientRange($_SESSION["loggedIn_username"],$patient); // Get the patient range for the selected patient
+        
+
+    ?>
     <div id="backgroundOverlay"></div>
 
     <div id="showPatientRange_container">
         <div id="close_icon_container" onclick="closeContainer()"><img src="images/recordBPImage/closeButton.svg" alt="" width="25px"></div>
-
         <h2>Patient Range : <?php echo $patient ?></h2>
+        <?php
+
+            if (isset($patientRange["error"])) {
+                echo "<span style=\"color: red;\">" . $patientRange["error"] . "</span>";
+            }
+            else{
+        ?>
+
         <div id="patient_range_details">
-            <p>Systolic: x mmHg - x mmHg</p>
-            <p>Diastolic: x mmHg - x mmHg</p>
+            <p><?php 
+                echo "Systolic : " . (!isset($patientRange["min_systolic"]) || empty($patientRange["min_systolic"]) ? "N/A" : $patientRange["min_systolic"]) . 
+                " mmHg - " . 
+                (!isset($patientRange["max_systolic"]) || empty($patientRange["max_systolic"]) ? "N/A" : $patientRange["max_systolic"])." mmHg";
+            ?></p>
+
+            <p><?php 
+                echo "Diastolic : " . 
+                (!isset($patientRange["min_diastolic"]) || empty($patientRange["min_diastolic"]) ? "N/A" : $patientRange["min_diastolic"]) . 
+                " mmHg - " . 
+                (!isset($patientRange["max_diastolic"]) || empty($patientRange["max_diastolic"]) ? "N/A" : $patientRange["max_diastolic"])." mmHg";
+            ?></p>
         </div>
+
+        <?php } //endif ?>
     </div>
 
     <?php }?>
@@ -469,6 +496,11 @@
         // Get the dropdown element
         const patientDropdown = document.getElementById("selected_patient_id");
 
+        if(userType =="Health Care Professional" || userType =="Family Member"){
+            const display_Patient_Btn = document.getElementById("view_patient_range");
+            display_Patient_Btn.style.display = "block";
+        }
+
         if (userType === "Health Care Professional") {
             selectPatientText.textContent = "Select your Patient";
             
@@ -477,7 +509,7 @@
 
             // Get the target range button element
             const targetRangeButton = document.getElementById("target_range_btn");
-            const display_Patient_Btn = document.getElementById("view_patient_range");
+
             // Check if the dropdown has more than 0 options (i.e., it's not empty)
             // Also handles the case where the only option might be the "No patients available" disabled one.
             // We check if there's at least one option that is NOT disabled.
@@ -495,7 +527,6 @@
                 if (hasPatientValidOptions) {
                     // If there are valid patient options, show the button
                     targetRangeButton.style.display = "block";
-                    display_Patient_Btn.style.display = "block";
                 } else {
                     // If the dropdown is empty or only has the disabled placeholder, hide the button
                     targetRangeButton.style.display = "none";

@@ -1001,6 +1001,7 @@
 
 
 
+    
     function getSupportNetworkEmails($patientUsername) {
         $conn = getDatabaseConnection(); // Assume this function gets the database connection
         $emails = [];
@@ -1053,6 +1054,47 @@
             if (isset($conn)) $conn->close();
         }
     }
+
+
+
+    function getPatientRange($loggedInUsername, $patientUsername) {
+        $conn = getDatabaseConnection(); // Assume this function gets the database connection
+        $rangeData = [];
+    
+        try {
+            // Prepare SQL query to call the stored procedure
+            $query = "CALL GetPatientRangeForSupportMember(?, ?)";
+            $stmt = $conn->prepare($query);
+    
+            if (!$stmt) {
+                throw new mysqli_sql_exception("Error preparing statement: " . $conn->error);
+            }
+    
+            // Bind parameters and execute
+            $stmt->bind_param("ss", $loggedInUsername, $patientUsername);
+            $stmt->execute();
+            $result = $stmt->get_result();
+    
+            // Fetch results into an associative array
+            if ($row = $result->fetch_assoc()) {
+                $rangeData = [
+                    "min_systolic"  => $row["min_systolic"],
+                    "max_systolic"  => $row["max_systolic"],
+                    "min_diastolic" => $row["min_diastolic"],
+                    "max_diastolic" => $row["max_diastolic"]
+                ];
+            }
+    
+            return $rangeData;
+    
+        } catch (mysqli_sql_exception $e) {
+            return ["error" => $e->getMessage()];
+        } finally {
+            if (isset($stmt)) $stmt->close();
+            if (isset($conn)) $conn->close();
+        }
+    }
+
 
 
 
