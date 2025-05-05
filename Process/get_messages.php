@@ -34,6 +34,11 @@
         exit();
     }
 
+    if (isset($messages["error"])) {
+        echo "<p style='color: red;'>" . $messages["error"] . "</p>";
+        exit();
+    }
+
     $dateofPrevRecord='';
     foreach ($messages as $message) {
         

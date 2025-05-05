@@ -97,6 +97,9 @@
         
         // Close the statement and connection
         $stmt->close();
+        if (isset($dbConn) && $dbConn instanceof mysqli) {
+            $dbConn->close();
+        }
         
         // Return true if the token exists, false otherwise
 
@@ -716,22 +719,44 @@
 
 
     function getChatMessages($senderId, $recipientId) {
-        $conn = getDatabaseConnection();  //  Assuming $conn is your database connection
+        $conn = getDatabaseConnection(); // Assuming $conn is your database connection
+        $stmt = null; // Initialize stmt to null
+        $messages = [];
 
-        $query = "SELECT c.*, u.username as sender_username 
-                FROM communicate c
-                JOIN web_users u ON c.sender_userid = u.userID
-                WHERE (c.sender_userid = ? AND c.recipient_userid = ?) 
-                    OR (c.sender_userid = ? AND c.recipient_userid = ?)
-                ORDER BY c.message_date";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("iiii", $senderId, $recipientId, $recipientId, $senderId);
+        try {
+            $query = "SELECT c.*, u.username as sender_username
+                    FROM communicate c
+                    JOIN web_users u ON c.sender_userid = u.userID
+                    WHERE (c.sender_userid = ? AND c.recipient_userid = ?)
+                        OR (c.sender_userid = ? AND c.recipient_userid = ?)
+                    ORDER BY c.message_date";
+            $stmt = $conn->prepare($query);
+
+            if (!$stmt) {
+                // Handle prepare error if needed, maybe log it or return an error array
+                throw new mysqli_sql_exception("Error preparing statement: " . $conn->error);
+            }
+
+            $stmt->bind_param("iiii", $senderId, $recipientId, $recipientId, $senderId);
         $stmt->execute();
         $result = $stmt->get_result();
 
         $messages = [];
         while ($row = $result->fetch_assoc()) {
             $messages[] = $row;
+        }
+
+        } catch (mysqli_sql_exception $e) {
+            // Optionally handle the exception, e.g., log it or return an error indicator
+            $messages = ['error' => $e->getMessage()];
+        } finally {
+            // Close resources safely
+            if ($stmt instanceof mysqli_stmt) {
+                $stmt->close();
+            }
+            if ($conn instanceof mysqli) {
+                $conn->close();
+            }
         }
         return $messages;
     }
@@ -1094,7 +1119,3 @@
             if (isset($conn)) $conn->close();
         }
     }
-
-
-
-
