@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 03, 2025 at 04:48 AM
+-- Generation Time: May 07, 2025 at 06:33 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -202,10 +202,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckPatientReading` (IN `patientUs
     DECLARE recordExists INT;
 
     -- Default hypertension thresholds
-    DECLARE defaultHypertensionMinSystolic INT DEFAULT 130;
-    DECLARE defaultHypertensionMaxSystolic INT DEFAULT 139;
-    DECLARE defaultHypertensionMinDiastolic INT DEFAULT 80;
-    DECLARE defaultHypertensionMaxDiastolic INT DEFAULT 89;
+    DECLARE defaultHypertensionMinSystolic INT DEFAULT 90;
+    DECLARE defaultHypertensionMaxSystolic INT DEFAULT 135;
+    DECLARE defaultHypertensionMinDiastolic INT DEFAULT 60;
+    DECLARE defaultHypertensionMaxDiastolic INT DEFAULT 90;
 
     -- Retrieve the patient's userID and full name
     SELECT userid, CONCAT(fname, ' ', lname) INTO patientUserID, patientName
@@ -219,12 +219,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckPatientReading` (IN `patientUs
 
     -- If no record exists in the patient_range table, check against default hypertension readings
     IF recordExists = 0 THEN
-        IF (systolic >= defaultHypertensionMinSystolic AND systolic <= defaultHypertensionMaxSystolic) OR
-           (diastolic >= defaultHypertensionMinDiastolic AND diastolic <= defaultHypertensionMaxDiastolic) THEN
+        IF (systolic <= defaultHypertensionMinSystolic OR systolic >= defaultHypertensionMaxSystolic) OR
+           (diastolic <= defaultHypertensionMinDiastolic OR diastolic >= defaultHypertensionMaxDiastolic) THEN
             SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Patient readings indicate potential hypertension based on default thresholds.';
         ELSE
-            SELECT 'Readings are within safe levels based on default thresholds.' AS message;
+            SELECT 'Readings are within a safe level based on default thresholds.' AS message;
         END IF;
     ELSE
         -- Retrieve the patient's recommended readings from the patient_range table
@@ -248,7 +248,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckPatientReading` (IN `patientUs
                   OR r.recipient_userid = patientUserID AND r.recipient_username = patientUsername AND r.sender_userid = wu.userID AND r.sender_username = wu.username)
             WHERE r.request_status = 'accepted';
         ELSE
-            -- If readings are in range, return a success message with patient's name and recommended readings
+            -- If readings are in range, return a success message
             SELECT 'Readings are within range.' AS message;
         END IF;
     END IF;
@@ -371,16 +371,48 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetBloodPressureReadings` (IN `p_us
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetFamilyChatMessages` (IN `p_loggedInUsername` VARCHAR(50), IN `p_patientUsername` VARCHAR(50))   BEGIN
-    DECLARE user_role VARCHAR(20);
+    DECLARE loggedInUserExists INT;
+    DECLARE patientExists INT;
+    DECLARE authorizedAccess INT;
 
-    -- Check if the logged-in user is a patient or family member
-    IF EXISTS (SELECT 1 FROM patient WHERE username = p_loggedInUsername) THEN
-        SET user_role = 'Patient';
-    ELSEIF EXISTS (SELECT 1 FROM family_member WHERE username = p_loggedInUsername) THEN
-        SET user_role = 'Family Member';
-    ELSE
+    -- Check if the logged-in user exists
+    SELECT COUNT(*) INTO loggedInUserExists 
+    FROM web_users 
+    WHERE username = p_loggedInUsername;
+
+    -- Check if the patient exists
+    SELECT COUNT(*) INTO patientExists 
+    FROM patient 
+    WHERE username = p_patientUsername;
+
+    -- If the logged-in user does not exist, raise an error
+    IF loggedInUserExists = 0 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'User is not authorized to view family chat messages.';
+        SET MESSAGE_TEXT = 'The logged-in user does not exist.';
+    END IF;
+
+    -- If the patient does not exist, raise an error
+    IF patientExists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The specified patient does not exist.';
+    END IF;
+
+    -- Only check for an accepted request if the logged-in user is not the same as the patient
+    IF p_loggedInUsername <> p_patientUsername THEN
+        SELECT COUNT(*) INTO authorizedAccess
+        FROM request
+        WHERE (
+            (sender_username = p_loggedInUsername AND recipient_username = p_patientUsername)
+            OR 
+            (sender_username = p_patientUsername AND recipient_username = p_loggedInUsername)
+        )
+        AND request_status = 'accepted';
+
+        -- If no accepted request exists, signal an error
+        IF authorizedAccess = 0 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'You are not authorized to view or send messages in this chat.';
+        END IF;
     END IF;
 
     -- Retrieve messages for the specified patient
@@ -559,6 +591,77 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPatientPendingRequests` (IN `p_p
     FROM support
     WHERE patient_username = p_patient_username
       AND end_date IS NULL; -- Assuming pending requests have no end date
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPatientRangeForSupportMember` (IN `loggedInUsername` VARCHAR(50), IN `patientUsername` VARCHAR(50))   BEGIN
+    DECLARE patientUserID INT;
+    DECLARE loggedInUserID INT;
+    DECLARE acceptedRequestExists INT;
+    DECLARE minSystolic VARCHAR(10);
+    DECLARE maxSystolic VARCHAR(10);
+    DECLARE minDiastolic VARCHAR(10);
+    DECLARE maxDiastolic VARCHAR(10);
+    DECLARE patientExists INT;
+    DECLARE userExists INT;
+
+    -- Check if the patient exists
+    SELECT COUNT(*) INTO patientExists
+    FROM patient
+    WHERE username = patientUsername;
+
+    -- Check if the logged-in user exists
+    SELECT COUNT(*) INTO userExists
+    FROM web_users
+    WHERE username = loggedInUsername;
+
+    -- If the patient does not exist, raise an error
+    IF patientExists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The specified patient does not exist.';
+    END IF;
+
+    -- If the logged-in user does not exist, raise an error
+    IF userExists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The logged-in user does not exist.';
+    END IF;
+
+    -- Retrieve patient user ID
+    SELECT userid INTO patientUserID
+    FROM patient
+    WHERE username = patientUsername;
+
+    -- Retrieve logged-in user ID
+    SELECT userid INTO loggedInUserID
+    FROM web_users
+    WHERE username = loggedInUsername;
+
+    -- Check if an accepted request exists between the logged-in user and the patient
+    SELECT COUNT(*) INTO acceptedRequestExists
+    FROM request
+    WHERE (
+        (sender_userid = loggedInUserID AND recipient_userid = patientUserID AND sender_username = loggedInUsername AND recipient_username = patientUsername)
+        OR 
+        (sender_userid = patientUserID AND recipient_userid = loggedInUserID AND sender_username = patientUsername AND recipient_username = loggedInUsername)
+    )
+    AND request_status = 'accepted';
+
+    -- If no accepted request exists, signal an error
+    IF acceptedRequestExists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Access denied. You are not part of the patient’s support network.';
+    END IF;
+
+    -- Retrieve patient range set by the healthcare professional
+    SELECT 
+        COALESCE(CAST(min_systolic AS CHAR), 'N/A') AS min_systolic,
+        COALESCE(CAST(max_systolic AS CHAR), 'N/A') AS max_systolic,
+        COALESCE(CAST(min_diastolic AS CHAR), 'N/A') AS min_diastolic,
+        COALESCE(CAST(max_diastolic AS CHAR), 'N/A') AS max_diastolic
+    FROM patient_range
+    WHERE patient_userid = patientUserID
+    AND patient_username = patientUsername;
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPatientsForSupportUser` (IN `loggedInUsername` VARCHAR(50))   BEGIN
@@ -969,7 +1072,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` 
     DECLARE hcpUserID INT;
     DECLARE patientUserID INT;
     DECLARE acceptedRequestExists INT;
-    DECLARE recordExists INT;
+    DECLARE sameHCPExists INT;
+    DECLARE otherHCPExists INT;
 
     -- Retrieve HCP's userID from health_care_prof table
     SELECT userid INTO hcpUserID
@@ -984,59 +1088,91 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `SetPatientRange` (IN `hcpUsername` 
     -- Check if an accepted request exists between the HCP and the patient
     SELECT COUNT(*) INTO acceptedRequestExists
     FROM request
-    WHERE (sender_userid = hcpUserID AND sender_username = hcpUsername AND recipient_userid = patientUserID AND recipient_username = patientUsername)
-       OR (sender_userid = patientUserID AND sender_username = patientUsername AND recipient_userid = hcpUserID AND recipient_username = hcpUsername)
-       AND request_status = 'accepted';
+    WHERE ((sender_userid = hcpUserID AND recipient_userid = patientUserID AND sender_username = hcpUsername AND recipient_username = patientUsername)
+        OR (sender_userid = patientUserID AND recipient_userid = hcpUserID AND sender_username = patientUsername AND recipient_username = hcpUsername))
+        AND request_status = 'accepted';
 
     -- If no accepted request exists, signal an error
     IF acceptedRequestExists = 0 THEN
-        SIGNAL SQLSTATE '45000' 
+        SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'No accepted request exists between this HCP and the patient.';
-    ELSE
-        -- Check if a record already exists in patient_range table
-        SELECT COUNT(*) INTO recordExists
-        FROM patient_range
-        WHERE hcp_userid = hcpUserID
-          AND hcp_username = hcpUsername
-          AND patient_userid = patientUserID
+    END IF;
+
+    -- Check if the same HCP already has a BP range set for the patient
+    SELECT COUNT(*) INTO sameHCPExists
+    FROM patient_range
+    WHERE patient_userid = patientUserID
+      AND patient_username = patientUsername
+      AND hcp_userid = hcpUserID;
+
+    -- Check if a different HCP set a BP range for this patient
+    SELECT COUNT(*) INTO otherHCPExists
+    FROM patient_range
+    WHERE patient_userid = patientUserID
+      AND patient_username = patientUsername
+      AND hcp_userid <> hcpUserID;
+
+    -- If the same HCP already has a record, update it
+    IF sameHCPExists > 0 THEN
+        UPDATE patient_range
+        SET min_systolic = minSystolic,
+            max_systolic = maxSystolic,
+            min_diastolic = minDiastolic,
+            max_diastolic = maxDiastolic,
+            date_set = CURRENT_TIMESTAMP
+        WHERE patient_userid = patientUserID
+          AND patient_username = patientUsername
+          AND hcp_userid = hcpUserID;
+    -- If another HCP has set a range, delete their record and insert a new one
+    ELSEIF otherHCPExists > 0 THEN
+        DELETE FROM patient_range
+        WHERE patient_userid = patientUserID
           AND patient_username = patientUsername;
 
-        -- If record exists, update it; otherwise, insert a new one
-        IF recordExists > 0 THEN
-            UPDATE patient_range
-            SET min_systolic = minSystolic,
-                max_systolic = maxSystolic,
-                min_diastolic = minDiastolic,
-                max_diastolic = maxDiastolic,
-                date_set = CURRENT_TIMESTAMP
-            WHERE hcp_userid = hcpUserID
-              AND hcp_username = hcpUsername
-              AND patient_userid = patientUserID
-              AND patient_username = patientUsername;
-        ELSE
-            INSERT INTO patient_range (
-                patient_userid,
-                patient_username,
-                min_systolic,
-                max_systolic,
-                min_diastolic,
-                max_diastolic,
-                date_set,
-                hcp_userid,
-                hcp_username
-            )
-            VALUES (
-                patientUserID,
-                patientUsername,
-                minSystolic,
-                maxSystolic,
-                minDiastolic,
-                maxDiastolic,
-                CURRENT_TIMESTAMP,
-                hcpUserID,
-                hcpUsername
-            );
-        END IF;
+        INSERT INTO patient_range (
+            patient_userid, 
+            patient_username, 
+            min_systolic, 
+            max_systolic, 
+            min_diastolic, 
+            max_diastolic, 
+            date_set, 
+            hcp_userid, 
+            hcp_username
+        ) VALUES (
+            patientUserID, 
+            patientUsername, 
+            minSystolic, 
+            maxSystolic, 
+            minDiastolic, 
+            maxDiastolic, 
+            CURRENT_TIMESTAMP, 
+            hcpUserID, 
+            hcpUsername
+        );
+    -- If no previous records exist, simply insert the new BP range
+    ELSE
+        INSERT INTO patient_range (
+            patient_userid, 
+            patient_username, 
+            min_systolic, 
+            max_systolic, 
+            min_diastolic, 
+            max_diastolic, 
+            date_set, 
+            hcp_userid, 
+            hcp_username
+        ) VALUES (
+            patientUserID, 
+            patientUsername, 
+            minSystolic, 
+            maxSystolic, 
+            minDiastolic, 
+            maxDiastolic, 
+            CURRENT_TIMESTAMP, 
+            hcpUserID, 
+            hcpUsername
+        );
     END IF;
 END$$
 
@@ -1146,7 +1282,8 @@ INSERT INTO `communicate` (`communicate_id`, `sender_userid`, `sender_username`,
 (66, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-04-28 21:22:25', 'xbxbxb'),
 (67, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 21:22:28', 'bxbx'),
 (68, 1, 'Dav_Rob1', 7, 'Wil_Sam7', '2025-04-28 21:27:42', 'p'),
-(69, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 21:27:47', 'f');
+(69, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-04-28 21:27:47', 'f'),
+(70, 7, 'Wil_Sam7', 1, 'Dav_Rob1', '2025-05-05 08:45:09', 'hello');
 
 -- --------------------------------------------------------
 
@@ -1218,7 +1355,9 @@ INSERT INTO `family_chat` (`chat_id`, `sender_username`, `sender_id`, `message_d
 (50, 'Dav_Rob1', 1, '2025-04-28 22:37:49', 'jjn', 'Dav_Rob1', 1),
 (51, 'Dav_Rob1', 1, '2025-04-28 22:37:56', 'nnkn', 'Dav_Rob1', 1),
 (52, 'Dav_Rob1', 1, '2025-04-28 22:38:07', 'oopp', 'Dav_Rob1', 1),
-(53, 'San_Ros2', 2, '2025-04-28 22:39:28', 'lll', 'Dav_Rob1', 1);
+(53, 'San_Ros2', 2, '2025-04-28 22:39:28', 'lll', 'Dav_Rob1', 1),
+(54, 'Dav_Rob1', 1, '2025-05-07 10:59:16', 'Hello, how are you\'re readings?', 'Dav_Rob1', 1),
+(55, 'San_Ros2', 2, '2025-05-07 10:59:33', 'you can check them out I just uploaded', 'Dav_Rob1', 1);
 
 -- --------------------------------------------------------
 
@@ -1309,9 +1448,9 @@ CREATE TABLE `patient_range` (
 --
 
 INSERT INTO `patient_range` (`patient_userid`, `patient_username`, `min_systolic`, `max_systolic`, `min_diastolic`, `max_diastolic`, `date_set`, `hcp_userid`, `hcp_username`) VALUES
-(1, 'Dav_Rob1', 100, 140, 70, 80, '2025-05-02 21:45:12', 7, 'Wil_Sam7'),
-(1, 'Dav_Rob1', 100, 140, 60, 80, '2025-04-27 22:04:27', 16, 'Kay_Jac16'),
-(10, 'Fre_Lew10', 50, 120, 88, 90, '2025-04-27 12:09:57', 7, 'Wil_Sam7');
+(1, 'Dav_Rob1', 100, 130, 79, 90, '2025-05-05 08:52:48', 7, 'Wil_Sam7'),
+(10, 'Fre_Lew10', 50, 120, 88, 90, '2025-04-27 12:09:57', 7, 'Wil_Sam7'),
+(15, 'Dia_Pot15', 90, 140, 60, 90, '2025-05-03 12:34:08', 16, 'Kay_Jac16');
 
 -- --------------------------------------------------------
 
@@ -1366,7 +1505,16 @@ INSERT INTO `reading` (`userid`, `username`, `readingdate`, `readingtime`, `syst
 (1, 'Dav_Rob1', '2025-04-18', '06:10:00', 287, 123, 60),
 (1, 'Dav_Rob1', '2025-04-19', '10:04:00', 300, 200, 100),
 (1, 'Dav_Rob1', '2025-04-20', '07:00:00', 150, 100, 80),
+(1, 'Dav_Rob1', '2025-04-21', '21:00:00', 140, 100, 83),
+(1, 'Dav_Rob1', '2025-04-22', '15:00:00', 140, 100, 80),
+(1, 'Dav_Rob1', '2025-04-23', '02:00:00', 140, 100, 90),
+(1, 'Dav_Rob1', '2025-04-24', '00:00:00', 142, 101, 90),
 (1, 'Dav_Rob1', '2025-04-26', '04:27:00', 80, 50, 88),
+(1, 'Dav_Rob1', '2025-04-27', '01:00:00', 140, 100, 95),
+(1, 'Dav_Rob1', '2025-04-28', '13:01:00', 180, 120, 130),
+(1, 'Dav_Rob1', '2025-04-29', '01:24:00', 140, 90, 80),
+(1, 'Dav_Rob1', '2025-04-30', '14:00:00', 141, 80, 76),
+(1, 'Dav_Rob1', '2025-05-01', '15:07:00', 142, 90, 100),
 (10, 'Fre_Lew10', '2025-03-18', '08:00:00', 130, 101, 90),
 (10, 'Fre_Lew10', '2025-03-19', '09:00:00', 120, 100, 77),
 (10, 'Fre_Lew10', '2025-03-20', '09:00:00', 118, 98, 75),
@@ -1436,9 +1584,10 @@ CREATE TABLE `request` (
 INSERT INTO `request` (`request_id`, `sender_userid`, `sender_username`, `recipient_userid`, `recipient_username`, `request_status`, `request_date`) VALUES
 (41, 11, 'Ada_Ros11', 15, 'Dia_Pot15', 'pending', '2025-04-17 17:41:29'),
 (54, 14, 'Fre_Smi14', 15, 'Dia_Pot15', 'accepted', '2025-04-21 19:28:05'),
-(55, 7, 'Wil_Sam7', 15, 'Dia_Pot15', 'pending', '2025-04-22 13:11:47'),
-(78, 15, 'Dia_Pot15', 16, 'Kay_Jac16', 'accepted', '2025-04-27 18:34:32'),
-(121, 7, 'Wil_Sam7', 1, 'Dav_Rob1', 'accepted', '2025-04-28 21:48:53');
+(55, 7, 'Wil_Sam7', 15, 'Dia_Pot15', 'accepted', '2025-05-04 18:53:32'),
+(126, 7, 'Wil_Sam7', 1, 'Dav_Rob1', 'accepted', '2025-05-03 12:52:15'),
+(128, 10, 'Fre_Lew10', 2, 'San_Ros2', 'pending', '2025-05-04 18:55:19'),
+(129, 10, 'Fre_Lew10', 7, 'Wil_Sam7', 'accepted', '2025-05-04 18:55:40');
 
 -- --------------------------------------------------------
 
@@ -1554,19 +1703,19 @@ ALTER TABLE `web_users`
 -- AUTO_INCREMENT for table `communicate`
 --
 ALTER TABLE `communicate`
-  MODIFY `communicate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+  MODIFY `communicate_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
 -- AUTO_INCREMENT for table `family_chat`
 --
 ALTER TABLE `family_chat`
-  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=125;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=131;
 
 --
 -- AUTO_INCREMENT for table `web_users`

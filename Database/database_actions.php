@@ -827,36 +827,40 @@
 
 
 
-    function getFamilyChatMessages(string $loggedInUsername,string $patientUsername) {
+    function getFamilyChatMessages(string $loggedInUsername, string $patientUsername) {
         // Get the database connection
         $conn = getDatabaseConnection();
-        if (!$conn) {
-            return ["error" => "Failed to connect to the database"];
-        }
     
-        // Call the stored procedure
-        $query = "CALL GetFamilyChatMessages(?,?)";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("ss", $loggedInUsername,$patientUsername);
+        try {
+            // Call the stored procedure
+            $query = "CALL GetFamilyChatMessages(?, ?)";
+            $stmt = $conn->prepare($query);
     
-        if ($stmt->execute()) {
-            $result = $stmt->get_result();
-            $messages = [];
-    
-            // Fetch all results
-            while ($row = $result->fetch_assoc()) {
-                $messages[] = $row;
+            if (!$stmt) {
+                throw new mysqli_sql_exception("Error preparing statement: " . $conn->error);
             }
     
-            $stmt->close();
-            $conn->close();
+            $stmt->bind_param("ss", $loggedInUsername, $patientUsername);
     
-            // Return the list of messages or an error message
-            return $messages;
-        } else {
-            $stmt->close();
-            $conn->close();
-            return ["error" => "Failed to execute the stored procedure"];
+            if ($stmt->execute()) {
+                $result = $stmt->get_result();
+                $messages = [];
+    
+                // Fetch all results
+                while ($row = $result->fetch_assoc()) {
+                    $messages[] = $row;
+                }
+            } else {
+                throw new mysqli_sql_exception("Failed to execute stored procedure.");
+            }
+    
+            return $messages; // Return messages after retrieval
+    
+        } catch (mysqli_sql_exception $e) {
+            return ["error" => $e->getMessage()];
+        } finally {
+            if (isset($stmt)) $stmt->close();
+            if (isset($conn)) $conn->close();
         }
     }
 

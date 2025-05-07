@@ -35,7 +35,7 @@
     }
 
     if (isset($messages["error"])) {
-        echo "<p style='color: red;'>" . $messages["error"] . "</p>";
+        echo "<p style='color: red;text-align:center;font-weight:bold;font-size:20px'>" . $messages["error"] . "</p>";
         exit();
     }
 
