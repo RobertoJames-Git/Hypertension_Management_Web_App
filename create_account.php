@@ -119,7 +119,7 @@
                     <span class="formError"><?php echo isset($_SESSION["phoneNum_Err"]) ? htmlspecialchars($_SESSION["phoneNum_Err"], ENT_QUOTES, 'UTF-8') : ''; ?></span>
                 </div>
 
-                <!--Specify the pattern in telephon input as being 1876-123-4567 -->
+                <!--Specify the pattern in telephon input as being 876-123-4567 -->
                 <input type="tel"  placeholder="876-123-4567" name="phoneNum" id="" value="<?php echo isset($_SESSION['phoneNum']) ? htmlspecialchars($_SESSION['phoneNum']) : ''; ?>">
 
                 <input id="submit-btn" class="button_style" type="submit" name="account_creation" value="Create Account">
