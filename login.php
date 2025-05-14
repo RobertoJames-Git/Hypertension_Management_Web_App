@@ -14,12 +14,30 @@
 </head>
 <body>
 
+    <?php
 
+        //keep the remaining time consistent on page refresh
+        if (isset($_SESSION["login_attempts"]) && $_SESSION["login_attempts"] == 0) {
+            // Get the current timestamp
+            $currentTime = microtime(true);
+
+            // Check if the user still needs to wait
+            if (isset($_SESSION["unlockTime"]) && ($_SESSION["unlockTime"]-$currentTime )>=0) {
+                $_SESSION["remainingMillis"] = round(($_SESSION["unlockTime"] - $currentTime) * 1000);
+                $_SESSION["dbValidate_response"] = "You have reached the maximum login attempts and must wait for <span id='attempt_countdown'>{$_SESSION["remainingMillis"]}</span>";
+
+            }
+
+
+        }
+
+    ?>
     
     <div id="database_Error">
-        <span id="errorContent">Response: <?php  echo isset($_SESSION["dbValidate_response"]) ? htmlspecialchars($_SESSION["dbValidate_response"]) :''; ?></span>
+        <span id="errorContent"><?php  echo isset($_SESSION["dbValidate_response"]) ? $_SESSION["dbValidate_response"] :''; ?></span>
     </div>
-    
+
+
     
     <div id="form_container">
 

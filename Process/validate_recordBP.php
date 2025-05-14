@@ -155,8 +155,17 @@
         //Check if readings are out of range and and send alert via phone number and email to support network
         $result=checkPatientReading($_SESSION["loggedIn_username"],$systolic,$diastolic);
 
-        if (isset($result['error'])) {//If an error occur store it in a session that will display it to the user
-            //check if the error contains "default thresholds."
+        if (isset($result['error'])) {
+
+
+            
+            /* 
+            $result ['error'] may contain "Patient readings indicate potential hypertension based on default thresholds.'"
+            or some other error message.
+        
+            check if the error contains "default thresholds. if the error contains this a 
+            email will be sent to the patients support network.
+            */
             if (strpos($result['error'], 'default thresholds') !== false) {
                 
                 $_SESSION["patientRange_Err"]=$result['error'];
