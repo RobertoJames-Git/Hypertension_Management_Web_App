@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2025 at 06:33 PM
+-- Generation Time: May 14, 2025 at 07:24 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -1587,7 +1587,9 @@ INSERT INTO `request` (`request_id`, `sender_userid`, `sender_username`, `recipi
 (55, 7, 'Wil_Sam7', 15, 'Dia_Pot15', 'accepted', '2025-05-04 18:53:32'),
 (126, 7, 'Wil_Sam7', 1, 'Dav_Rob1', 'accepted', '2025-05-03 12:52:15'),
 (128, 10, 'Fre_Lew10', 2, 'San_Ros2', 'pending', '2025-05-04 18:55:19'),
-(129, 10, 'Fre_Lew10', 7, 'Wil_Sam7', 'accepted', '2025-05-04 18:55:40');
+(129, 10, 'Fre_Lew10', 7, 'Wil_Sam7', 'accepted', '2025-05-04 18:55:40'),
+(131, 8, 'Nat_Dre8', 1, 'Dav_Rob1', 'accepted', '2025-05-13 17:58:29'),
+(132, 2, 'San_Ros2', 1, 'Dav_Rob1', 'accepted', '2025-05-13 17:58:31');
 
 -- --------------------------------------------------------
 
@@ -1715,7 +1717,7 @@ ALTER TABLE `family_chat`
 -- AUTO_INCREMENT for table `request`
 --
 ALTER TABLE `request`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=131;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=133;
 
 --
 -- AUTO_INCREMENT for table `web_users`

@@ -51,7 +51,7 @@
             <div id="alert_info">     
                 <h2> Alert</h2>
 
-                <p>Sends daily reminders to upload blood pressure readings and emergency notifications to your support network if readings are at a critical level.</p>
+                <p>Sends emergency notifications to your support network if readings are at a critical level.</p>
 
                 <div id="learn_more_container">Learn more</div>
             </div>
