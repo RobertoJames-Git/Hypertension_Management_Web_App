@@ -17,15 +17,16 @@ function loadEnv($filePath) {
 }
 
 function alertSupportNetwork(array $phoneNumbers, $message) {
+    
     // Require the bundled autoload file
-    require __DIR__ . '/twilio-php-main/src/Twilio/autoload.php';
+    require_once 'twilio-php-main/src/Twilio/autoload.php';
 
     // Load the .env file
     loadEnv(__DIR__ . '/../.env');
 
     // Get credentials from environment variables
-    $sid = getenv('TWILIO_ACCOUNT_SID');
-    $token = getenv('TWILIO_AUTH_TOKEN') ?? null;
+    $sid = getenv('TWILIO_ACCOUNT_SID')??null;
+    $token =getenv('TWILIO_AUTH_TOKEN')?? null;
     $twilioPhoneNumber = getenv('TWILIO_PHONE_NUMBER') ?? null;
 
     // Initialize Twilio client
@@ -34,8 +35,13 @@ function alertSupportNetwork(array $phoneNumbers, $message) {
     $allSuccessful = true; // Track overall success
 
     foreach ($phoneNumbers as $phoneNumber) {
+
+        // Ensure $phoneNumber is a string
+        $phoneNumber = (string) $phoneNumber;
         // Remove dashes but retain the '+' if present
         $phoneNumber = preg_replace('/[^0-9+]/', '', $phoneNumber);
+        
+
 
         // Validate phone number format and correct prefixes
         if (preg_match('/^\+?876/', $phoneNumber)) {
@@ -66,8 +72,6 @@ function alertSupportNetwork(array $phoneNumbers, $message) {
     // Return appropriate message based on success/failure
     return $allSuccessful
         ? [true, "All members in your support network were notified"]
-        : [false, "Failed to notify all members of your support network"];
+        : [false, "Failed to notify all members of your support network".$e];
 }
-
-echo alertSupportNetwork(["+1876-xxx-xxx"],"Your hypertensive family member readings are too high.");
 
