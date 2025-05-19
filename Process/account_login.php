@@ -104,7 +104,7 @@
         }
 
         // Calculate the unlock time (5 minutes from now)
-        $waitTime = 5 * 60; // 5 minutes in seconds
+        $waitTime = 1 * 60; // 1 minutes in seconds
         $_SESSION["unlockTime"] = $currentTime + $waitTime;
 
         header("location:../login.php");

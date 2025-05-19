@@ -168,9 +168,9 @@
                     }
                 } else {
 
-                    echo '<option value="" disabled>No '.$dropDownMessage.' found</option>';
-            }
-            
+                        echo '<option value="" disabled>No '.$dropDownMessage.' found</option>';
+                }
+                
             ?>
         </select>
 
@@ -284,7 +284,7 @@
             // Periodically update the chat (using setInterval for simplicity)
 
             if((isset($_GET["chat_with_patient"]) && $_GET["chat_with_patient"]!="" && ($_SESSION['userType']=="Family Member"||$_SESSION['userType']=="Health Care Professional"))||($_SESSION['userType']=="Patient")){
-                    echo "loadChat();\n\t\t\tsetInterval(loadChat, 3000);";
+                    echo "loadChat();\n\t\t\tsetInterval(loadChat, 2000);";
                 
             }
 
@@ -325,7 +325,7 @@
             }
         });
     }
-});  
+    });  
 
         });
         

@@ -16,10 +16,26 @@ function loadEnv($filePath) {
     }
 }
 
-function alertSupportNetwork(array $phoneNumbers, $message) {
+
+
+
+
+function sendSmsToSupportNetwork(array $phoneNumbers,$patient_name,$recommended_min_Systolic,$recommended_min_Diastolic,$recommended_max_Systolic,$recommended_max_Diastolic,$patient_systolic,$patient_diastolic,$patient_heartRate) {
     
     // Require the bundled autoload file
     require_once 'twilio-php-main/src/Twilio/autoload.php';
+
+     $message="URGENT!!!!,$patient_name has elevate blood pressure.
+Please contact them.
+
+Current Readings
+- Systolic: $patient_systolic mmHg
+- Diastolic: $patient_diastolic mmHg
+- Heart Rate: $patient_heartRate BPM
+        
+Recommended Readings
+- Systolic: $recommended_min_Systolic mmHg - $recommended_max_Systolic mmHg
+- Diastolic: $recommended_min_Diastolic mmHg - $recommended_max_Diastolic mmHg";
 
     // Load the .env file
     loadEnv(__DIR__ . '/../.env');

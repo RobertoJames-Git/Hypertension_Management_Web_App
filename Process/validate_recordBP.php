@@ -156,8 +156,6 @@
         $result=checkPatientReading($_SESSION["loggedIn_username"],$systolic,$diastolic);
 
         if (isset($result['error'])) {
-
-
             
             /* 
             $result ['error'] may contain "Patient readings indicate potential hypertension based on default thresholds.'"
@@ -202,6 +200,7 @@
 
             // Initialize an array to store all support network email addresses
             $supportNetworkEmail = array();
+            $supNetworkPhoneNum=array();
 
             // Iterate through `$result` (assuming `$result` is an array of associative arrays)
             foreach ($result as $entry) {
@@ -210,9 +209,28 @@
                 }
             }
 
+            // Iterate through `$result` 
+            foreach ($result as $entry) {
+                if (isset($entry['phone_number'])) { // Ensure 'email' exists in the current entry
+                    $supNetworkPhoneNum[] = $entry['phone_number']; // Add phone number to the array
+                }
+            }
+
+            require_once('sendsms.php');
+            $sms_result=sendSmsToSupportNetwork($supNetworkPhoneNum,$result[0]['Patient_Name'], $result[0]['Recommended_Min_Systolic'],$result[0]['Recommended_Min_Diastolic'], $result[0]['Recommended_Max_Systolic'], $result[0]['Recommended_Max_Diastolic'], $systolic,$diastolic,$heartRate);
+            
+            /*
+            if($sms_result[0]===false){
+                $_SESSION["patientRange_Err"]= "Error sending sms : <br>".$sms_result[1];
+
+                echo $_SESSION["patientRange_Err"];
+                
+                exit;
+                return;
+            }*/
 
             $emailResult = sendAlertEmailToSupportNetwork($supportNetworkEmail,$result[0]['Patient_Name'], $result[0]['Recommended_Min_Systolic'],$result[0]['Recommended_Min_Diastolic'], $result[0]['Recommended_Max_Systolic'], $result[0]['Recommended_Max_Diastolic'], $systolic,$diastolic,$heartRate);
-
+            
             if($emailResult){
                 $_SESSION["patientRange_Err"]= "Your support Network was notified of your irregular reading.";
             }
