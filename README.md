@@ -13,7 +13,7 @@ HypMonitor is a web-based platform designed to help individuals, their families,
 5. [Usage Instructions](#usage-instructions)  
 6. [Research/Study Context](#researchstudy-context)  
 7. [Full Study](#full-study)
-8. 8. [License](#license)
+8. [License](#license)
 9. [Acknowledgments](#acknowledgments)  
 
 ---
