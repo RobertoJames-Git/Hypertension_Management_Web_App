@@ -4,20 +4,6 @@ HypMonitor is a web-based platform designed to help individuals, their families,
 
 ---
 
-## 📑 Table of Contents
-
-1. [Overview / Motivation](#overview--motivation)  
-2. [Features](#features)  
-3. [Tech Stack](#tech-stack)  
-4. [Installation & Setup](#installation--setup)  
-5. [Usage Instructions](#usage-instructions)  
-6. [Research/Study Context](#researchstudy-context)  
-7. [Full Study](#full-study)
-8. [License](#license)
-9. [Acknowledgments](#acknowledgments)  
-
----
-
 ## 📌 Overview
 
 This project was completed as part of my 4th-year major project at the University of Technology, Jamaica. Students are required to choose either a **full research** or a **research plus mini-development** project. My group and I chose the latter and developed a **Digital Health Intervention (DHI) platform** for hypertensive patients.
