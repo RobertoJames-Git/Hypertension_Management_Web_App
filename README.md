@@ -40,7 +40,7 @@ The reserch section of this project was guided by the **UTAUT 2 framework**, whi
 ## ⚙️ Installation & Setup  
 
 For a full step-by-step installation and execution guide, please see the  
-[Installation Guide and Execution guide (PDF)](docs/MP05_Prototype_Documentation_Installation_and_Execution.pdf). 
+[Installation Guide and Execution guide (PDF)](https://drive.google.com/file/d/1Sn5jUEnWe_YhVBK0efizoosQlr-xA8kl/view?usp=sharing). 
 
 ---
 
@@ -49,8 +49,6 @@ For a full step-by-step installation and execution guide, please see the
 * **Patients**: Register, activate account via email, log daily readings, view progress, chat with healthcare professionals and family members.”
 * **Family Members**: Connect to a patient, monitor readings, receive alerts, chat with patient
 * **Healthcare Professionals**: Monitor patients, set custom ranges, receive alerts, chat with patient
-
-*(Add screenshots or GIFs here for clarity — e.g., login page, BP chart, support network view.)*
 
 ---
 
@@ -69,7 +67,7 @@ This project is part of a study on the **Acceptability of Digital Health Interve
 This project is part of my major project at the University of Technology, Jamaica.  
 The complete research paper can be accessed here:  
 
-👉 [Full Study PDF](docs/MP05_Research_Acceptability_of_digital_health_intervention_for_patients_with_hypertension_and_their_support_network.pdf)  
+👉 [Full Study PDF](https://drive.google.com/file/d/1Yj8XCR5uCstR8vJwFoeHNla7en10ZcHu/view?usp=sharing)  
 
 ---
 
